@@ -8,6 +8,12 @@ spring:
   datasource:
     password: ${DB_PASSWORD:oil_shop_local}
 
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
+
 logging:
   level:
     com.shop: DEBUG

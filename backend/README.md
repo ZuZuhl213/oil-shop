@@ -46,6 +46,26 @@ Stop PostgreSQL with:
 docker compose down
 ```
 
+## Bootstrap the first admin
+
+The bootstrap command is available only through the `bootstrap-admin` profile. It creates one active admin, hashes the password with BCrypt, and refuses to overwrite an existing email.
+
+From the repository root, load the database connection and enter the bootstrap credentials without putting the password in a file or command history:
+
+```bash
+set -a
+. ./backend/.env
+set +a
+read -r "BOOTSTRAP_ADMIN_EMAIL?Admin email: "
+read -rs "BOOTSTRAP_ADMIN_PASSWORD?Admin password: "
+echo
+export BOOTSTRAP_ADMIN_EMAIL BOOTSTRAP_ADMIN_PASSWORD
+SPRING_PROFILES_ACTIVE=local,bootstrap-admin ./backend/gradlew -p backend bootRun --args='--spring.main.web-application-type=none'
+unset BOOTSTRAP_ADMIN_EMAIL BOOTSTRAP_ADMIN_PASSWORD
+```
+
+Normal startup never runs this command and there is no public registration endpoint.
+
 ## Tests
 
 Docker must be running because integration tests use PostgreSQL through Testcontainers.

@@ -7,6 +7,12 @@ spring:
   datasource:
     password: ${DB_PASSWORD:oil_shop_test}
 
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
+
 logging:
   level:
     root: WARN
