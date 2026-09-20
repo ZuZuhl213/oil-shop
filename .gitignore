@@ -1,5 +1,6 @@
-# Docs 
+# Local design and execution plans
 docs/
+web-oil-shop-design.md
 
 # Environment
 .env
@@ -25,4 +26,3 @@ Thumbs.db
 .idea/
 *.iml
 .vscode/
-
