@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = "app.security.allowed-origins=http://localhost:3000")
@@ -81,11 +82,23 @@ class AdminAuthIT extends PostgresIntegrationTest {
                         .session(authenticatedSession)
                         .header("Origin", TRUSTED_ORIGIN)
                         .header("X-CSRF-TOKEN", logoutToken))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNoContent())
+                .andExpect(cookie().maxAge("JSESSIONID", 0))
+                .andExpect(cookie().path("JSESSIONID", "/api"));
 
         mockMvc.perform(get("/api/v1/admin/auth/me").session(authenticatedSession))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
+    }
+
+    @Test
+    void publicCatalogRoutesDoNotRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/api/v1/categories"))
+                .andExpect(result -> assertThat(result.getResponse().getStatus()).isNotEqualTo(401));
+        mockMvc.perform(get("/api/v1/products"))
+                .andExpect(result -> assertThat(result.getResponse().getStatus()).isNotEqualTo(401));
+        mockMvc.perform(get("/api/v1/products/sample-slug"))
+                .andExpect(result -> assertThat(result.getResponse().getStatus()).isNotEqualTo(401));
     }
 
     @Test

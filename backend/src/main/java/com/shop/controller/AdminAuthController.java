@@ -5,8 +5,10 @@ import com.shop.dto.LoginRequest;
 import com.shop.security.AdminPrincipal;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/admin/auth")
+@ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class AdminAuthController {
     private final AuthenticationManager authenticationManager;
     private final SessionAuthenticationStrategy sessionStrategy;
@@ -48,6 +51,13 @@ public class AdminAuthController {
     @PostMapping("/logout")
     ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+        Cookie sessionCookie = new Cookie("JSESSIONID", "");
+        sessionCookie.setHttpOnly(true);
+        sessionCookie.setPath("/api");
+        sessionCookie.setMaxAge(0);
+        sessionCookie.setSecure(request.isSecure());
+        sessionCookie.setAttribute("SameSite", "Lax");
+        response.addCookie(sessionCookie);
         return ResponseEntity.noContent().build();
     }
 }
