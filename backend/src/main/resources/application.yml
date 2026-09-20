@@ -14,6 +14,13 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        path: /api
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:true}
 
 management:
   endpoints:
