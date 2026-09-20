@@ -59,3 +59,12 @@ cd backend
 ## Configuration
 
 The example environment is in `../.env.example`. The default profile requires `DATABASE_PASSWORD`; only the `local` and `test` profiles provide non-production fallback values. Hibernate validates the schema and Flyway owns schema changes.
+
+## Database boundary
+
+- Internal identifiers are `Long`; REST DTOs added by later plans must encode them as decimal strings.
+- Money is nullable `Long` where quote requests require it; quantities are `BigDecimal` and the database rejects values outside 0.01–99999999.99 or with more than two decimal places.
+- `Instant` maps to PostgreSQL `TIMESTAMPTZ`. Database triggers own `updated_at` for both JPA and direct SQL updates.
+- Entities are not HTTP response models. They intentionally have no recursive `equals`, `hashCode`, or `toString` implementations.
+- Cross-table rules such as FIXED_PRICE requiring a price and order items matching the product sale type belong to services in plans 04–06; PostgreSQL enforces all local row invariants.
+- Do not edit an applied migration. Add a new versioned migration for later schema changes.
