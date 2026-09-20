@@ -6,7 +6,7 @@ spring:
     compose:
       enabled: false
   datasource:
-    password: ${DATABASE_PASSWORD:oil_shop_local}
+    password: ${DB_PASSWORD:oil_shop_local}
 
 logging:
   level:

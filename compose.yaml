@@ -2,11 +2,11 @@ services:
   db:
     image: postgres:17.10-alpine3.24
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-oil_shop}
-      POSTGRES_USER: ${POSTGRES_USER:-oil_shop}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-oil_shop_local}
+      POSTGRES_DB: ${DB_DATABASE:-oil_shop}
+      POSTGRES_USER: ${DB_USERNAME:-oil_shop}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-oil_shop_local}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${DB_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s

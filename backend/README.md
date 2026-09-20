@@ -20,16 +20,17 @@ Pinned foundation versions:
 From the repository root:
 
 ```bash
-cp .env.example .env
-docker compose --env-file .env up -d db
+cp backend/.env.example backend/.env
+# Set DB_PASSWORD in backend/.env before starting.
+docker compose --env-file backend/.env up -d db
 
 set -a
-. ./.env
+. ./backend/.env
 set +a
-SPRING_PROFILES_ACTIVE=local ./backend/gradlew -p backend bootRun
+./backend/gradlew -p backend bootRun
 ```
 
-If port 5432 is already in use, set both `POSTGRES_PORT` and the port inside `DATABASE_URL` in `.env` to the same free port before starting Compose.
+If PostgreSQL is already running, skip the Compose command and set its connection values in `backend/.env`. If port 5432 is already in use and Compose should run another database, set `DB_PORT` to a free host port.
 
 Readiness is available at:
 
@@ -58,7 +59,7 @@ cd backend
 
 ## Configuration
 
-The example environment is in `../.env.example`. The default profile requires `DATABASE_PASSWORD`; only the `local` and `test` profiles provide non-production fallback values. Hibernate validates the schema and Flyway owns schema changes.
+The example environment is in `.env.example`. Spring builds its JDBC connection from `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, and `DB_DATABASE`, then authenticates with `DB_USERNAME` and `DB_PASSWORD`. `DB_CONNECTION` must be `postgresql`, the PostgreSQL JDBC subprotocol. The default profile requires `DB_PASSWORD`; only the `local` and `test` profiles provide non-production fallback values. Hibernate validates the schema and Flyway owns schema changes.
 
 ## Database boundary
 
