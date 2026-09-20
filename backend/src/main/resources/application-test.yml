@@ -5,7 +5,7 @@ spring:
   main:
     banner-mode: off
   datasource:
-    password: ${DATABASE_PASSWORD:oil_shop_test}
+    password: ${DB_PASSWORD:oil_shop_test}
 
 logging:
   level:

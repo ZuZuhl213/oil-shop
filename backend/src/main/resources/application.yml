@@ -2,9 +2,9 @@ spring:
   application:
     name: oil-shop-api
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/oil_shop}
-    username: ${DATABASE_USERNAME:oil_shop}
-    password: ${DATABASE_PASSWORD}
+    url: jdbc:${DB_CONNECTION:postgresql}://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:oil_shop}
+    username: ${DB_USERNAME:oil_shop}
+    password: ${DB_PASSWORD}
   jpa:
     open-in-view: false
     hibernate:

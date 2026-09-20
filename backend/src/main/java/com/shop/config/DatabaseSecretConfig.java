@@ -16,9 +16,9 @@ public class DatabaseSecretConfig {
     static BeanFactoryPostProcessor requireDatabasePassword(Environment environment) {
         return beanFactory -> {
             String password = environment.getProperty("spring.datasource.password");
-            if (!StringUtils.hasText(password) || password.contains("${DATABASE_PASSWORD}")) {
+            if (!StringUtils.hasText(password) || password.contains("${DB_PASSWORD}")) {
                 throw new BeanInitializationException(
-                        "DATABASE_PASSWORD is required outside local/test profiles");
+                        "DB_PASSWORD is required outside local/test profiles");
             }
         };
     }
