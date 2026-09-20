@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: oil-shop-api
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/oil_shop}
+    username: ${DATABASE_USERNAME:oil_shop}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+      group:
+        readiness:
+          include: readinessState,db

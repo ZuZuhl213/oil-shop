@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  docker:
+    compose:
+      enabled: false
+  datasource:
+    password: ${DATABASE_PASSWORD:oil_shop_local}
+
+logging:
+  level:
+    com.shop: DEBUG

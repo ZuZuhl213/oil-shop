@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  main:
+    banner-mode: off
+  datasource:
+    password: ${DATABASE_PASSWORD:oil_shop_test}
+
+logging:
+  level:
+    root: WARN
+    com.shop: INFO
