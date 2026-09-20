@@ -1,0 +1,28 @@
+# Docs 
+docs/
+
+# Environment
+.env
+.env*.local
+!.env.example
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+*.log
+
+# Java / Gradle
+.gradle/
+build/
+target/
+*.class
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/
+
