@@ -52,4 +52,14 @@ class StartupIT extends PostgresIntegrationTest {
                         "--spring.flyway.connect-retries=0"))
                 .isInstanceOf(RuntimeException.class);
     }
+
+    @Test
+    void refusesToStartOutsideLocalWithoutDatabasePassword() {
+        assertThatThrownBy(() -> SpringApplication.from(ShopApplication::main)
+                .run(
+                        "--spring.main.web-application-type=none",
+                        "--spring.profiles.active=production",
+                        "--spring.datasource.password="))
+                .hasMessage("DATABASE_PASSWORD is required outside local/test profiles");
+    }
 }
