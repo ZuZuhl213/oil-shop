@@ -20,6 +20,9 @@ class OrderStatusTest {
 
     private static Stream<Arguments> statusMatrix() {
         return Stream.of(
+                Arguments.of(null, null, false),
+                Arguments.of(null, OrderStatus.NEW, false),
+                Arguments.of(OrderStatus.NEW, null, false),
                 Arguments.of(OrderStatus.NEW, OrderStatus.NEW, true),
                 Arguments.of(OrderStatus.NEW, OrderStatus.CONTACTED, true),
                 Arguments.of(OrderStatus.NEW, OrderStatus.CONFIRMED, false),

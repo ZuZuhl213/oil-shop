@@ -164,6 +164,21 @@ class AdminOrderQueryIT extends PostgresIntegrationTest {
     }
 
     @Test
+    void treatsKeywordWildcardsAsLiteralCharacters() throws Exception {
+        Data data = fixture.create();
+        create(data, "Percent", "0912345678", OrderType.ORDER, null);
+        create(data, "Underscore", "0912345679", OrderType.ORDER, null);
+
+        MockHttpSession session = login();
+        mockMvc.perform(get("/api/v1/admin/orders").param("keyword", "%").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(0));
+        mockMvc.perform(get("/api/v1/admin/orders").param("keyword", "_").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    @Test
     void hidesPrivateDataWhenUnauthenticatedAndReturnsNotFoundForUnknownOrder() throws Exception {
         mockMvc.perform(get("/api/v1/admin/orders/999999999"))
                 .andExpect(status().isUnauthorized())

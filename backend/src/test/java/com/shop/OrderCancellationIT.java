@@ -76,6 +76,7 @@ class OrderCancellationIT extends PostgresIntegrationTest {
     @Autowired PasswordEncoder encoder;
     @Autowired JdbcTemplate jdbc;
     @MockitoSpyBean VoucherRepository voucherSpy;
+    @MockitoSpyBean OrderItemRepository orderItemSpy;
 
     @BeforeEach
     void reset() {
@@ -133,6 +134,22 @@ class OrderCancellationIT extends PostgresIntegrationTest {
     }
 
     @Test
+    void rejectsCancellationWhenVoucherUsageIsInconsistent() throws Exception {
+        Data data = fixture.create();
+        CreateResult created = createWithVoucher(data, "WELCOME");
+        Order order = orders.findByOrderCode(created.receipt().orderCode()).orElseThrow();
+        Voucher voucher = vouchers.findByCode("WELCOME").orElseThrow();
+        jdbc.update("UPDATE vouchers SET used_count = 0 WHERE id = ?", voucher.getId());
+
+        patchStatus(login(), order.getId(), OrderStatus.CANCELLED)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("VOUCHER_USAGE_INCONSISTENT"));
+
+        assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.NEW);
+        assertThat(vouchers.findById(voucher.getId()).orElseThrow().getUsedCount()).isZero();
+    }
+
+    @Test
     void inactiveOrExpiredVoucherStillGetsReleasedOnValidCancellation() {
         Data data = fixture.create();
         CreateResult created = createWithVoucher(data, "WELCOME");
@@ -174,6 +191,22 @@ class OrderCancellationIT extends PostgresIntegrationTest {
         Order order = orders.findByOrderCode(created.receipt().orderCode()).orElseThrow();
         Voucher voucher = vouchers.findByCode("WELCOME").orElseThrow();
         doThrow(new IllegalStateException("simulated failure")).when(voucherSpy).save(org.mockito.ArgumentMatchers.any(Voucher.class));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> statuses.change(order.getId(), OrderStatus.CANCELLED))
+                .isInstanceOf(IllegalStateException.class);
+
+        assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.NEW);
+        assertThat(vouchers.findById(voucher.getId()).orElseThrow().getUsedCount()).isEqualTo(1);
+    }
+
+    @Test
+    void rollsBackAfterVoucherDecrementAndOrderFlushWhenResponseMappingFails() {
+        Data data = fixture.create();
+        CreateResult created = createWithVoucher(data, "WELCOME");
+        Order order = orders.findByOrderCode(created.receipt().orderCode()).orElseThrow();
+        Voucher voucher = vouchers.findByCode("WELCOME").orElseThrow();
+        doThrow(new IllegalStateException("simulated mapping failure")).when(orderItemSpy)
+                .findAllByOrder_IdOrderByIdAsc(order.getId());
 
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> statuses.change(order.getId(), OrderStatus.CANCELLED))
                 .isInstanceOf(IllegalStateException.class);

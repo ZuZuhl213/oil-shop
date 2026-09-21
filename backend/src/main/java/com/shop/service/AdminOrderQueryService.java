@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AdminOrderQueryService {
+    private static final char LIKE_ESCAPE = '\\';
     private final OrderRepository orders;
     private final OrderItemRepository orderItems;
     private final OrderMapper mapper;
@@ -54,10 +55,11 @@ public class AdminOrderQueryService {
                 predicates.add(builder.equal(root.get("orderType"), orderType));
             }
             if (normalizedKeyword != null) {
-                String pattern = "%" + normalizedKeyword.toLowerCase(Locale.ROOT) + "%";
+                String escapedKeyword = escapeLike(normalizedKeyword);
+                String pattern = "%" + escapedKeyword.toLowerCase(Locale.ROOT) + "%";
                 predicates.add(builder.or(
-                        builder.like(builder.lower(root.get("orderCode")), pattern),
-                        builder.like(root.get("phone"), "%" + normalizedKeyword + "%")));
+                        builder.like(builder.lower(root.get("orderCode")), pattern, LIKE_ESCAPE),
+                        builder.like(root.get("phone"), "%" + escapedKeyword + "%", LIKE_ESCAPE)));
             }
             if (from != null) {
                 predicates.add(builder.greaterThanOrEqualTo(root.get("createdAt"), from));
@@ -91,5 +93,11 @@ public class AdminOrderQueryService {
 
     static BusinessException notFound(long id) {
         return new BusinessException(HttpStatus.NOT_FOUND, "NOT_FOUND", "Order not found");
+    }
+
+    private String escapeLike(String value) {
+        return value.replace(String.valueOf(LIKE_ESCAPE), String.valueOf(LIKE_ESCAPE) + LIKE_ESCAPE)
+                .replace("%", String.valueOf(LIKE_ESCAPE) + "%")
+                .replace("_", String.valueOf(LIKE_ESCAPE) + "_");
     }
 }
