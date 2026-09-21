@@ -58,6 +58,11 @@ class PublicCatalogIT extends PostgresIntegrationTest {
         mockMvc.perform(get("/api/v1/products")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].slug").value("lac-nhan"));
+        mockMvc.perform(get("/api/v1/products/dau-lac-ep-lanh"))
+                .andExpect(status().isNotFound());
+        assertThatThrownBy(() -> query.loadSellable(List.of(data.bottleOneLiter().getId())))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(error -> assertThat(((BusinessException) error).code()).isEqualTo("ITEM_UNAVAILABLE"));
 
         data.oils().setActive(true);
         categories.save(data.oils());
@@ -92,6 +97,12 @@ class PublicCatalogIT extends PostgresIntegrationTest {
                 .andExpect(jsonPath("$.page").value(0)).andExpect(jsonPath("$.size").value(1))
                 .andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.totalPages").value(1));
         mockMvc.perform(get("/api/v1/products").param("size", "0"))
+                .andExpect(status().isUnprocessableContent());
+        mockMvc.perform(get("/api/v1/products").param("page", "-1"))
+                .andExpect(status().isUnprocessableContent());
+        mockMvc.perform(get("/api/v1/products").param("size", "101"))
+                .andExpect(status().isUnprocessableContent());
+        mockMvc.perform(get("/api/v1/products").param("keyword", "x".repeat(101)))
                 .andExpect(status().isUnprocessableContent());
         mockMvc.perform(get("/api/v1/products").param("page", "not-a-number"))
                 .andExpect(status().isBadRequest());
