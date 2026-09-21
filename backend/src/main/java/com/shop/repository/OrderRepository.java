@@ -2,6 +2,7 @@ package com.shop.repository;
 
 import com.shop.entity.Order;
 import java.util.Optional;
+import java.util.UUID;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByOrderCode(String orderCode);
+
+    Optional<Order> findByIdempotencyKey(UUID idempotencyKey);
 
     @Query(value = "select nextval(pg_get_serial_sequence('orders', 'id'))", nativeQuery = true)
     long reserveId();
@@ -18,11 +21,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             insert into orders (
                 id, order_code, order_type, customer_name, phone, address,
                 subtotal, discount_amount, total_amount, voucher_id,
-                voucher_code_snapshot, status, customer_note, admin_note)
+                voucher_code_snapshot, status, customer_note, admin_note,
+                idempotency_key, request_hash)
             values (
                 :id, :orderCode, :orderType, :customerName, :phone, :address,
                 :subtotal, :discountAmount, :totalAmount, :voucherId,
-                :voucherCodeSnapshot, :status, :customerNote, :adminNote)
+                :voucherCodeSnapshot, :status, :customerNote, :adminNote,
+                :idempotencyKey, :requestHash)
             """, nativeQuery = true)
     void insertWithId(
             @Param("id") long id,
@@ -38,5 +43,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             @Param("voucherCodeSnapshot") String voucherCodeSnapshot,
             @Param("status") String status,
             @Param("customerNote") String customerNote,
-            @Param("adminNote") String adminNote);
+            @Param("adminNote") String adminNote,
+            @Param("idempotencyKey") UUID idempotencyKey,
+            @Param("requestHash") String requestHash);
 }

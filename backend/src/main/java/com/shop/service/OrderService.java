@@ -15,10 +15,10 @@ import com.shop.repository.OrderRepository;
 import com.shop.repository.VoucherRepository;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +33,7 @@ public class OrderService {
     private final OrderItemRepository orderItems;
     private final OrderCodeGenerator codes;
     private final OrderMapper mapper;
+    private final OrderRequestFingerprint fingerprint;
     private final Clock clock;
 
     public OrderService(
@@ -43,6 +44,7 @@ public class OrderService {
             OrderItemRepository orderItems,
             OrderCodeGenerator codes,
             OrderMapper mapper,
+            OrderRequestFingerprint fingerprint,
             Clock clock) {
         this.pricing = pricing;
         this.vouchers = vouchers;
@@ -51,11 +53,17 @@ public class OrderService {
         this.orderItems = orderItems;
         this.codes = codes;
         this.mapper = mapper;
+        this.fingerprint = fingerprint;
         this.clock = clock;
     }
 
     @Transactional
     public CreateResult create(CreateOrder request, String idempotencyKey) {
+        return create(request, idempotencyKey, request == null ? "0".repeat(64) : fingerprint.hash(request));
+    }
+
+    @Transactional
+    public CreateResult create(CreateOrder request, String idempotencyKey, String requestHash) {
         if (request == null) {
             throw validation("request", "Request is required");
         }
@@ -84,11 +92,12 @@ public class OrderService {
         Instant createdAt = clock.instant();
         long id = orders.reserveId();
         String orderCode = codes.from(id, createdAt, request.orderType());
+        UUID key = UUID.fromString(idempotencyKey);
         Long subtotal = request.orderType() == OrderType.ORDER ? cart.subtotal() : null;
         Long total = request.orderType() == OrderType.ORDER ? subtotal - discount : null;
         orders.insertWithId(id, orderCode, request.orderType().name(), customerName, phone, address, subtotal,
                 discount, total, voucher == null ? null : voucher.getId(), voucherCode,
-                "NEW", note, null);
+                "NEW", note, null, key, requestHash);
         for (PricedLine line : cart.lines()) {
             orderItems.insert(id, line.catalog().productId(), line.catalog().variantId(), line.catalog().productName(),
                     line.catalog().variantName(), line.quantity(), line.unitPrice(), line.lineTotal());

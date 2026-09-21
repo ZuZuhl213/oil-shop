@@ -13,7 +13,6 @@ import com.shop.support.CatalogFixture.Data;
 import com.shop.support.PostgresIntegrationTest;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

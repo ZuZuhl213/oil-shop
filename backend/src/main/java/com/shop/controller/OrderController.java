@@ -3,7 +3,7 @@ package com.shop.controller;
 import com.shop.dto.OrderDtos.CreateOrder;
 import com.shop.dto.OrderDtos.CreateResult;
 import com.shop.dto.OrderDtos.OrderReceipt;
-import com.shop.service.OrderService;
+import com.shop.service.IdempotentOrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrderController {
-    private final OrderService service;
+    private final IdempotentOrderService service;
 
-    public OrderController(OrderService service) {
+    public OrderController(IdempotentOrderService service) {
         this.service = service;
     }
 
