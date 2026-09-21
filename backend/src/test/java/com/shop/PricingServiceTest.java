@@ -51,6 +51,24 @@ class PricingServiceTest {
     }
 
     @Test
+    void mapsFractionalVndErrorToTheFailingCartLine() {
+        PricingService pricing = pricing(
+                fixed(10L, "1.00", "1.00", 100L),
+                fixed(11L, "0.50", "0.50", 101L));
+
+        assertThatThrownBy(() -> pricing.calculate(List.of(
+                new ItemInput("10", new BigDecimal("1")),
+                new ItemInput("11", new BigDecimal("0.5")))))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(error -> {
+                    BusinessException business = (BusinessException) error;
+                    assertThat(business.fieldErrors())
+                            .containsEntry("items[1].quantity", "Price multiplied by quantity must be whole VND within the limit")
+                            .containsEntry("items[1].variantId", "11");
+                });
+    }
+
+    @Test
     void rejectsQuarterUnitOnHalfUnitVariantRule() {
         PricingService pricing = pricing(fixed(10L, "0.50", "0.50", 100L));
 

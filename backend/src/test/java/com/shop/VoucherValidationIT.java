@@ -115,6 +115,25 @@ class VoucherValidationIT extends PostgresIntegrationTest {
                 .formatted(data.bottleOneLiter().getId(), data.weighted().getId()), "MIXED_SALE_TYPES");
     }
 
+    @Test
+    void rejectsDuplicateVariantWithIndexedFieldError() throws Exception {
+        var data = fixture.create();
+        MockHttpSession session = csrfSession();
+
+        mockMvc.perform(post("/api/v1/vouchers/validate")
+                        .session(session)
+                        .header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(("{\"code\":\"WELCOME\",\"items\":["
+                                + "{\"variantId\":\"%s\",\"quantity\":1},"
+                                + "{\"variantId\":\"%s\",\"quantity\":1}]}"
+                                ).formatted(data.bottleOneLiter().getId(), data.bottleOneLiter().getId())))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors['items[1].variantId']")
+                        .value("Duplicate variantId is not allowed"));
+    }
+
     private void assertCode(MockHttpSession session, String code, String items, String expectedCode) throws Exception {
         String itemArray = items.startsWith("[") ? items : "[" + items + "]";
         mockMvc.perform(post("/api/v1/vouchers/validate")

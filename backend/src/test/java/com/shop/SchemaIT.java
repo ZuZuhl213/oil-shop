@@ -112,6 +112,8 @@ class SchemaIT extends PostgresIntegrationTest {
                 OffsetDateTime.parse("2026-09-20T00:00:00Z")));
         assertConstraint("ck_vouchers_discount", () -> createVoucher(
                 "PERCENT101", "PERCENT", 101, null, 1, 0));
+        assertConstraint("ck_vouchers_max_discount", () -> createVoucher(
+                "ZEROMAX", "PERCENT", 10, 0L, 1, 0));
     }
 
     @ParameterizedTest(name = "rejects variant {0}={1}")

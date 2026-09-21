@@ -22,7 +22,7 @@ public class VoucherPolicy {
                 || voucher.getMinOrderValue() > MONEY_LIMIT || voucher.getDiscountValue() <= 0
                 || voucher.getDiscountValue() > MONEY_LIMIT
                 || (voucher.getMaxDiscount() != null
-                    && (voucher.getMaxDiscount() < 0 || voucher.getMaxDiscount() > MONEY_LIMIT))) {
+                    && (voucher.getMaxDiscount() <= 0 || voucher.getMaxDiscount() > MONEY_LIMIT))) {
             throw invalid();
         }
         if (voucher.getUsedCount() >= voucher.getQuantity()) {

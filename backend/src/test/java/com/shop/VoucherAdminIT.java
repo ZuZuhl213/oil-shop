@@ -100,8 +100,14 @@ class VoucherAdminIT extends PostgresIntegrationTest {
         MockHttpSession session = login();
         assertInvalid(session, "{\"code\":\"P0\",\"discountType\":\"PERCENT\",\"discountValue\":0,\"minOrderValue\":0,\"quantity\":1}");
         assertInvalid(session, "{\"code\":\"P101\",\"discountType\":\"PERCENT\",\"discountValue\":101,\"minOrderValue\":0,\"quantity\":1}");
+        assertInvalid(session, "{\"code\":\"PZERO\",\"discountType\":\"PERCENT\",\"discountValue\":10,\"maxDiscount\":0,\"minOrderValue\":0,\"quantity\":1}");
         assertInvalid(session, "{\"code\":\"FMAX\",\"discountType\":\"FIXED\",\"discountValue\":10,\"maxDiscount\":1,\"minOrderValue\":0,\"quantity\":1}");
         assertInvalid(session, "{\"code\":\"TIME\",\"discountType\":\"FIXED\",\"discountValue\":10,\"minOrderValue\":0,\"quantity\":1,\"startAt\":\"2026-09-21T02:00:00Z\",\"endAt\":\"2026-09-21T01:00:00Z\"}");
+        mockMvc.perform(post("/api/v1/admin/vouchers")
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"PONE\",\"discountType\":\"PERCENT\",\"discountValue\":10,\"maxDiscount\":1,\"minOrderValue\":0,\"quantity\":1}"))
+                .andExpect(status().isCreated());
         mockMvc.perform(post("/api/v1/admin/vouchers")
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON)

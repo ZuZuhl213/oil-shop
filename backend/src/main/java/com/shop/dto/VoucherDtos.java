@@ -15,7 +15,7 @@ public final class VoucherDtos {
             @NotBlank @Size(max = 50) String code,
             @NotNull DiscountType discountType,
             @NotNull @Positive Long discountValue,
-            @PositiveOrZero Long maxDiscount,
+            @Positive Long maxDiscount,
             @NotNull @PositiveOrZero Long minOrderValue,
             @NotNull @PositiveOrZero Integer quantity,
             Instant startAt,
