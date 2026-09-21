@@ -97,7 +97,13 @@ class VoucherValidationIT extends PostgresIntegrationTest {
         assertCode(session, "INACTIVE", item, "VOUCHER_INVALID");
         assertCode(session, "NOTSTARTED", item, "VOUCHER_INVALID");
         assertCode(session, "EXPIRED", item, "VOUCHER_INVALID");
-        assertCode(session, "WELCOME", "{\"variantId\":\"%s\",\"quantity\":1.5}".formatted(data.bottleOneLiter().getId()), "VALIDATION_ERROR");
+        mockMvc.perform(post("/api/v1/vouchers/validate")
+                        .session(session).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"WELCOME\",\"items\":[{\"variantId\":\"%s\",\"quantity\":1.5}]}".formatted(data.bottleOneLiter().getId())))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.fieldErrors['items[0].variantId']").value(String.valueOf(data.bottleOneLiter().getId())));
     }
 
     @Test

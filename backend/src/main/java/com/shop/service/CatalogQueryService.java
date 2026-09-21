@@ -72,7 +72,8 @@ public class CatalogQueryService {
             if (variant == null || !variant.isActive()
                     || variant.getProduct().getStatus() != com.shop.entity.ProductStatus.ACTIVE
                     || !variant.getProduct().getCategory().isActive()) {
-                throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "ITEM_UNAVAILABLE", "Catalog item is unavailable");
+                throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "ITEM_UNAVAILABLE", "Catalog item is unavailable",
+                        Map.of("variantId", String.valueOf(id)));
             }
             return new CatalogLine(variant.getId(), variant.getProduct().getId(), variant.getProduct().getName(),
                     variant.getName(), variant.getProduct().getSaleType(), variant.getPrice(),

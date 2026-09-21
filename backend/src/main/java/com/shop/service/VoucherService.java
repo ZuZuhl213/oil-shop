@@ -5,9 +5,10 @@ import com.shop.dto.VoucherDtos.VoucherWrite;
 import com.shop.entity.Voucher;
 import com.shop.exception.BusinessException;
 import com.shop.repository.VoucherRepository;
-import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -23,8 +24,11 @@ public class VoucherService {
     }
 
     @Transactional(readOnly = true)
-    public List<VoucherDto> list() {
-        return vouchers.findAll(Sort.by(Sort.Order.asc("id"))).stream().map(this::dto).toList();
+    public com.shop.dto.CatalogDtos.PageDto<VoucherDto> list(int page, int size) {
+        Page<Voucher> values = vouchers.findAll(PageRequest.of(page, size, Sort.by(Sort.Order.asc("id"))));
+        Page<VoucherDto> mapped = values.map(this::dto);
+        return new com.shop.dto.CatalogDtos.PageDto<>(mapped.getContent(), mapped.getNumber(), mapped.getSize(),
+                mapped.getTotalElements(), mapped.getTotalPages());
     }
 
     @Transactional(readOnly = true)
@@ -49,7 +53,7 @@ public class VoucherService {
         Voucher value = vouchers.findByIdForUpdate(id).orElseThrow(() -> notFound());
         String code = normalizeCode(body.code());
         validate(body, value.getUsedCount());
-        vouchers.findByCodeForUpdate(code).filter(existing -> !existing.getId().equals(id)).ifPresent(existing -> {
+        vouchers.findByCode(code).filter(existing -> !existing.getId().equals(id)).ifPresent(existing -> {
             throw conflict();
         });
         value.setCode(code);

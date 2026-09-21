@@ -33,7 +33,8 @@ public class PricingService {
         List<Long> variantIds = items.stream().map(item -> parseVariantId(item.variantId())).toList();
         for (Long id : variantIds) {
             if (!ids.add(id)) {
-                throw validation("items", "Duplicate variantId is not allowed");
+                throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "VALIDATION_ERROR",
+                        "Duplicate variantId is not allowed", java.util.Map.of("variantId", String.valueOf(id)));
             }
         }
         List<CatalogLine> catalogLines = catalog.loadSellable(variantIds);
@@ -49,7 +50,7 @@ public class PricingService {
             if (line.saleType() != saleType) {
                 throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "MIXED_SALE_TYPES", "Mixed sale types are not allowed");
             }
-            validateQuantity(item.quantity(), line);
+            validateQuantity(item.quantity(), line, variantIds.get(i), i);
             if (saleType == SaleType.QUOTE) {
                 lines.add(new PricedLine(line, item.quantity(), null, null));
                 continue;
@@ -79,14 +80,14 @@ public class PricingService {
         }
     }
 
-    private void validateQuantity(BigDecimal quantity, CatalogLine line) {
+    private void validateQuantity(BigDecimal quantity, CatalogLine line, Long variantId, int index) {
         if (quantity == null || quantity.signum() <= 0 || quantity.scale() > 2
                 || quantity.compareTo(MAX_QUANTITY) > 0 || line.minQuantity() == null
                 || line.quantityStep() == null || line.minQuantity().signum() <= 0
                 || line.quantityStep().signum() <= 0
                 || quantity.compareTo(line.minQuantity()) < 0
                 || quantity.subtract(line.minQuantity()).remainder(line.quantityStep()).compareTo(BigDecimal.ZERO) != 0) {
-            throw validation("quantity", "Quantity does not match the variant rule");
+            throw lineValidation(index, variantId, "quantity", "Quantity does not match the variant rule");
         }
     }
 
@@ -118,5 +119,11 @@ public class PricingService {
     private BusinessException validation(String field, String message) {
         return new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "VALIDATION_ERROR", message,
                 java.util.Map.of(field, message));
+    }
+
+    private BusinessException lineValidation(int index, Long variantId, String field, String message) {
+        return new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "VALIDATION_ERROR", message,
+                java.util.Map.of("items[" + index + "]." + field, message,
+                        "items[" + index + "].variantId", String.valueOf(variantId)));
     }
 }

@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,7 @@ class VoucherAdminIT extends PostgresIntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.discountType").value("PERCENT"));
         mockMvc.perform(get("/api/v1/admin/vouchers").session(session))
-                .andExpect(status().isOk()).andExpect(jsonPath("$[0].code").value("WELCOME"));
+                .andExpect(status().isOk()).andExpect(jsonPath("$.content[0].code").value("WELCOME"));
 
         mockMvc.perform(post("/api/v1/admin/vouchers")
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
@@ -97,14 +98,14 @@ class VoucherAdminIT extends PostgresIntegrationTest {
     @Test
     void validatesDiscountTypeTimeQuantityAndReadOnlyFields() throws Exception {
         MockHttpSession session = login();
-        assertInvalid(session, "{\"code\":\"P0\",\"discountType\":\"PERCENT\",\"discountValue\":0,\"quantity\":1}");
-        assertInvalid(session, "{\"code\":\"P101\",\"discountType\":\"PERCENT\",\"discountValue\":101,\"quantity\":1}");
-        assertInvalid(session, "{\"code\":\"FMAX\",\"discountType\":\"FIXED\",\"discountValue\":10,\"maxDiscount\":1,\"quantity\":1}");
-        assertInvalid(session, "{\"code\":\"TIME\",\"discountType\":\"FIXED\",\"discountValue\":10,\"quantity\":1,\"startAt\":\"2026-09-21T02:00:00Z\",\"endAt\":\"2026-09-21T01:00:00Z\"}");
+        assertInvalid(session, "{\"code\":\"P0\",\"discountType\":\"PERCENT\",\"discountValue\":0,\"minOrderValue\":0,\"quantity\":1}");
+        assertInvalid(session, "{\"code\":\"P101\",\"discountType\":\"PERCENT\",\"discountValue\":101,\"minOrderValue\":0,\"quantity\":1}");
+        assertInvalid(session, "{\"code\":\"FMAX\",\"discountType\":\"FIXED\",\"discountValue\":10,\"maxDiscount\":1,\"minOrderValue\":0,\"quantity\":1}");
+        assertInvalid(session, "{\"code\":\"TIME\",\"discountType\":\"FIXED\",\"discountValue\":10,\"minOrderValue\":0,\"quantity\":1,\"startAt\":\"2026-09-21T02:00:00Z\",\"endAt\":\"2026-09-21T01:00:00Z\"}");
         mockMvc.perform(post("/api/v1/admin/vouchers")
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"code\":\"READONLY\",\"discountType\":\"FIXED\",\"discountValue\":10,\"quantity\":1,\"usedCount\":1}"))
+                        .content("{\"code\":\"READONLY\",\"discountType\":\"FIXED\",\"discountValue\":10,\"minOrderValue\":0,\"quantity\":1,\"usedCount\":1}"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -112,12 +113,19 @@ class VoucherAdminIT extends PostgresIntegrationTest {
     void updateLocksLatestUsedCountAndStatusDoesNotConsume() throws Exception {
         Voucher voucher = vouchers.save(new Voucher("LOCKED", DiscountType.FIXED, 10, null, 0, 5, 3, null, null, true));
         MockHttpSession session = login();
-        String invalidUpdate = "{\"code\":\"LOCKED\",\"discountType\":\"FIXED\",\"discountValue\":10,\"quantity\":2,\"isActive\":true}";
+        String invalidUpdate = "{\"code\":\"LOCKED\",\"discountType\":\"FIXED\",\"discountValue\":10,\"minOrderValue\":0,\"quantity\":2,\"isActive\":true}";
         mockMvc.perform(put("/api/v1/admin/vouchers/" + voucher.getId())
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON).content(invalidUpdate))
                 .andExpect(status().isUnprocessableContent());
         assertThat(vouchers.findById(voucher.getId()).orElseThrow().getQuantity()).isEqualTo(5);
+
+        mockMvc.perform(put("/api/v1/admin/vouchers/" + voucher.getId())
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"code\":\"LOCKED\",\"discountType\":\"FIXED\",\"discountValue\":10,\"minOrderValue\":0,\"quantity\":4,\"isActive\":true}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.quantity").value(4))
+                .andExpect(jsonPath("$.usedCount").value(3));
 
         mockMvc.perform(patch("/api/v1/admin/vouchers/" + voucher.getId() + "/status")
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
@@ -144,6 +152,8 @@ class VoucherAdminIT extends PostgresIntegrationTest {
             assertThat(consumerLocked.await(5, TimeUnit.SECONDS)).isTrue();
             Future<?> admin = executor.submit(() -> voucherService.update(voucher.getId(),
                     new VoucherWrite("RACE", DiscountType.FIXED, 10L, null, 0L, 1, null, null, true)));
+            assertThatThrownBy(() -> admin.get(200, TimeUnit.MILLISECONDS))
+                    .isInstanceOf(TimeoutException.class);
             allowConsumerCommit.countDown();
             consumer.get(5, TimeUnit.SECONDS);
             ExecutionException error = assertThrows(ExecutionException.class, () -> admin.get(5, TimeUnit.SECONDS));
