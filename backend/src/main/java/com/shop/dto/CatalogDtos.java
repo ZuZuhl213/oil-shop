@@ -1,6 +1,7 @@
 package com.shop.dto;
 
 import com.shop.entity.SaleType;
+import com.shop.entity.ProductStatus;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,6 +21,7 @@ public final class CatalogDtos {
                                @NotNull @DecimalMin("0.01") BigDecimal minQuantity,
                                @NotNull @DecimalMin("0.01") BigDecimal quantityStep, Boolean isActive, Integer sortOrder) {}
     public record StatusWrite(@NotNull Boolean isActive) {}
+    public record ProductStatusWrite(@NotNull ProductStatus status) {}
     public record CategoryDto(String id, String name, String slug, String description, int sortOrder, boolean isActive) {}
     public record VariantDto(String id, String productId, String name, String sku, Long price, BigDecimal minQuantity,
                              BigDecimal quantityStep, boolean isActive, int sortOrder) {}

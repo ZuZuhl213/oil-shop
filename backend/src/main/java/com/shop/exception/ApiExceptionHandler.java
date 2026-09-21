@@ -3,6 +3,8 @@ package com.shop.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -35,6 +37,22 @@ public class ApiExceptionHandler {
             fieldErrors.putIfAbsent(
                     fieldError.getField(),
                     fieldError.getDefaultMessage() == null ? "Invalid value" : fieldError.getDefaultMessage());
+        }
+        return response(
+                HttpStatus.UNPROCESSABLE_CONTENT,
+                "VALIDATION_ERROR",
+                "Request validation failed",
+                fieldErrors);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<ApiError> handleConstraintValidation(ConstraintViolationException exception) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        for (ConstraintViolation<?> violation : exception.getConstraintViolations()) {
+            String path = violation.getPropertyPath().toString();
+            int separator = path.lastIndexOf('.');
+            String field = separator < 0 ? path : path.substring(separator + 1);
+            fieldErrors.putIfAbsent(field, violation.getMessage());
         }
         return response(
                 HttpStatus.UNPROCESSABLE_CONTENT,

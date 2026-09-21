@@ -90,6 +90,7 @@ public class Product {
     }
 
     public void setCategory(Category category) { this.category = category; }
+    public void setSlug(String slug) { this.slug = slug; }
 
     public String getName() {
         return name;
