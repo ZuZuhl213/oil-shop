@@ -58,6 +58,14 @@ class PublicCatalogIT extends PostgresIntegrationTest {
         mockMvc.perform(get("/api/v1/products")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].slug").value("lac-nhan"));
+
+        data.oils().setActive(true);
+        categories.save(data.oils());
+        data.fixedProduct().setStatus(com.shop.entity.ProductStatus.INACTIVE);
+        products.save(data.fixedProduct());
+        mockMvc.perform(get("/api/v1/products")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].slug").value("lac-nhan"));
     }
 
     @Test
@@ -69,6 +77,9 @@ class PublicCatalogIT extends PostgresIntegrationTest {
                 .andExpect(jsonPath("$.content.length()").value(1));
         mockMvc.perform(get("/api/v1/products/dau-lac-ep-lanh")).andExpect(status().isNotFound());
         mockMvc.perform(get("/api/v1/products/no-such-product")).andExpect(status().isNotFound());
+        assertThatThrownBy(() -> query.loadSellable(List.of(data.bottleOneLiter().getId())))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(error -> assertThat(((BusinessException) error).code()).isEqualTo("ITEM_UNAVAILABLE"));
     }
 
     @Test
@@ -82,6 +93,8 @@ class PublicCatalogIT extends PostgresIntegrationTest {
                 .andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.totalPages").value(1));
         mockMvc.perform(get("/api/v1/products").param("size", "0"))
                 .andExpect(status().isUnprocessableContent());
+        mockMvc.perform(get("/api/v1/products").param("page", "not-a-number"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

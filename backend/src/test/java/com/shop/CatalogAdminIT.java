@@ -70,6 +70,22 @@ class CatalogAdminIT extends PostgresIntegrationTest {
                 .andExpect(status().isCreated()).andReturn());
         mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(productId))
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Thiếu giá\",\"sku\":\"NULL-PRICE\",\"minQuantity\":1,\"quantityStep\":1}"))
+                .andExpect(status().isUnprocessableContent());
+        String quoteProductId = id(mockMvc.perform(post("/api/v1/admin/products")
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"categoryId\":\"%s\",\"name\":\"Lạc\",\"slug\":\"lac-nhan\",\"saleType\":\"QUOTE\"}".formatted(categoryId)))
+                .andExpect(status().isCreated()).andReturn());
+        mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(quoteProductId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Quote có giá\",\"sku\":\"QUOTE-PRICE\",\"price\":100,\"minQuantity\":1,\"quantityStep\":1}"))
+                .andExpect(status().isUnprocessableContent());
+        mockMvc.perform(post("/api/v1/admin/products/999999/variants")
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Không có product\",\"sku\":\"MISSING\",\"minQuantity\":1,\"quantityStep\":1}"))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(productId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Read-only\",\"sku\":\"RO\",\"productId\":\"999\",\"price\":100,\"minQuantity\":1,\"quantityStep\":1}"))
                 .andExpect(status().isBadRequest());
@@ -122,6 +138,58 @@ class CatalogAdminIT extends PostgresIntegrationTest {
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Trùng\",\"sku\":\"SKU\",\"price\":100,\"minQuantity\":1,\"quantityStep\":1}"))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void coversAdminUpdatesStatusesListsAndSaleTypeValidation() throws Exception {
+        MockHttpSession session = login();
+        String categoryId = id(mockMvc.perform(post("/api/v1/admin/categories")
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Dầu\",\"slug\":\"dau\"}"))
+                .andExpect(status().isCreated()).andReturn());
+        String productId = id(mockMvc.perform(post("/api/v1/admin/products")
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"categoryId\":\"%s\",\"name\":\"Dầu\",\"slug\":\"dau-lac\",\"saleType\":\"FIXED_PRICE\"}".formatted(categoryId)))
+                .andExpect(status().isCreated()).andReturn());
+        String variantId = id(mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(productId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Chai\",\"sku\":\"SKU-1\",\"price\":100,\"minQuantity\":1,\"quantityStep\":1}"))
+                .andExpect(status().isCreated()).andReturn());
+
+        mockMvc.perform(put("/api/v1/admin/categories/%s".formatted(categoryId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Dầu mới\",\"slug\":\"dau-moi\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.slug").value("dau-moi"));
+        mockMvc.perform(patch("/api/v1/admin/categories/%s/status".formatted(categoryId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"isActive\":false}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.isActive").value(false));
+        mockMvc.perform(get("/api/v1/admin/categories").session(session))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].slug").value("dau-moi"));
+
+        mockMvc.perform(put("/api/v1/admin/products/%s".formatted(productId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"categoryId\":\"%s\",\"name\":\"Dầu mới\",\"slug\":\"dau-lac-moi\",\"saleType\":\"QUOTE\"}".formatted(categoryId)))
+                .andExpect(status().isUnprocessableContent());
+        mockMvc.perform(patch("/api/v1/admin/products/%s/status".formatted(productId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"INACTIVE\"}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("INACTIVE"));
+        mockMvc.perform(get("/api/v1/admin/products").session(session))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.page").value(0)).andExpect(jsonPath("$.content[0].status").value("INACTIVE"));
+
+        mockMvc.perform(put("/api/v1/admin/variants/%s".formatted(variantId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Sai\",\"sku\":\"SKU-1\",\"price\":1,\"minQuantity\":0.3,\"quantityStep\":0.2}"))
+                .andExpect(status().isUnprocessableContent());
+        mockMvc.perform(get("/api/v1/admin/products/%s".formatted(productId)).session(session))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.variants[0].minQuantity").value(1.0));
     }
 
     @Test
