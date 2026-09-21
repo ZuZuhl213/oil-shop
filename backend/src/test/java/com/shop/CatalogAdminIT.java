@@ -127,6 +127,11 @@ class CatalogAdminIT extends PostgresIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Trùng slug\",\"slug\":\"dau\"}"))
                 .andExpect(status().isConflict());
+        mockMvc.perform(post("/api/v1/admin/categories")
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Slash slug\",\"slug\":\"dau/lac\"}"))
+                .andExpect(status().isUnprocessableContent());
         String productId = id(mockMvc.perform(post("/api/v1/admin/products")
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"categoryId\":\"%s\",\"name\":\"Dầu\",\"slug\":\"dau-lac\",\"saleType\":\"FIXED_PRICE\",\"status\":\"ACTIVE\"}".formatted(categoryId)))
@@ -136,6 +141,16 @@ class CatalogAdminIT extends PostgresIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"categoryId\":\"%s\",\"name\":\"Trùng slug\",\"slug\":\"dau-lac\",\"saleType\":\"FIXED_PRICE\"}".formatted(categoryId)))
                 .andExpect(status().isConflict());
+        mockMvc.perform(post("/api/v1/admin/products")
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"categoryId\":\"%s\",\"name\":\"Slash slug\",\"slug\":\"dau/lac\",\"saleType\":\"FIXED_PRICE\"}".formatted(categoryId)))
+                .andExpect(status().isUnprocessableContent());
+        mockMvc.perform(post("/api/v1/admin/products")
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"categoryId\":\"%s\",\"name\":\"Unicode slug\",\"slug\":\"İ\",\"saleType\":\"FIXED_PRICE\"}".formatted(categoryId)))
+                .andExpect(status().isUnprocessableContent());
         mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(productId))
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"name\":\"Sai\",\"sku\":\"BAD\",\"price\":1,\"minQuantity\":0.3,\"quantityStep\":0.2}"))

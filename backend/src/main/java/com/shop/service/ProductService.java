@@ -11,7 +11,6 @@ import com.shop.mapper.CatalogMapper;
 import com.shop.repository.CategoryRepository;
 import com.shop.repository.ProductRepository;
 import com.shop.repository.ProductVariantRepository;
-import java.util.Locale;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -37,11 +36,20 @@ public class ProductService {
         return new PageDto<>(mapped.getContent(), mapped.getNumber(), mapped.getSize(), mapped.getTotalElements(), mapped.getTotalPages());
     }
     @Transactional(readOnly = true) public ProductDto getAdmin(long id) { Product p=get(id); return mapper.product(p, variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
-    @Transactional public ProductDto create(ProductWrite b) { Category c=category(b.categoryId()); String slug=CategoryService.slug(b.slug()); unique(slug,null); Product p=new Product(c,b.name().trim(),slug,CategoryService.trim(b.shortDescription()),CategoryService.trim(b.description()),thumbnail(b.thumbnailUrl()),b.saleType(),status(b.status()),CategoryService.value(b.sortOrder())); return mapper.product(products.save(p), java.util.List.of()); }
-    @Transactional public ProductDto update(long id, ProductWrite b) { Product p=get(id); Category c=category(b.categoryId()); String slug=CategoryService.slug(b.slug()); unique(slug,id); if (b.saleType()!=p.getSaleType()) throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"VALIDATION_ERROR","saleType cannot be changed"); p.setCategory(c);p.setSlug(slug);p.setName(b.name().trim());p.setShortDescription(CategoryService.trim(b.shortDescription()));p.setDescription(CategoryService.trim(b.description()));p.setThumbnailUrl(thumbnail(b.thumbnailUrl()));p.setStatus(status(b.status()));p.setSortOrder(CategoryService.value(b.sortOrder())); return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
+    @Transactional public ProductDto create(ProductWrite b) { Category c=category(b.categoryId()); String slug=CategoryService.normalizeSlug(b.slug(), 180); unique(slug,null); Product p=new Product(c,b.name().trim(),slug,CategoryService.trim(b.shortDescription()),CategoryService.trim(b.description()),thumbnail(b.thumbnailUrl()),b.saleType(),status(b.status()),CategoryService.value(b.sortOrder())); return mapper.product(products.save(p), java.util.List.of()); }
+    @Transactional public ProductDto update(long id, ProductWrite b) { Product p=get(id); Category c=category(b.categoryId()); String slug=CategoryService.normalizeSlug(b.slug(), 180); unique(slug,id); if (b.saleType()!=p.getSaleType()) throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"VALIDATION_ERROR","saleType cannot be changed"); p.setCategory(c);p.setSlug(slug);p.setName(b.name().trim());p.setShortDescription(CategoryService.trim(b.shortDescription()));p.setDescription(CategoryService.trim(b.description()));p.setThumbnailUrl(thumbnail(b.thumbnailUrl()));p.setStatus(status(b.status()));p.setSortOrder(CategoryService.value(b.sortOrder())); return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
     @Transactional public ProductDto status(long id, ProductStatus value) { Product p=get(id);p.setStatus(value);return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
     Product get(long id) { return products.findById(id).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,"NOT_FOUND","Product not found")); }
-    Category category(String id) { try { return categories.findById(Long.parseLong(id)).orElseThrow(); } catch(Exception e) { throw new BusinessException(HttpStatus.NOT_FOUND,"NOT_FOUND","Category not found"); } }
+    Category category(String id) {
+        final long categoryId;
+        try {
+            categoryId = Long.parseLong(id);
+        } catch (NumberFormatException exception) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "NOT_FOUND", "Category not found");
+        }
+        return categories.findById(categoryId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "NOT_FOUND", "Category not found"));
+    }
     private void unique(String slug, Long id) { products.findBySlug(slug).filter(p -> id==null || !p.getId().equals(id)).ifPresent(p->{throw new BusinessException(HttpStatus.CONFLICT,"CONFLICT","Product slug already exists");}); }
     private ProductStatus status(String value) { try { return value==null?ProductStatus.ACTIVE:ProductStatus.valueOf(value); } catch(Exception e) { throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"VALIDATION_ERROR","Invalid product status"); } }
     private String thumbnail(String value) {

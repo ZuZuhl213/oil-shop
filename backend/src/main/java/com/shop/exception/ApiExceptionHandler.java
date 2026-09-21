@@ -102,10 +102,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(Exception.class)
     ResponseEntity<ApiError> handleUnexpected(Exception exception) {
         String traceId = traceId();
-        log.error(
-                "Unexpected API error traceId={} exceptionType={}",
-                traceId,
-                exception.getClass().getName());
+        log.error("Unexpected API error traceId={}", traceId, exception);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiError(
                         "INTERNAL_ERROR",
