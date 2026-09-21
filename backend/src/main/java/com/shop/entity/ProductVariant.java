@@ -84,6 +84,12 @@ public class ProductVariant {
         return name;
     }
 
+    public void setName(String name) { this.name = name; }
+    public void setSku(String sku) { this.sku = sku; }
+    public void setMinQuantity(BigDecimal value) { this.minQuantity = value; }
+    public void setQuantityStep(BigDecimal value) { this.quantityStep = value; }
+    public void setSortOrder(int value) { this.sortOrder = value; }
+
     public String getSku() {
         return sku;
     }

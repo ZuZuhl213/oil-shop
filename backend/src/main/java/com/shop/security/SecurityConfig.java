@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .accessDeniedHandler((request, response, exception) -> writeError(response, mapper, 403,
                                 "FORBIDDEN", "Access is denied")))
                 .addFilterAfter(activeAdminFilter, SecurityContextHolderFilter.class)
+                .addFilterBefore(new AdminAuthenticationPrecheckFilter(mapper), org.springframework.security.web.csrf.CsrfFilter.class)
                 .addFilterBefore(originValidationFilter, org.springframework.security.web.csrf.CsrfFilter.class);
         return http.build();
     }
