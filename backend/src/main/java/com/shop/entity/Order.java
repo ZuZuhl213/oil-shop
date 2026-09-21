@@ -177,6 +177,8 @@ public class Order {
         return status;
     }
 
+    public void setStatus(OrderStatus status) { this.status = status; }
+
     public String getCustomerNote() {
         return customerNote;
     }
@@ -184,6 +186,8 @@ public class Order {
     public String getAdminNote() {
         return adminNote;
     }
+
+    public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
 
     public UUID getIdempotencyKey() {
         return idempotencyKey;

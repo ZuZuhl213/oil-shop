@@ -11,6 +11,9 @@ import org.springframework.data.repository.query.Param;
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
     List<OrderItem> findAllByOrder_IdOrderByIdAsc(Long orderId);
 
+    @Query("select i from OrderItem i where i.order.id in :orderIds order by i.order.id asc, i.id asc")
+    List<OrderItem> findAllByOrderIds(@Param("orderIds") List<Long> orderIds);
+
     @Modifying(flushAutomatically = true)
     @Query(value = """
             insert into order_items (
