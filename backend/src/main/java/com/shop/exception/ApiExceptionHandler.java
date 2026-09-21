@@ -15,6 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -70,6 +71,12 @@ public class ApiExceptionHandler {
                 "VALIDATION_ERROR",
                 "Request parameter has an invalid value",
                 Map.of(exception.getName(), "Invalid value"));
+    }
+
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    ResponseEntity<ApiError> handleMissingHeader(MissingRequestHeaderException exception) {
+        return response(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Required header is missing",
+                Map.of(exception.getHeaderName(), "Header is required"));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -132,7 +139,8 @@ public class ApiExceptionHandler {
                 if ("uq_categories_slug".equals(name)
                         || "uq_products_slug".equals(name)
                         || "uq_product_variants_sku".equals(name)
-                        || "uq_vouchers_code".equals(name)) {
+                        || "uq_vouchers_code".equals(name)
+                        || "uq_orders_idempotency_key".equals(name)) {
                     return name;
                 }
                 return null;

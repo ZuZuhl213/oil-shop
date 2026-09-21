@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
@@ -62,6 +63,12 @@ public class Order {
     @Column(name = "admin_note", columnDefinition = "text")
     private String adminNote;
 
+    @Column(name = "idempotency_key", nullable = false, unique = true)
+    private UUID idempotencyKey;
+
+    @Column(name = "request_hash", nullable = false, length = 64)
+    private String requestHash;
+
     @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
     private Instant createdAt;
 
@@ -85,6 +92,26 @@ public class Order {
             OrderStatus status,
             String customerNote,
             String adminNote) {
+        this(orderCode, orderType, customerName, phone, address, subtotal, discountAmount, totalAmount, voucher,
+                voucherCodeSnapshot, status, customerNote, adminNote, UUID.randomUUID(), "0".repeat(64));
+    }
+
+    public Order(
+            String orderCode,
+            OrderType orderType,
+            String customerName,
+            String phone,
+            String address,
+            Long subtotal,
+            long discountAmount,
+            Long totalAmount,
+            Voucher voucher,
+            String voucherCodeSnapshot,
+            OrderStatus status,
+            String customerNote,
+            String adminNote,
+            UUID idempotencyKey,
+            String requestHash) {
         this.orderCode = orderCode;
         this.orderType = orderType;
         this.customerName = customerName;
@@ -98,6 +125,8 @@ public class Order {
         this.status = status;
         this.customerNote = customerNote;
         this.adminNote = adminNote;
+        this.idempotencyKey = idempotencyKey;
+        this.requestHash = requestHash;
     }
 
     public Long getId() {
@@ -154,6 +183,14 @@ public class Order {
 
     public String getAdminNote() {
         return adminNote;
+    }
+
+    public UUID getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public String getRequestHash() {
+        return requestHash;
     }
 
     public Instant getCreatedAt() {

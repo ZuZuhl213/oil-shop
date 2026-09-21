@@ -272,10 +272,11 @@ class SchemaIT extends PostgresIntegrationTest {
         return jdbc.queryForObject("""
                 INSERT INTO orders (
                     order_code, order_type, customer_name, phone, subtotal,
-                    discount_amount, total_amount, voucher_id, voucher_code_snapshot)
-                VALUES (?, ?, 'Nguyễn Văn An', '0912345678', ?, ?, ?, ?, ?) RETURNING id
+                    discount_amount, total_amount, voucher_id, voucher_code_snapshot,
+                    idempotency_key, request_hash)
+                VALUES (?, ?, 'Nguyễn Văn An', '0912345678', ?, ?, ?, ?, ?, ?, ?) RETURNING id
                 """, Long.class, orderCode, orderType, subtotal, discountAmount,
-                totalAmount, voucherId, voucherCode);
+                totalAmount, voucherId, voucherCode, UUID.randomUUID(), "0".repeat(64));
     }
 
     private long createOrderItem(
