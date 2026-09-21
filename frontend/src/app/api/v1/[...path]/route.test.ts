@@ -56,6 +56,28 @@ describe("same-origin API proxy", () => {
     expect(response.headers.getSetCookie()).toEqual(["SESSION=abc; Path=/", "XSRF=def; Path=/"]);
   });
 
+  it("forwards mutation body and CSRF headers without exposing the upstream URL", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({ code: "VOUCHER_INVALID" }), { status: 422, headers: { "content-type": "application/json" } }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(
+      new Request("http://frontend.test/api/v1/vouchers/validate", {
+        method: "POST",
+        body: JSON.stringify({ code: "SAVE10", items: [] }),
+        headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "token-1", Origin: "https://frontend.test" },
+      }),
+      params(["vouchers", "validate"]),
+    );
+
+    expect(response.status).toBe(422);
+    const [upstreamUrl, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(upstreamUrl).toBe("http://localhost:8080/api/v1/vouchers/validate");
+    expect(await new Response(options.body).text()).toBe(JSON.stringify({ code: "SAVE10", items: [] }));
+    const forwardedHeaders = new Headers(options.headers);
+    expect(forwardedHeaders.get("x-csrf-token")).toBe("token-1");
+    expect(forwardedHeaders.get("origin")).toBe("https://frontend.test");
+  });
+
   it("rejects paths outside the proxy allowlist", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);

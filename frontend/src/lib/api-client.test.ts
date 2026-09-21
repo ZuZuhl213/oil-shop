@@ -55,6 +55,20 @@ describe("apiFetch", () => {
     });
   });
 
+  it("preserves authentication errors as structured API errors", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ code: "UNAUTHENTICATED", message: "Authentication is required", fieldErrors: {}, traceId: "trace-401" }), {
+          status: 401,
+          headers: { "content-type": "application/json" },
+        }),
+      ),
+    );
+
+    await expect(apiFetch("/admin/auth/me")).rejects.toMatchObject({ status: 401, code: "UNAUTHENTICATED", traceId: "trace-401" });
+  });
+
   it("turns a network failure into a service unavailable error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("offline")));
 
