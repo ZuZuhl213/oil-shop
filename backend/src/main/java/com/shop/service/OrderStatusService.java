@@ -10,6 +10,7 @@ import com.shop.mapper.OrderMapper;
 import com.shop.repository.OrderItemRepository;
 import com.shop.repository.OrderRepository;
 import com.shop.repository.VoucherRepository;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -22,14 +23,16 @@ public class OrderStatusService {
     private final OrderItemRepository orderItems;
     private final OrderMapper mapper;
     private final OrderTransitions transitions;
+    private final EntityManager entityManager;
 
     public OrderStatusService(OrderRepository orders, VoucherRepository vouchers, OrderItemRepository orderItems,
-            OrderMapper mapper, OrderTransitions transitions) {
+            OrderMapper mapper, OrderTransitions transitions, EntityManager entityManager) {
         this.orders = orders;
         this.vouchers = vouchers;
         this.orderItems = orderItems;
         this.mapper = mapper;
         this.transitions = transitions;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -50,7 +53,8 @@ public class OrderStatusService {
         }
         if (current != target) {
             order.setStatus(target);
-            orders.save(order);
+            orders.saveAndFlush(order);
+            entityManager.refresh(order);
         }
         List<OrderItem> items = orderItems.findAllByOrder_IdOrderByIdAsc(orderId);
         return mapper.adminOrder(order, items);

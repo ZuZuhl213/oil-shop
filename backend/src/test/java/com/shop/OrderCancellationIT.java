@@ -21,6 +21,7 @@ import com.shop.support.CatalogFixture;
 import com.shop.support.CatalogFixture.Data;
 import com.shop.support.PostgresIntegrationTest;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -95,13 +96,17 @@ class OrderCancellationIT extends PostgresIntegrationTest {
         Data data = fixture.create();
         CreateResult created = createWithVoucher(data, "WELCOME");
         Order order = orders.findByOrderCode(created.receipt().orderCode()).orElseThrow();
+        Instant before = order.getUpdatedAt();
         Voucher voucher = vouchers.findByCode("WELCOME").orElseThrow();
         assertThat(voucher.getUsedCount()).isEqualTo(1);
         MockHttpSession session = login();
 
-        patchStatus(session, order.getId(), OrderStatus.CANCELLED)
+        MvcResult cancellation = patchStatus(session, order.getId(), OrderStatus.CANCELLED)
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("CANCELLED"));
+                .andExpect(jsonPath("$.status").value("CANCELLED"))
+                .andReturn();
+        assertThat(Instant.parse(mapper.readTree(cancellation.getResponse().getContentAsByteArray())
+                .get("updatedAt").asText())).isAfter(before);
         assertThat(vouchers.findById(voucher.getId()).orElseThrow().getUsedCount()).isZero();
 
         patchStatus(session, order.getId(), OrderStatus.CANCELLED)
