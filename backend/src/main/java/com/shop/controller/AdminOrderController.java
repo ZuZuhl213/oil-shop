@@ -12,6 +12,7 @@ import com.shop.service.OrderStatusService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,7 +41,7 @@ public class AdminOrderController {
     public PageDto<AdminOrder> list(
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) OrderType orderType,
-            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) @Size(max = 100) String keyword,
             @RequestParam(required = false) Instant from,
             @RequestParam(required = false) Instant to,
             @RequestParam(defaultValue = "0") @Min(0) int page,

@@ -117,6 +117,8 @@ class AdminOrderQueryIT extends PostgresIntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1));
         mockMvc.perform(get("/api/v1/admin/orders?from=2026-09-20T10:30:00Z&to=2026-09-20T11:00:00Z").session(session))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1));
+        mockMvc.perform(get("/api/v1/admin/orders?keyword=%s".formatted("x".repeat(101))).session(session))
+                .andExpect(status().isUnprocessableContent());
 
         mockMvc.perform(get("/api/v1/admin/orders/" + firstOrder.getId()).session(session))
                 .andExpect(status().isOk())
