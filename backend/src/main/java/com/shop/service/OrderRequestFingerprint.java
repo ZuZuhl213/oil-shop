@@ -3,7 +3,6 @@ package com.shop.service;
 import com.shop.dto.ItemInput;
 import com.shop.dto.OrderDtos.CreateOrder;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -54,11 +53,8 @@ public class OrderRequestFingerprint {
         if (normalized == null) {
             return null;
         }
-        try {
-            return new BigInteger(normalized).toString();
-        } catch (RuntimeException exception) {
-            return normalized;
-        }
+        Long parsed = positiveLong(normalized);
+        return parsed == null ? normalized : parsed.toString();
     }
 
     private String optional(String value) {
@@ -70,11 +66,21 @@ public class OrderRequestFingerprint {
         return value == null ? null : value.stripTrailingZeros().toPlainString();
     }
 
-    private BigInteger numeric(String value) {
+    private long numeric(String value) {
+        Long parsed = positiveLong(value);
+        return parsed == null ? Long.MAX_VALUE : parsed;
+    }
+
+    private Long positiveLong(String value) {
+        String normalized = trim(value);
+        if (normalized == null) {
+            return null;
+        }
         try {
-            return new BigInteger(trim(value));
-        } catch (RuntimeException exception) {
-            return BigInteger.valueOf(Long.MAX_VALUE);
+            long parsed = Long.parseLong(normalized);
+            return parsed > 0 ? parsed : null;
+        } catch (NumberFormatException exception) {
+            return null;
         }
     }
 
