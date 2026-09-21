@@ -20,7 +20,7 @@ public final class OrderDtos {
             @Size(max = 1000) String address,
             @Size(max = 2000) String note,
             @Size(max = 50) String voucherCode,
-            @NotEmpty @Size(max = 50) List<@Valid ItemInput> items) {
+            @NotEmpty @Size(max = 50) List<@NotNull @Valid ItemInput> items) {
     }
 
     public record OrderReceipt(

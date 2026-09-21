@@ -18,14 +18,15 @@ public class OrderRequestFingerprint {
         StringBuilder canonical = new StringBuilder();
         field(canonical, "orderType", request.orderType() == null ? null : request.orderType().name());
         field(canonical, "customerName", trim(request.customerName()));
-        field(canonical, "phone", trim(request.phone()));
+        field(canonical, "phone", phone(request.phone()));
         field(canonical, "address", optional(request.address()));
         field(canonical, "note", optional(request.note()));
         String voucherCode = optional(request.voucherCode());
         field(canonical, "voucherCode", voucherCode == null ? null : voucherCode.toUpperCase(Locale.ROOT));
         List<ItemInput> items = request.items() == null ? List.of() : request.items().stream()
                 .sorted(Comparator.comparing((ItemInput item) -> numeric(item == null ? null : item.variantId()))
-                        .thenComparing(item -> quantity(item == null ? null : item.quantity())))
+                        .thenComparing(item -> quantity(item == null ? null : item.quantity()),
+                                Comparator.nullsFirst(Comparator.naturalOrder())))
                 .toList();
         field(canonical, "items", Integer.toString(items.size()));
         for (ItemInput item : items) {
@@ -36,6 +37,14 @@ public class OrderRequestFingerprint {
     }
 
     private String trim(String value) { return value == null ? null : value.trim(); }
+
+    private String phone(String value) {
+        String normalized = trim(value);
+        if (normalized != null && normalized.startsWith("+84")) {
+            return "0" + normalized.substring(3);
+        }
+        return normalized;
+    }
 
     private String optional(String value) {
         String normalized = trim(value);

@@ -45,6 +45,8 @@ class OrderRequestFingerprintTest {
         assertThat(fingerprint.hash(new CreateOrder(OrderType.ORDER, "A", "0912345678", null, null, null,
                 List.of(new ItemInput("13", new BigDecimal("2")))))).isNotEqualTo(fingerprint.hash(base));
         assertThat(fingerprint.hash(new CreateOrder(OrderType.ORDER, "A", "+84912345678", null, null, null,
+                base.items()))).isEqualTo(fingerprint.hash(base));
+        assertThat(fingerprint.hash(new CreateOrder(OrderType.ORDER, "A", "0912345679", null, null, null,
                 base.items()))).isNotEqualTo(fingerprint.hash(base));
         assertThat(fingerprint.hash(new CreateOrder(OrderType.QUOTE_REQUEST, "A", "0912345678", null, null, null,
                 base.items()))).isNotEqualTo(fingerprint.hash(base));
@@ -55,7 +57,7 @@ class OrderRequestFingerprintTest {
     @Test
     void hashesMalformedNullItemWithoutThrowingBeforeValidation() {
         CreateOrder malformed = new CreateOrder(
-                OrderType.ORDER, "A", "0912345678", null, null, null, Collections.singletonList(null));
+                OrderType.ORDER, "A", "0912345678", null, null, null, Collections.nCopies(2, null));
 
         assertThat(fingerprint.hash(malformed)).hasSize(64);
     }

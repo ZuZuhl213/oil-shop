@@ -28,13 +28,14 @@ class OrderMigrationIT extends PostgresIntegrationTest {
                     .load()
                     .migrate();
 
-            long id = jdbc.queryForObject("""
+            jdbc.update("""
                     INSERT INTO "%s".orders (
                         order_code, order_type, customer_name, phone,
                         subtotal, discount_amount, total_amount, status)
-                    VALUES ('DH-20260921-1', 'ORDER', 'Legacy', '0912345678', 100, 0, 100, 'NEW')
-                    RETURNING id
-                    """.formatted(schema), Long.class);
+                    VALUES
+                        ('DH-20260921-1', 'ORDER', 'Legacy 1', '0912345678', 100, 0, 100, 'NEW'),
+                        ('DH-20260921-2', 'ORDER', 'Legacy 2', '0912345679', 200, 0, 200, 'NEW')
+                    """.formatted(schema));
 
             Flyway.configure()
                     .dataSource(dataSource)
@@ -44,10 +45,12 @@ class OrderMigrationIT extends PostgresIntegrationTest {
                     .load()
                     .migrate();
 
-            assertThat(jdbc.queryForObject("SELECT idempotency_key IS NOT NULL FROM \"%s\".orders WHERE id = ?"
-                    .formatted(schema), Boolean.class, id)).isTrue();
-            assertThat(jdbc.queryForObject("SELECT length(request_hash) FROM \"%s\".orders WHERE id = ?"
-                    .formatted(schema), Integer.class, id)).isEqualTo(64);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM \"%s\".orders WHERE idempotency_key IS NOT NULL"
+                    .formatted(schema), Long.class)).isEqualTo(2);
+            assertThat(jdbc.queryForObject("SELECT count(DISTINCT idempotency_key) FROM \"%s\".orders"
+                    .formatted(schema), Long.class)).isEqualTo(2);
+            assertThat(jdbc.queryForObject("SELECT count(*) FROM \"%s\".orders WHERE length(request_hash) = 64"
+                    .formatted(schema), Long.class)).isEqualTo(2);
         } finally {
             jdbc.execute("DROP SCHEMA IF EXISTS \"%s\" CASCADE".formatted(schema));
         }

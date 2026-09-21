@@ -84,6 +84,8 @@ class OrderConcurrencyIT extends PostgresIntegrationTest {
     @Test
     void sameKeyConcurrentRequestsCreateOneOrderAndReplayOneReceipt() throws Exception {
         Data data = fixture.create();
+        data.welcome().setQuantity(1);
+        vouchers.saveAndFlush(data.welcome());
         CreateOrder request = request(data, "A");
         ExecutorService executor = Executors.newFixedThreadPool(2);
         try {
@@ -105,6 +107,8 @@ class OrderConcurrencyIT extends PostgresIntegrationTest {
     @Test
     void sameKeyDifferentPayloadReturnsConflictUnderRace() throws Exception {
         Data data = fixture.create();
+        data.welcome().setQuantity(1);
+        vouchers.saveAndFlush(data.welcome());
         CreateOrder firstRequest = request(data, "A");
         CreateOrder secondRequest = request(data, "B");
         ExecutorService executor = Executors.newFixedThreadPool(2);

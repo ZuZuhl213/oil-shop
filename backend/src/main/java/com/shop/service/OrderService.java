@@ -78,6 +78,15 @@ public class OrderService {
         CalculatedCart cart = pricing.calculate(request.items());
         validateOrderType(request.orderType(), cart.saleType());
 
+        Instant createdAt = clock.instant();
+        long id = orders.reserveId();
+        String orderCode = codes.from(id, createdAt, request.orderType());
+        UUID key = UUID.fromString(idempotencyKey);
+        Long subtotal = request.orderType() == OrderType.ORDER ? cart.subtotal() : null;
+        Long total = subtotal;
+        orders.insertWithId(id, orderCode, request.orderType().name(), customerName, phone, address, subtotal,
+                0, total, null, null, "NEW", note, null, key, requestHash, createdAt);
+
         Voucher voucher = null;
         long discount = 0;
         if (voucherCode != null) {
@@ -87,17 +96,8 @@ public class OrderService {
             voucher = vouchers.findByCodeForUpdate(voucherCode)
                     .orElseThrow(() -> new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "VOUCHER_INVALID", "Voucher is not valid"));
             discount = voucherPolicy.evaluate(voucher, cart.subtotal(), clock.instant());
+            orders.updatePricingAndVoucher(id, discount, subtotal - discount, voucher.getId(), voucherCode);
         }
-
-        Instant createdAt = clock.instant();
-        long id = orders.reserveId();
-        String orderCode = codes.from(id, createdAt, request.orderType());
-        UUID key = UUID.fromString(idempotencyKey);
-        Long subtotal = request.orderType() == OrderType.ORDER ? cart.subtotal() : null;
-        Long total = request.orderType() == OrderType.ORDER ? subtotal - discount : null;
-        orders.insertWithId(id, orderCode, request.orderType().name(), customerName, phone, address, subtotal,
-                discount, total, voucher == null ? null : voucher.getId(), voucherCode,
-                "NEW", note, null, key, requestHash);
         for (PricedLine line : cart.lines()) {
             orderItems.insert(id, line.catalog().productId(), line.catalog().variantId(), line.catalog().productName(),
                     line.catalog().variantName(), line.quantity(), line.unitPrice(), line.lineTotal());

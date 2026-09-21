@@ -8,11 +8,19 @@ import com.shop.repository.CategoryRepository;
 import com.shop.repository.ProductRepository;
 import com.shop.repository.ProductVariantRepository;
 import com.shop.repository.VoucherRepository;
+import com.shop.service.OrderService;
 import com.shop.support.CatalogFixture;
 import com.shop.support.CatalogFixture.Data;
 import com.shop.support.PostgresIntegrationTest;
+import com.shop.dto.ItemInput;
+import com.shop.dto.OrderDtos.CreateOrder;
+import com.shop.dto.OrderDtos.CreateResult;
+import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +31,14 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,6 +61,8 @@ class OrderCreationIT extends PostgresIntegrationTest {
     @Autowired ProductVariantRepository variants;
     @Autowired VoucherRepository vouchers;
     @Autowired CategoryRepository categories;
+    @Autowired OrderService orderService;
+    @MockitoSpyBean Clock clock;
 
     @BeforeEach
     void reset() {
@@ -167,12 +179,29 @@ class OrderCreationIT extends PostgresIntegrationTest {
     }
 
     @Test
+    void persistsTheClockInstantUsedToGenerateOrderCode() {
+        Data data = fixture.create();
+        Instant atVietnameseMidnight = Instant.parse("2026-09-21T17:00:00Z");
+        doReturn(atVietnameseMidnight).when(clock).instant();
+
+        CreateResult result = orderService.create(new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput(data.bottleOneLiter().getId().toString(), BigDecimal.ONE))),
+                "00000000-0000-4000-8000-000000000005");
+
+        Order order = orders.findByOrderCode(result.receipt().orderCode()).orElseThrow();
+        assertThat(order.getCreatedAt()).isEqualTo(atVietnameseMidnight);
+        assertThat(order.getOrderCode()).isEqualTo("DH-20260922-" + order.getId());
+    }
+
+    @Test
     void rejectsInvalidAddressQuantityDuplicatesAndUnavailableItems() throws Exception {
         Data data = fixture.create();
         assertInvalid(data, "{\"orderType\":\"ORDER\",\"customerName\":\"A\",\"phone\":\"0912345678\",\"address\":\"   \",\"items\":[{\"variantId\":\"%s\",\"quantity\":1}]}".formatted(data.bottleOneLiter().getId()), "address");
         assertInvalid(data, "{\"orderType\":\"ORDER\",\"customerName\":\"A\",\"phone\":\"0912345678\",\"address\":\"%s\",\"items\":[{\"variantId\":\"%s\",\"quantity\":1}]}".formatted("x".repeat(1001), data.bottleOneLiter().getId()), "address");
         assertInvalid(data, "{\"orderType\":\"ORDER\",\"customerName\":\"A\",\"phone\":\"0912345678\",\"items\":[{\"variantId\":\"%s\",\"quantity\":0.5}]}".formatted(data.bottleOneLiter().getId()), "items[0].quantity");
         assertInvalid(data, "{\"orderType\":\"ORDER\",\"customerName\":\"A\",\"phone\":\"0912345678\",\"items\":[{\"variantId\":\"%s\",\"quantity\":1},{\"variantId\":\"%s\",\"quantity\":1}]}".formatted(data.bottleOneLiter().getId(), data.bottleOneLiter().getId()), "items[1].variantId");
+        assertInvalid(data, "{\"orderType\":\"ORDER\",\"customerName\":\"A\",\"phone\":\"0912345678\",\"items\":[null,null]}", "items[0]");
         assertInvalid(data, "{\"orderType\":\"ORDER\",\"customerName\":\"A\",\"phone\":\"0912345678\",\"items\":[{\"variantId\":\"999999999\",\"quantity\":1}]}", "code");
     }
 
