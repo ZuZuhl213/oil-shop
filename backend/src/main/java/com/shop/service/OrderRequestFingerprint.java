@@ -15,11 +15,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrderRequestFingerprint {
     public String hash(CreateOrder request) {
+        if (request == null) {
+            return sha256("request:-1;");
+        }
         StringBuilder canonical = new StringBuilder();
         field(canonical, "orderType", request.orderType() == null ? null : request.orderType().name());
         field(canonical, "customerName", trim(request.customerName()));
         field(canonical, "phone", phone(request.phone()));
-        field(canonical, "address", optional(request.address()));
+        field(canonical, "address", trim(request.address()));
         field(canonical, "note", optional(request.note()));
         String voucherCode = optional(request.voucherCode());
         field(canonical, "voucherCode", voucherCode == null ? null : voucherCode.toUpperCase(Locale.ROOT));
@@ -30,7 +33,7 @@ public class OrderRequestFingerprint {
                 .toList();
         field(canonical, "items", Integer.toString(items.size()));
         for (ItemInput item : items) {
-            field(canonical, "variantId", item == null ? null : trim(item.variantId()));
+            field(canonical, "variantId", item == null ? null : variantId(item.variantId()));
             field(canonical, "quantity", item == null ? null : quantity(item.quantity()));
         }
         return sha256(canonical.toString());
@@ -44,6 +47,18 @@ public class OrderRequestFingerprint {
             return "0" + normalized.substring(3);
         }
         return normalized;
+    }
+
+    private String variantId(String value) {
+        String normalized = trim(value);
+        if (normalized == null) {
+            return null;
+        }
+        try {
+            return new BigInteger(normalized).toString();
+        } catch (RuntimeException exception) {
+            return normalized;
+        }
     }
 
     private String optional(String value) {

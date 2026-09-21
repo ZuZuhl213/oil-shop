@@ -53,7 +53,7 @@ public class IdempotentOrderService {
             throw new BusinessException(HttpStatus.CONFLICT, "IDEMPOTENCY_CONFLICT",
                     "Idempotency-Key was already used with a different request");
         }
-        return new CreateResult(mapper.receipt(existing), true);
+        return new CreateResult(mapper.createReceipt(existing), true);
     }
 
     private UUID parseKey(String rawKey) {

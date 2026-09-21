@@ -8,7 +8,7 @@ import com.shop.repository.CategoryRepository;
 import com.shop.repository.ProductRepository;
 import com.shop.repository.ProductVariantRepository;
 import com.shop.repository.VoucherRepository;
-import com.shop.service.OrderService;
+import com.shop.service.IdempotentOrderService;
 import com.shop.support.CatalogFixture;
 import com.shop.support.CatalogFixture.Data;
 import com.shop.support.PostgresIntegrationTest;
@@ -61,7 +61,7 @@ class OrderCreationIT extends PostgresIntegrationTest {
     @Autowired ProductVariantRepository variants;
     @Autowired VoucherRepository vouchers;
     @Autowired CategoryRepository categories;
-    @Autowired OrderService orderService;
+    @Autowired IdempotentOrderService orderService;
     @MockitoSpyBean Clock clock;
 
     @BeforeEach
@@ -176,6 +176,22 @@ class OrderCreationIT extends PostgresIntegrationTest {
         assertThat(item.getQuantity()).isEqualByComparingTo("0.50");
         assertThat(item.getUnitPrice()).isNull();
         assertThat(item.getLineTotal()).isNull();
+    }
+
+    @Test
+    void publicOrderCreationDoesNotNeedCsrfOrSession() throws Exception {
+        Data data = fixture.create();
+
+        MvcResult result = mockMvc.perform(post("/api/v1/orders")
+                        .header("Idempotency-Key", "00000000-0000-4000-8000-000000000006")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"orderType":"ORDER","customerName":"A","phone":"0912345678","items":[{"variantId":"%s","quantity":1}]}
+                                """.formatted(data.bottleOneLiter().getId())))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        assertThat(result.getRequest().getSession(false)).isNull();
     }
 
     @Test

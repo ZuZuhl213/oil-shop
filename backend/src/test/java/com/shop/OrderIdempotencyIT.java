@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,6 +45,7 @@ class OrderIdempotencyIT extends PostgresIntegrationTest {
     @Autowired VoucherRepository vouchers;
     @Autowired OrderRepository orders;
     @Autowired OrderItemRepository orderItems;
+    @Autowired JdbcTemplate jdbc;
 
     @BeforeEach
     void reset() {
@@ -76,6 +78,7 @@ class OrderIdempotencyIT extends PostgresIntegrationTest {
         data.welcome().setQuantity(1);
         data.welcome().setUsedCount(1);
         vouchers.saveAndFlush(data.welcome());
+        jdbc.update("UPDATE orders SET status = 'CONTACTED'");
 
         String replay = responseBody(mockMvc.perform(post("/api/v1/orders")
                         .session(session).header("X-CSRF-TOKEN", csrf(session)).header("Idempotency-Key", key)
@@ -100,6 +103,25 @@ class OrderIdempotencyIT extends PostgresIntegrationTest {
         mockMvc.perform(post("/api/v1/orders")
                         .session(session).header("X-CSRF-TOKEN", csrf(session)).header("Idempotency-Key", key)
                         .contentType(MediaType.APPLICATION_JSON).content(fixedBody(data, "B")))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("IDEMPOTENCY_CONFLICT"));
+        assertThat(orders.count()).isEqualTo(1);
+    }
+
+    @Test
+    void malformedRetryPayloadCannotReplayAValidReceipt() throws Exception {
+        Data data = fixture.create();
+        MockHttpSession session = csrfSession();
+        String key = "00000000-0000-4000-8000-000000000105";
+        mockMvc.perform(post("/api/v1/orders")
+                        .session(session).header("X-CSRF-TOKEN", csrf(session)).header("Idempotency-Key", key)
+                        .contentType(MediaType.APPLICATION_JSON).content(fixedBody(data, "A")))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/orders")
+                        .session(session).header("X-CSRF-TOKEN", csrf(session)).header("Idempotency-Key", key)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(fixedBody(data, "A").replace("\"items\":", "\"address\":\"   \",\"items\":")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("IDEMPOTENCY_CONFLICT"));
         assertThat(orders.count()).isEqualTo(1);

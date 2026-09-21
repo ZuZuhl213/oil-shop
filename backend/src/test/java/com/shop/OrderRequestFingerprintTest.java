@@ -20,7 +20,7 @@ class OrderRequestFingerprintTest {
                 OrderType.ORDER, " Nguyễn Văn A ", " 0912345678 ", null, " Gọi trước ", " welcome ",
                 List.of(new ItemInput("21", new BigDecimal("1.00")), new ItemInput("13", new BigDecimal("2.0"))));
         CreateOrder reordered = new CreateOrder(
-                OrderType.ORDER, "Nguyễn Văn A", "0912345678", "", "Gọi trước", "WELCOME",
+                OrderType.ORDER, "Nguyễn Văn A", "0912345678", null, "Gọi trước", "WELCOME",
                 List.of(new ItemInput("13", new BigDecimal("2.00")), new ItemInput("21", new BigDecimal("1"))));
         CreateOrder blankVoucher = new CreateOrder(
                 OrderType.ORDER, "Nguyễn Văn A", "0912345678", null, "Gọi trước", "   ",
@@ -55,10 +55,39 @@ class OrderRequestFingerprintTest {
     }
 
     @Test
+    void doesNotTreatBlankAddressAsMissingAddress() {
+        CreateOrder missingAddress = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput("13", BigDecimal.ONE)));
+        CreateOrder blankAddress = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", "   ", null, null,
+                missingAddress.items());
+
+        assertThat(fingerprint.hash(blankAddress)).isNotEqualTo(fingerprint.hash(missingAddress));
+    }
+
+    @Test
+    void canonicalizesEquivalentNumericVariantIds() {
+        CreateOrder canonical = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput("13", BigDecimal.ONE)));
+        CreateOrder padded = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput("013", BigDecimal.ONE)));
+
+        assertThat(fingerprint.hash(padded)).isEqualTo(fingerprint.hash(canonical));
+    }
+
+    @Test
     void hashesMalformedNullItemWithoutThrowingBeforeValidation() {
         CreateOrder malformed = new CreateOrder(
                 OrderType.ORDER, "A", "0912345678", null, null, null, Collections.nCopies(2, null));
 
         assertThat(fingerprint.hash(malformed)).hasSize(64);
+    }
+
+    @Test
+    void hashesNullRequestWithoutThrowingBeforeValidation() {
+        assertThat(fingerprint.hash(null)).hasSize(64);
     }
 }

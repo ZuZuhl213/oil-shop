@@ -33,7 +33,6 @@ public class OrderService {
     private final OrderItemRepository orderItems;
     private final OrderCodeGenerator codes;
     private final OrderMapper mapper;
-    private final OrderRequestFingerprint fingerprint;
     private final Clock clock;
 
     public OrderService(
@@ -44,7 +43,6 @@ public class OrderService {
             OrderItemRepository orderItems,
             OrderCodeGenerator codes,
             OrderMapper mapper,
-            OrderRequestFingerprint fingerprint,
             Clock clock) {
         this.pricing = pricing;
         this.vouchers = vouchers;
@@ -53,17 +51,11 @@ public class OrderService {
         this.orderItems = orderItems;
         this.codes = codes;
         this.mapper = mapper;
-        this.fingerprint = fingerprint;
         this.clock = clock;
     }
 
     @Transactional
-    public CreateResult create(CreateOrder request, String idempotencyKey) {
-        return create(request, idempotencyKey, request == null ? "0".repeat(64) : fingerprint.hash(request));
-    }
-
-    @Transactional
-    public CreateResult create(CreateOrder request, String idempotencyKey, String requestHash) {
+    CreateResult create(CreateOrder request, String idempotencyKey, String requestHash) {
         if (request == null) {
             throw validation("request", "Request is required");
         }

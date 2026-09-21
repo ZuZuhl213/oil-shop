@@ -7,7 +7,7 @@ import com.shop.repository.OrderRepository;
 import com.shop.repository.ProductRepository;
 import com.shop.repository.ProductVariantRepository;
 import com.shop.repository.VoucherRepository;
-import com.shop.service.OrderService;
+import com.shop.service.IdempotentOrderService;
 import com.shop.support.CatalogFixture;
 import com.shop.support.CatalogFixture.Data;
 import com.shop.support.PostgresIntegrationTest;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.doThrow;
 @Import(CatalogFixture.class)
 class OrderRollbackIT extends PostgresIntegrationTest {
     @Autowired CatalogFixture fixture;
-    @Autowired OrderService service;
+    @Autowired IdempotentOrderService service;
     @Autowired OrderRepository orders;
     @Autowired VoucherRepository vouchers;
     @Autowired JdbcTemplate jdbc;

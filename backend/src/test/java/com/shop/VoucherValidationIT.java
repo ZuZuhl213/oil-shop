@@ -83,6 +83,21 @@ class VoucherValidationIT extends PostgresIntegrationTest {
     }
 
     @Test
+    void publicVoucherValidationDoesNotNeedCsrfOrSession() throws Exception {
+        var data = fixture.create();
+
+        MvcResult result = mockMvc.perform(post("/api/v1/vouchers/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"code":"WELCOME","items":[{"variantId":"%s","quantity":1}]}
+                                """.formatted(data.bottleOneLiter().getId())))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        assertThat(result.getRequest().getSession(false)).isNull();
+    }
+
+    @Test
     void rejectsUnavailableVouchersAndInvalidQuantities() throws Exception {
         var data = fixture.create();
         Instant now = Instant.now();

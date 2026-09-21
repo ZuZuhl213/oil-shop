@@ -47,6 +47,13 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.ignoringRequestMatchers(request -> {
+                    if (!HttpMethod.POST.matches(request.getMethod())) {
+                        return false;
+                    }
+                    String path = request.getRequestURI().substring(request.getContextPath().length());
+                    return "/api/v1/orders".equals(path) || "/api/v1/vouchers/validate".equals(path);
+                }))
                 .cors(Customizer.withDefaults())
                 .requestCache(cache -> cache.disable())
                 .securityContext(context -> context.requireExplicitSave(true))

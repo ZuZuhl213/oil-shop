@@ -141,6 +141,26 @@ class VoucherAdminIT extends PostgresIntegrationTest {
     }
 
     @Test
+    void adminMutationsStillRequireCsrf() throws Exception {
+        Voucher voucher = vouchers.save(new Voucher("CSRF", DiscountType.FIXED, 10, null, 0, 5, 0, null, null, true));
+        MockHttpSession session = login();
+        String body = "{\"code\":\"CSRF\",\"discountType\":\"FIXED\",\"discountValue\":10,\"minOrderValue\":0,\"quantity\":5,\"isActive\":true}";
+
+        mockMvc.perform(post("/api/v1/admin/vouchers")
+                        .session(session).header("Origin", ORIGIN)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(put("/api/v1/admin/vouchers/" + voucher.getId())
+                        .session(session).header("Origin", ORIGIN)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(patch("/api/v1/admin/vouchers/" + voucher.getId() + "/status")
+                        .session(session).header("Origin", ORIGIN)
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"isActive\":false}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void concurrentUsedCountUpdateWinsBeforeAdminQuantityDecrease() throws Exception {
         Voucher voucher = vouchers.save(new Voucher("RACE", DiscountType.FIXED, 10, null, 0, 2, 1, null, null, true));
         CountDownLatch consumerLocked = new CountDownLatch(1);
