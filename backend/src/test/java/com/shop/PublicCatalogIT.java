@@ -4,6 +4,7 @@ import com.shop.repository.CategoryRepository;
 import com.shop.repository.ProductRepository;
 import com.shop.repository.ProductVariantRepository;
 import com.shop.repository.VoucherRepository;
+import com.shop.dto.CatalogLine;
 import com.shop.exception.BusinessException;
 import com.shop.support.CatalogFixture;
 import com.shop.support.PostgresIntegrationTest;
@@ -111,7 +112,9 @@ class PublicCatalogIT extends PostgresIntegrationTest {
     @Test
     void loadSellableRejectsInactiveCatalogChain() {
         var data = fixture.create();
-        assertThat(query.loadSellable(List.of(data.bottleOneLiter().getId()))).hasSize(1);
+        assertThat(query.loadSellable(List.of(data.weighted().getId(), data.bottleOneLiter().getId())))
+                .extracting(CatalogLine::variantId)
+                .containsExactly(data.weighted().getId(), data.bottleOneLiter().getId());
 
         data.oils().setActive(false);
         categories.save(data.oils());

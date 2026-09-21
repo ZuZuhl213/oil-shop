@@ -22,7 +22,8 @@ public class AdminAuthenticationPrecheckFilter extends OncePerRequestFilter {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean adminMutation = path.startsWith(request.getContextPath() + "/api/v1/admin/")
                 && !path.endsWith("/auth/login")
-                && !"GET".equals(request.getMethod()) && !"HEAD".equals(request.getMethod());
+                && !"GET".equals(request.getMethod()) && !"HEAD".equals(request.getMethod())
+                && !"OPTIONS".equals(request.getMethod());
         if (adminMutation && (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken)) {
             SecurityConfig.writeError(response, mapper, 401, "UNAUTHENTICATED", "Authentication is required");
             return;

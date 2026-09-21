@@ -11,7 +11,9 @@ import com.shop.repository.CategoryRepository;
 import com.shop.repository.ProductRepository;
 import com.shop.repository.ProductVariantRepository;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,9 +58,26 @@ public class CatalogQueryService {
         return mapper.product(product, active);
     }
     @Transactional(readOnly = true) public List<CatalogLine> loadSellable(List<Long> ids) {
-        return ids.stream().map(id -> variants.findById(id).filter(v -> v.isActive() && v.getProduct().getStatus() == com.shop.entity.ProductStatus.ACTIVE && v.getProduct().getCategory().isActive())
-                .map(v -> new CatalogLine(v.getId(), v.getProduct().getId(), v.getProduct().getName(), v.getName(), v.getProduct().getSaleType(), v.getPrice(), v.getMinQuantity(), v.getQuantityStep()))
-                .orElseThrow(() -> new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"ITEM_UNAVAILABLE","Catalog item is unavailable"))).toList();
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, ProductVariant> byId = new HashMap<>();
+        List<Long> lookupIds = ids.stream().filter(Objects::nonNull).distinct().toList();
+        if (!lookupIds.isEmpty()) {
+            variants.findAllByIdInWithProductAndCategory(lookupIds)
+                    .forEach(variant -> byId.put(variant.getId(), variant));
+        }
+        return ids.stream().map(id -> {
+            ProductVariant variant = byId.get(id);
+            if (variant == null || !variant.isActive()
+                    || variant.getProduct().getStatus() != com.shop.entity.ProductStatus.ACTIVE
+                    || !variant.getProduct().getCategory().isActive()) {
+                throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "ITEM_UNAVAILABLE", "Catalog item is unavailable");
+            }
+            return new CatalogLine(variant.getId(), variant.getProduct().getId(), variant.getProduct().getName(),
+                    variant.getName(), variant.getProduct().getSaleType(), variant.getPrice(),
+                    variant.getMinQuantity(), variant.getQuantityStep());
+        }).toList();
     }
     private String blank(String v) { return v == null || v.isBlank() ? null : v.trim(); }
 }
