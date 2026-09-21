@@ -131,7 +131,8 @@ public class ApiExceptionHandler {
                 String name = violation.getConstraintName();
                 if ("uq_categories_slug".equals(name)
                         || "uq_products_slug".equals(name)
-                        || "uq_product_variants_sku".equals(name)) {
+                        || "uq_product_variants_sku".equals(name)
+                        || "uq_vouchers_code".equals(name)) {
                     return name;
                 }
                 return null;
