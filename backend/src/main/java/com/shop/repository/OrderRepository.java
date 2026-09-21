@@ -2,17 +2,24 @@ package com.shop.repository;
 
 import com.shop.entity.Order;
 import java.time.Instant;
+import org.springframework.data.jpa.repository.Lock;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
 
-public interface OrderRepository extends JpaRepository<Order, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
     Optional<Order> findByOrderCode(String orderCode);
 
     Optional<Order> findByIdempotencyKey(UUID idempotencyKey);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select o from Order o where o.id = :id")
+    Optional<Order> findByIdForUpdate(@Param("id") long id);
 
     @Query(value = "select nextval(pg_get_serial_sequence('orders', 'id'))", nativeQuery = true)
     long reserveId();

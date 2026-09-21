@@ -10,7 +10,8 @@ public abstract class PostgresIntegrationTest {
             new PostgreSQLContainer("postgres:17.10-alpine3.24")
                     .withDatabaseName("oil_shop_test")
                     .withUsername("oil_shop")
-                    .withPassword("oil_shop_test");
+                    .withPassword("oil_shop_test")
+                    .withCommand("postgres", "-c", "max_connections=200");
 
     static {
         POSTGRES.start();

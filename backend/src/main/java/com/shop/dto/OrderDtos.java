@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -34,5 +35,40 @@ public final class OrderDtos {
     }
 
     public record CreateResult(OrderReceipt receipt, boolean replayed) {
+    }
+
+    public record AdminOrder(
+            String id,
+            String orderCode,
+            OrderType orderType,
+            OrderStatus status,
+            Long subtotal,
+            long discountAmount,
+            Long totalAmount,
+            Instant createdAt,
+            Instant updatedAt,
+            String customerName,
+            String phone,
+            String address,
+            String customerNote,
+            String adminNote,
+            String voucherCodeSnapshot,
+            List<AdminOrderItem> items) {
+    }
+
+    public record AdminOrderItem(
+            String productId,
+            String variantId,
+            String productNameSnapshot,
+            String variantNameSnapshot,
+            BigDecimal quantity,
+            Long unitPrice,
+            Long lineTotal) {
+    }
+
+    public record AdminNoteWrite(@Size(max = 2000) String adminNote) {
+    }
+
+    public record OrderStatusWrite(@NotNull OrderStatus status) {
     }
 }
