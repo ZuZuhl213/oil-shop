@@ -158,6 +158,7 @@ class VoucherAdminIT extends PostgresIntegrationTest {
             consumer.get(5, TimeUnit.SECONDS);
             ExecutionException error = assertThrows(ExecutionException.class, () -> admin.get(5, TimeUnit.SECONDS));
             assertThat(error.getCause()).isInstanceOf(com.shop.exception.BusinessException.class);
+            assertThat(((com.shop.exception.BusinessException) error.getCause()).code()).isEqualTo("VALIDATION_ERROR");
         } finally {
             executor.shutdownNow();
         }
