@@ -80,7 +80,7 @@ public class VoucherService {
                 || body.minOrderValue() == null || body.minOrderValue() < 0 || body.minOrderValue() > MONEY_LIMIT
                 || body.quantity() == null || body.quantity() < 0
                 || body.discountType() == null
-                || body.maxDiscount() != null && (body.maxDiscount() < 0 || body.maxDiscount() > MONEY_LIMIT)
+                || body.maxDiscount() != null && (body.maxDiscount() <= 0 || body.maxDiscount() > MONEY_LIMIT)
                 || body.quantity() < usedCount
                 || body.startAt() != null && body.endAt() != null && !body.startAt().isBefore(body.endAt())) {
             throw validation();

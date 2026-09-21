@@ -31,10 +31,10 @@ public class PricingService {
         }
         Set<Long> ids = new HashSet<>();
         List<Long> variantIds = items.stream().map(item -> parseVariantId(item.variantId())).toList();
-        for (Long id : variantIds) {
+        for (int i = 0; i < variantIds.size(); i++) {
+            Long id = variantIds.get(i);
             if (!ids.add(id)) {
-                throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "VALIDATION_ERROR",
-                        "Duplicate variantId is not allowed", java.util.Map.of("variantId", String.valueOf(id)));
+                throw duplicateValidation(i);
             }
         }
         List<CatalogLine> catalogLines = catalog.loadSellable(variantIds);
@@ -58,7 +58,7 @@ public class PricingService {
             if (line.price() == null || line.price() < 0 || line.price() > MONEY_LIMIT) {
                 throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "ITEM_UNAVAILABLE", "Catalog item is unavailable");
             }
-            long lineTotal = wholeVnd(line.price(), item.quantity());
+            long lineTotal = wholeVnd(line.price(), item.quantity(), variantIds.get(i), i);
             subtotal = checkedAdd(subtotal, lineTotal);
             lines.add(new PricedLine(line, item.quantity(), line.price(), lineTotal));
         }
@@ -91,7 +91,7 @@ public class PricingService {
         }
     }
 
-    private long wholeVnd(long price, BigDecimal quantity) {
+    private long wholeVnd(long price, BigDecimal quantity, Long variantId, int index) {
         try {
             BigDecimal value = BigDecimal.valueOf(price).multiply(quantity);
             long amount = value.longValueExact();
@@ -100,7 +100,8 @@ public class PricingService {
             }
             return amount;
         } catch (ArithmeticException exception) {
-            throw validation("quantity", "Price multiplied by quantity must be whole VND within the limit");
+            throw lineValidation(index, variantId, "quantity",
+                    "Price multiplied by quantity must be whole VND within the limit");
         }
     }
 
@@ -125,5 +126,11 @@ public class PricingService {
         return new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "VALIDATION_ERROR", message,
                 java.util.Map.of("items[" + index + "]." + field, message,
                         "items[" + index + "].variantId", String.valueOf(variantId)));
+    }
+
+    private BusinessException duplicateValidation(int index) {
+        return new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "VALIDATION_ERROR",
+                "Duplicate variantId is not allowed",
+                java.util.Map.of("items[" + index + "].variantId", "Duplicate variantId is not allowed"));
     }
 }

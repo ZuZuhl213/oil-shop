@@ -74,7 +74,13 @@ class VoucherPolicyTest {
         assertCode(policy, voucher(DiscountType.FIXED, 10, null, 0, 20, 20, null, null, true), "VOUCHER_EXHAUSTED");
         assertCode(policy, voucher(DiscountType.PERCENT, 0, null, 0, 20, 0, null, null, true), "VOUCHER_INVALID");
         assertCode(policy, voucher(DiscountType.PERCENT, 101, null, 0, 20, 0, null, null, true), "VOUCHER_INVALID");
+        assertCode(policy, voucher(DiscountType.PERCENT, 10, 0L, 0, 20, 0, null, null, true), "VOUCHER_INVALID");
         assertCode(policy, voucher(DiscountType.PERCENT, 10, -1L, 0, 20, 0, null, null, true), "VOUCHER_INVALID");
+    }
+
+    @Test
+    void keepsOversoldVoucherInvalidInsteadOfTreatingItAsExhausted() {
+        assertCode(new VoucherPolicy(), voucher(DiscountType.FIXED, 10, null, 0, 1, 2, null, null, true), "VOUCHER_INVALID");
     }
 
     private void assertCode(VoucherPolicy policy, Voucher voucher, String code) {
