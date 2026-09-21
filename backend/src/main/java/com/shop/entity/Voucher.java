@@ -125,6 +125,17 @@ public class Voucher {
         return active;
     }
 
+    public void setCode(String code) { this.code = code; }
+    public void setDiscountType(DiscountType discountType) { this.discountType = discountType; }
+    public void setDiscountValue(long discountValue) { this.discountValue = discountValue; }
+    public void setMaxDiscount(Long maxDiscount) { this.maxDiscount = maxDiscount; }
+    public void setMinOrderValue(long minOrderValue) { this.minOrderValue = minOrderValue; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
+    public void setUsedCount(int usedCount) { this.usedCount = usedCount; }
+    public void setStartAt(Instant startAt) { this.startAt = startAt; }
+    public void setEndAt(Instant endAt) { this.endAt = endAt; }
+    public void setActive(boolean active) { this.active = active; }
+
     public Instant getCreatedAt() {
         return createdAt;
     }
