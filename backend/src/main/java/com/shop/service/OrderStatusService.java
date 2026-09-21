@@ -46,8 +46,8 @@ public class OrderStatusService {
         }
         if (current != target && target == OrderStatus.CANCELLED && order.getVoucher() != null) {
             Voucher voucher = vouchers.findByIdForUpdate(order.getVoucher().getId())
-                    .orElseThrow(() -> new BusinessException(HttpStatus.CONFLICT, "INVALID_TRANSITION",
-                            "Order voucher is unavailable"));
+                    .orElseThrow(() -> new BusinessException(HttpStatus.CONFLICT, "VOUCHER_USAGE_INCONSISTENT",
+                            "Voucher usage state is inconsistent"));
             if (voucher.getUsedCount() <= 0) {
                 throw new BusinessException(HttpStatus.CONFLICT, "VOUCHER_USAGE_INCONSISTENT",
                         "Voucher usage state is inconsistent");
