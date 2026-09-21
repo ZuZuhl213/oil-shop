@@ -68,4 +68,7 @@ public final class OrderDtos {
 
     public record AdminNoteWrite(@Size(max = 2000) String adminNote) {
     }
+
+    public record OrderStatusWrite(@NotNull OrderStatus status) {
+    }
 }

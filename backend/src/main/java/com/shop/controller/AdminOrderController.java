@@ -3,10 +3,12 @@ package com.shop.controller;
 import com.shop.dto.CatalogDtos.PageDto;
 import com.shop.dto.OrderDtos.AdminNoteWrite;
 import com.shop.dto.OrderDtos.AdminOrder;
+import com.shop.dto.OrderDtos.OrderStatusWrite;
 import com.shop.entity.OrderStatus;
 import com.shop.entity.OrderType;
 import com.shop.service.AdminOrderQueryService;
 import com.shop.service.OrderNoteService;
+import com.shop.service.OrderStatusService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -26,10 +28,12 @@ import java.time.Instant;
 public class AdminOrderController {
     private final AdminOrderQueryService queries;
     private final OrderNoteService notes;
+    private final OrderStatusService statuses;
 
-    public AdminOrderController(AdminOrderQueryService queries, OrderNoteService notes) {
+    public AdminOrderController(AdminOrderQueryService queries, OrderNoteService notes, OrderStatusService statuses) {
         this.queries = queries;
         this.notes = notes;
+        this.statuses = statuses;
     }
 
     @GetMapping
@@ -52,5 +56,10 @@ public class AdminOrderController {
     @PatchMapping("/{id}/note")
     public AdminOrder note(@PathVariable long id, @Valid @RequestBody AdminNoteWrite body) {
         return notes.update(id, body.adminNote());
+    }
+
+    @PatchMapping("/{id}/status")
+    public AdminOrder status(@PathVariable long id, @Valid @RequestBody OrderStatusWrite body) {
+        return statuses.change(id, body.status());
     }
 }
