@@ -64,6 +64,11 @@ public class Category {
         return slug;
     }
 
+    public void setDescription(String description) { this.description = description; }
+    public void setSlug(String slug) { this.slug = slug; }
+    public void setSortOrder(int sortOrder) { this.sortOrder = sortOrder; }
+    public void setActive(boolean active) { this.active = active; }
+
     public String getDescription() {
         return description;
     }

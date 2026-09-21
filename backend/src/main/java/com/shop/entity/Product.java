@@ -89,6 +89,9 @@ public class Product {
         return category;
     }
 
+    public void setCategory(Category category) { this.category = category; }
+    public void setSlug(String slug) { this.slug = slug; }
+
     public String getName() {
         return name;
     }
@@ -104,6 +107,11 @@ public class Product {
     public String getShortDescription() {
         return shortDescription;
     }
+
+    public void setShortDescription(String value) { this.shortDescription = value; }
+    public void setDescription(String value) { this.description = value; }
+    public void setThumbnailUrl(String value) { this.thumbnailUrl = value; }
+    public void setSortOrder(int value) { this.sortOrder = value; }
 
     public String getDescription() {
         return description;
