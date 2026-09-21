@@ -2,6 +2,7 @@ package com.shop.service;
 
 import com.shop.dto.CatalogDtos.ProductDto;
 import com.shop.dto.CatalogDtos.ProductWrite;
+import com.shop.dto.CatalogDtos.PageDto;
 import com.shop.entity.Category;
 import com.shop.entity.Product;
 import com.shop.entity.ProductStatus;
@@ -11,6 +12,9 @@ import com.shop.repository.CategoryRepository;
 import com.shop.repository.ProductRepository;
 import com.shop.repository.ProductVariantRepository;
 import java.util.Locale;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +26,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
     private final ProductRepository products; private final CategoryRepository categories; private final ProductVariantRepository variants; private final CatalogMapper mapper;
     public ProductService(ProductRepository products, CategoryRepository categories, ProductVariantRepository variants, CatalogMapper mapper) { this.products=products; this.categories=categories; this.variants=variants; this.mapper=mapper; }
-    @Transactional(readOnly = true) public Page<ProductDto> list(int page, int size) { return products.findAllByOrderBySortOrderAscIdAsc(PageRequest.of(page, size, Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("id")))).map(p -> mapper.product(p, variants.findByProductIdOrderBySortOrderAscIdAsc(p.getId()))); }
+    @Transactional(readOnly = true) public PageDto<ProductDto> list(int page, int size) {
+        Page<Product> values = products.findAllByOrderBySortOrderAscIdAsc(PageRequest.of(page, size, Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("id"))));
+        List<Product> pageProducts = values.getContent();
+        Map<Long, List<com.shop.entity.ProductVariant>> variantsByProduct = pageProducts.isEmpty()
+                ? Map.of()
+                : variants.findAllByProductIdInOrderBySortOrderAscIdAsc(pageProducts.stream().map(Product::getId).toList())
+                        .stream().collect(Collectors.groupingBy(v -> v.getProduct().getId(), Collectors.toList()));
+        Page<ProductDto> mapped = values.map(p -> mapper.product(p, variantsByProduct.getOrDefault(p.getId(), List.of())));
+        return new PageDto<>(mapped.getContent(), mapped.getNumber(), mapped.getSize(), mapped.getTotalElements(), mapped.getTotalPages());
+    }
     @Transactional(readOnly = true) public ProductDto getAdmin(long id) { Product p=get(id); return mapper.product(p, variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
     @Transactional public ProductDto create(ProductWrite b) { Category c=category(b.categoryId()); String slug=CategoryService.slug(b.slug()); unique(slug,null); Product p=new Product(c,b.name().trim(),slug,CategoryService.trim(b.shortDescription()),CategoryService.trim(b.description()),thumbnail(b.thumbnailUrl()),b.saleType(),status(b.status()),CategoryService.value(b.sortOrder())); return mapper.product(products.save(p), java.util.List.of()); }
     @Transactional public ProductDto update(long id, ProductWrite b) { Product p=get(id); Category c=category(b.categoryId()); String slug=CategoryService.slug(b.slug()); unique(slug,id); if (b.saleType()!=p.getSaleType()) throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"VALIDATION_ERROR","saleType cannot be changed"); p.setCategory(c);p.setSlug(slug);p.setName(b.name().trim());p.setShortDescription(CategoryService.trim(b.shortDescription()));p.setDescription(CategoryService.trim(b.description()));p.setThumbnailUrl(thumbnail(b.thumbnailUrl()));p.setStatus(status(b.status()));p.setSortOrder(CategoryService.value(b.sortOrder())); return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }

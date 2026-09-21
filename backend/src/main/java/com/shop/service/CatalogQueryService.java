@@ -3,6 +3,7 @@ package com.shop.service;
 import com.shop.dto.CatalogLine;
 import com.shop.dto.CatalogDtos.CategoryDto;
 import com.shop.dto.CatalogDtos.ProductDto;
+import com.shop.dto.CatalogDtos.PageDto;
 import com.shop.entity.ProductVariant;
 import com.shop.exception.BusinessException;
 import com.shop.mapper.CatalogMapper;
@@ -24,7 +25,7 @@ public class CatalogQueryService {
     private final CategoryRepository categories; private final ProductRepository products; private final ProductVariantRepository variants; private final CatalogMapper mapper;
     public CatalogQueryService(CategoryRepository categories, ProductRepository products, ProductVariantRepository variants, CatalogMapper mapper) { this.categories=categories;this.products=products;this.variants=variants;this.mapper=mapper; }
     @Transactional(readOnly = true) public List<CategoryDto> publicCategories() { return categories.findAllByOrderBySortOrderAscIdAsc().stream().filter(c -> c.isActive()).map(mapper::category).toList(); }
-    @Transactional(readOnly = true) public Page<ProductDto> publicProducts(int page, int size, String category, String keyword) {
+    @Transactional(readOnly = true) public PageDto<ProductDto> publicProducts(int page, int size, String category, String keyword) {
         PageRequest request = PageRequest.of(page, size, Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("id")));
         String normalizedCategory = blank(category);
         String normalizedKeyword = blank(keyword);
@@ -46,7 +47,8 @@ public class CatalogQueryService {
         Map<Long, List<ProductVariant>> variantsByProduct = pageVariants.stream()
                 .filter(ProductVariant::isActive)
                 .collect(Collectors.groupingBy(v -> v.getProduct().getId(), Collectors.toList()));
-        return values.map(p -> mapper.product(p, variantsByProduct.getOrDefault(p.getId(), List.of())));
+        Page<ProductDto> mapped = values.map(p -> mapper.product(p, variantsByProduct.getOrDefault(p.getId(), List.of())));
+        return new PageDto<>(mapped.getContent(), mapped.getNumber(), mapped.getSize(), mapped.getTotalElements(), mapped.getTotalPages());
     }
     @Transactional(readOnly = true) public ProductDto publicProduct(String slug) {
         var product = products.findPublicBySlug(slug).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,"NOT_FOUND","Product not found"));

@@ -78,6 +78,7 @@ class PublicCatalogIT extends PostgresIntegrationTest {
                 .andExpect(jsonPath("$[0].slug").value("dau-thuc-vat"));
         mockMvc.perform(get("/api/v1/products").param("category", "dau-thuc-vat").param("keyword", "lạc").param("page", "0").param("size", "1"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.page").value(0)).andExpect(jsonPath("$.size").value(1))
                 .andExpect(jsonPath("$.totalElements").value(1)).andExpect(jsonPath("$.totalPages").value(1));
         mockMvc.perform(get("/api/v1/products").param("size", "0"))
                 .andExpect(status().isUnprocessableContent());

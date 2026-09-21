@@ -7,6 +7,7 @@ import com.shop.repository.ProductRepository;
 import com.shop.repository.ProductVariantRepository;
 import com.shop.support.PostgresIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,6 +45,9 @@ class CatalogAdminIT extends PostgresIntegrationTest {
     @BeforeEach
     void reset() { variants.deleteAll(); products.deleteAll(); categories.deleteAll(); admins.deleteAll(); }
 
+    @AfterEach
+    void cleanup() { reset(); }
+
     @Test
     void adminCreatesCatalogUpdatesVariantAndKeepsInactiveRows() throws Exception {
         MockHttpSession session = login();
@@ -64,6 +68,16 @@ class CatalogAdminIT extends PostgresIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Chai 1L\",\"sku\":\"DL-1L\",\"price\":170000,\"minQuantity\":1,\"quantityStep\":1,\"isActive\":true,\"sortOrder\":0}"))
                 .andExpect(status().isCreated()).andReturn());
+        mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(productId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Read-only\",\"sku\":\"RO\",\"productId\":\"999\",\"price\":100,\"minQuantity\":1,\"quantityStep\":1}"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(productId))
+                        .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Decimal price\",\"sku\":\"DECIMAL\",\"price\":1.9,\"minQuantity\":1,\"quantityStep\":1}"))
+                .andExpect(status().isBadRequest());
         mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(productId))
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON)

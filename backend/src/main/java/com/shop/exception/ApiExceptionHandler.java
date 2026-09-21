@@ -7,12 +7,14 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -61,6 +63,24 @@ public class ApiExceptionHandler {
                 fieldErrors);
     }
 
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
+        return response(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_ERROR",
+                "Request parameter has an invalid value",
+                Map.of(exception.getName(), "Invalid value"));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException exception) {
+        String constraint = uniqueConstraint(exception);
+        if (constraint != null) {
+            return response(HttpStatus.CONFLICT, "CONFLICT", "Resource already exists", Map.of());
+        }
+        return handleUnexpected(exception);
+    }
+
     @ExceptionHandler(BusinessException.class)
     ResponseEntity<ApiError> handleBusiness(BusinessException exception) {
         return response(
@@ -105,5 +125,22 @@ public class ApiExceptionHandler {
 
     private String traceId() {
         return UUID.randomUUID().toString();
+    }
+
+    private String uniqueConstraint(DataIntegrityViolationException exception) {
+        Throwable cause = exception;
+        while (cause != null) {
+            if (cause instanceof org.hibernate.exception.ConstraintViolationException violation) {
+                String name = violation.getConstraintName();
+                if ("uq_categories_slug".equals(name)
+                        || "uq_products_slug".equals(name)
+                        || "uq_product_variants_sku".equals(name)) {
+                    return name;
+                }
+                return null;
+            }
+            cause = cause.getCause();
+        }
+        return null;
     }
 }

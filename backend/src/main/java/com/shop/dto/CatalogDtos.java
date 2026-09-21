@@ -28,4 +28,5 @@ public final class CatalogDtos {
     public record ProductDto(String id, String categoryId, String name, String slug, String shortDescription,
                              String description, String thumbnailUrl, SaleType saleType, String status, int sortOrder,
                              List<VariantDto> variants) {}
+    public record PageDto<T>(List<T> content, int page, int size, long totalElements, int totalPages) {}
 }
