@@ -25,7 +25,7 @@ export default function StorefrontLayout({
     <StorefrontProviders>
       <div className="flex flex-col min-h-dvh bg-warm-cream">
         <Header />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 flex flex-col">{children}</main>
         <Footer />
       </div>
     </StorefrontProviders>

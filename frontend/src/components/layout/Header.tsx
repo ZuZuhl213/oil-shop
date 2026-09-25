@@ -74,8 +74,16 @@ export function Header() {
               </li>
               <li>
                 <Link
+                  href="/about"
+                  className={`desktop-nav-link ${pathname === '/about' ? 'active' : ''}`}
+                >
+                  Về HM Naturals
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/products"
-                  className={`desktop-nav-link ${pathname.startsWith('/products') ? 'active' : ''}`}
+                  className={`desktop-nav-link ${pathname.startsWith('/products') && pathname !== '/products/dau-sachi-ep-song' ? 'active' : ''}`}
                 >
                   Sản Phẩm
                 </Link>
@@ -94,14 +102,6 @@ export function Header() {
                   className={`desktop-nav-link ${pathname === '/products/dau-sachi-ep-song' ? 'active' : ''}`}
                 >
                   Báo Giá Sỉ
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className={`desktop-nav-link ${pathname === '/about' ? 'active' : ''}`}
-                >
-                  Quy Trình
                 </Link>
               </li>
               <li>
@@ -134,26 +134,28 @@ export function Header() {
               <input
                 id="desktopSearchInput"
                 type="text"
-                placeholder="Tìm nông phẩm..."
+                placeholder="Tìm kiếm nông phẩm..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
                 style={{
                   border: 'none',
                   background: 'transparent',
                   outline: 'none',
-                  fontSize: 13,
+                  fontSize: '13px',
                   width: '100%',
                   color: 'var(--dark-cocoa)',
                 }}
               />
-              <kbd style={{
-                fontSize: 10,
-                background: 'var(--warm-cream)',
-                padding: '2px 5px',
-                borderRadius: 4,
-                border: '1px solid var(--soft-sand)',
-                color: 'var(--text-muted)',
-              }}>
+              <kbd
+                style={{
+                  fontSize: '10px',
+                  background: 'var(--warm-cream)',
+                  padding: '2px 5px',
+                  borderRadius: '4px',
+                  border: '1px solid var(--soft-sand)',
+                  color: 'var(--text-muted)',
+                }}
+              >
                 ⌘K
               </kbd>
             </form>

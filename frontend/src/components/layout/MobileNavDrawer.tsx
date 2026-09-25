@@ -60,10 +60,19 @@ export function MobileNavDrawer() {
           >
             <div className="drawer-row-left">
               <span className="drawer-row-icon">🏡</span>
-              <div>
-                <div>Trang Chủ</div>
-                <div style={{ fontSize: 11, opacity: pathname === '/' ? 0.9 : 0.6 }}>Cửa hàng &amp; Tuyển phẩm vụ mới</div>
-              </div>
+              <span className="drawer-row-label">Trang Chủ</span>
+            </div>
+            <span className="drawer-row-arrow">›</span>
+          </Link>
+
+          <Link
+            href="/about"
+            onClick={closeNav}
+            className={`drawer-nav-row ${pathname === '/about' ? 'active' : ''}`}
+          >
+            <div className="drawer-row-left">
+              <span className="drawer-row-icon">🌿</span>
+              <span className="drawer-row-label">Về HM Naturals</span>
             </div>
             <span className="drawer-row-arrow">›</span>
           </Link>
@@ -71,31 +80,12 @@ export function MobileNavDrawer() {
           <Link
             href="/products"
             onClick={closeNav}
-            className={`drawer-nav-row ${pathname === '/products' ? 'active' : ''}`}
+            className={`drawer-nav-row ${pathname.startsWith('/products') && pathname !== '/products/dau-sachi-ep-song' ? 'active' : ''}`}
           >
             <div className="drawer-row-left">
-              <span className="drawer-row-icon">🫒</span>
-              <div>
-                <div>Danh Mục Sản Phẩm</div>
-                <div style={{ fontSize: 11, opacity: pathname === '/products' ? 0.9 : 0.6 }}>Tất cả sản phẩm &amp; tìm kiếm</div>
-              </div>
+              <span className="drawer-row-icon">🏺</span>
+              <span className="drawer-row-label">Sản Phẩm</span>
             </div>
-            <span className="drawer-row-arrow">›</span>
-          </Link>
-
-          <Link
-            href="/products/dau-sachi-ep-song"
-            onClick={closeNav}
-            className={`drawer-nav-row ${pathname === '/products/dau-sachi-ep-song' ? 'active' : ''}`}
-          >
-            <div className="drawer-row-left">
-              <span className="drawer-row-icon">📦</span>
-              <div>
-                <div>Báo Giá Sỉ &amp; Đại Lý</div>
-                <div style={{ fontSize: 11, opacity: 0.7 }}>Sachi &amp; Phụ phẩm ép khô</div>
-              </div>
-            </div>
-            <span className="drawer-row-badge">Sỉ</span>
             <span className="drawer-row-arrow">›</span>
           </Link>
 
@@ -106,10 +96,20 @@ export function MobileNavDrawer() {
           >
             <div className="drawer-row-left">
               <span className="drawer-row-icon">📖</span>
-              <div>
-                <div>Góc Kiến Thức</div>
-                <div style={{ fontSize: 11, opacity: pathname.startsWith('/knowledge') ? 0.9 : 0.6 }}>Cẩm nang chọn dầu &amp; điểm khói</div>
-              </div>
+              <span className="drawer-row-label">Góc Kiến Thức</span>
+            </div>
+            <span className="drawer-row-badge">Mới</span>
+            <span className="drawer-row-arrow">›</span>
+          </Link>
+
+          <Link
+            href="/products/dau-sachi-ep-song"
+            onClick={closeNav}
+            className={`drawer-nav-row ${pathname === '/products/dau-sachi-ep-song' ? 'active' : ''}`}
+          >
+            <div className="drawer-row-left">
+              <span className="drawer-row-icon">📋</span>
+              <span className="drawer-row-label">Báo Giá Sỉ</span>
             </div>
             <span className="drawer-row-arrow">›</span>
           </Link>
@@ -121,25 +121,7 @@ export function MobileNavDrawer() {
           >
             <div className="drawer-row-left">
               <span className="drawer-row-icon">🔍</span>
-              <div>
-                <div>Tra Cứu Đơn Hàng</div>
-                <div style={{ fontSize: 11, opacity: pathname === '/tracking' ? 0.9 : 0.6 }}>Khách vãng lai không cần tài khoản</div>
-              </div>
-            </div>
-            <span className="drawer-row-arrow">›</span>
-          </Link>
-
-          <Link
-            href="/about"
-            onClick={closeNav}
-            className={`drawer-nav-row ${pathname === '/about' ? 'active' : ''}`}
-          >
-            <div className="drawer-row-left">
-              <span className="drawer-row-icon">ℹ️</span>
-              <div>
-                <div>Về Chúng Tôi</div>
-                <div style={{ fontSize: 11, opacity: pathname === '/about' ? 0.9 : 0.6 }}>Quy trình ép mộc &amp; cơ sở xưởng</div>
-              </div>
+              <span className="drawer-row-label">Tra Cứu Đơn Hàng</span>
             </div>
             <span className="drawer-row-arrow">›</span>
           </Link>
@@ -150,11 +132,8 @@ export function MobileNavDrawer() {
             className={`drawer-nav-row ${pathname === '/contact' ? 'active' : ''}`}
           >
             <div className="drawer-row-left">
-              <span className="drawer-row-icon">📞</span>
-              <div>
-                <div>Liên Hệ Xưởng</div>
-                <div style={{ fontSize: 11, opacity: pathname === '/contact' ? 0.9 : 0.6 }}>Đường dây nóng &amp; địa chỉ xưởng</div>
-              </div>
+              <span className="drawer-row-icon">📍</span>
+              <span className="drawer-row-label">Liên Hệ</span>
             </div>
             <span className="drawer-row-arrow">›</span>
           </Link>
@@ -163,23 +142,32 @@ export function MobileNavDrawer() {
         {/* Drawer Bottom Contact / Action Card */}
         <div className="drawer-footer-card">
           <div className="drawer-contact-head">
-            <span className="drawer-contact-eyebrow">XƯỞNG ÉP TỰ NHIÊN</span>
-            <span className="drawer-contact-title">Tư Vấn &amp; Đặt Hàng Trực Tiếp</span>
+            <span className="drawer-contact-eyebrow">Hỗ trợ &amp; Đặt hàng</span>
+            <span className="drawer-contact-title">Xưởng Ép HM NATURALS</span>
           </div>
           <div className="drawer-quick-actions">
-            <a href="tel:0912345678" className="drawer-contact-btn">
-              <span>📞</span> <span>Gọi Hotline</span>
+            <a href="tel:0912345678" className="drawer-contact-btn" aria-label="Gọi hotline xưởng">
+              <span>📞</span>
+              <span>Hotline xưởng</span>
             </a>
-            <a href="https://zalo.me/0912345678" target="_blank" rel="noopener noreferrer" className="drawer-contact-btn">
-              <span>💬</span> <span>Nhắn Zalo</span>
+            <a
+              href="https://zalo.me/0912345678"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="drawer-contact-btn"
+              aria-label="Nhắn Zalo"
+            >
+              <span>💬</span>
+              <span>Nhắn Zalo</span>
             </a>
           </div>
           <Link
-            href="/products/dau-lac-nguyen-chat"
+            href="/products"
             onClick={closeNav}
-            className="drawer-primary-cta"
+            className="drawer-primary-cta no-underline"
           >
-            <span>🌿</span> <span>Đặt Mua Dầu Lạc Mộc</span>
+            <span>Gửi Yêu Cầu Mua Hàng</span>
+            <span>→</span>
           </Link>
         </div>
       </aside>

@@ -92,8 +92,8 @@ html {
 body {
   font-family: var(--font-body);
   color: var(--dark-cocoa);
-  /* ponytail: body bg shifted from #F2EADF to #F7F3EE for card-vs-page contrast */
-  background: #F7F3EE;
+  /* ponytail: keep warm-cream brand bg; cards float via shadow-md + border */
+  background: var(--warm-cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 16px;
@@ -107,7 +107,7 @@ body {
 /* Global Centered Site Container */
 .site-container {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1440px;
   margin-left: auto !important;
   margin-right: auto !important;
   padding-left: 18px;
@@ -117,8 +117,8 @@ body {
 
 @media (min-width: 1024px) {
   .site-container {
-    padding-left: 32px;
-    padding-right: 32px;
+    padding-left: 48px;
+    padding-right: 48px;
   }
 
   .site-container .process-strip-card,
@@ -144,12 +144,14 @@ body {
   }
 }
 
-/* Responsive visibility rules for Headers */
+/* Responsive visibility rules for Headers and Footers */
 @media (min-width: 1024px) {
-  .app-navbar {
+  .app-navbar,
+  .app-footer-mobile {
     display: none !important;
   }
-  .desktop-header {
+  .desktop-header,
+  .app-footer-desktop {
     display: block !important;
   }
   .desktop-top-bar {
@@ -161,11 +163,15 @@ body {
   .desktop-header,
   .desktop-top-bar,
   .desktop-hero-wrap,
-  .desktop-trust-section {
+  .desktop-trust-section,
+  .app-footer-desktop {
     display: none !important;
   }
   .app-navbar {
     display: flex !important;
+  }
+  .app-footer-mobile {
+    display: block !important;
   }
 }
 
@@ -299,7 +305,7 @@ body {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1440px;
 }
 .desktop-top-bar b {
   color: var(--peanut-gold);
@@ -322,7 +328,7 @@ body {
   justify-content: space-between;
   gap: 24px;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 .desktop-brand-lockup {
@@ -2019,16 +2025,331 @@ body {
 
 /* Footer */
 .app-footer {
-  padding: 24px var(--screen-pad) 20px;
-  background: #EAE2D6;
-  border-top: 1px solid var(--soft-sand);
-  font-size: 12px;
-  color: var(--text-muted);
+  padding: 28px var(--screen-pad) 24px;
+  background: var(--forest-green-dark);
+  color: var(--warm-cream);
+  border-top: 1px solid rgba(200, 139, 58, 0.25);
+  font-size: 13px;
 }
 .footer-brand {
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 700;
-  color: var(--forest-green);
+  color: var(--warm-cream);
   margin-bottom: 4px;
 }
+
+/* =========================================================
+   ABOUT PAGE: HM NATURALS (Mobile & Desktop - 1:1 from index.html)
+   ========================================================= */
+.about-view-container {
+  padding: 24px var(--screen-pad) 48px;
+  width: 100%;
+}
+.about-hero-section {
+  text-align: center;
+  padding: 12px 4px 28px;
+  border-bottom: 1px solid var(--soft-sand);
+  margin-bottom: 32px;
+}
+.about-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--deep-olive);
+  margin-bottom: 10px;
+}
+.about-hero-title {
+  font-family: var(--font-display);
+  font-size: 23px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--forest-green);
+  margin-bottom: 12px;
+}
+.about-hero-lead {
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Story Section */
+.about-story-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+.about-story-text {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.about-story-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--peanut-bark);
+}
+.about-story-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.28;
+  color: var(--dark-cocoa);
+}
+.about-story-p {
+  font-size: 14px;
+  line-height: 1.68;
+  color: var(--text-muted);
+}
+.about-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.about-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--forest-green);
+  background: var(--peanut-gold-surface);
+  border: 1px solid var(--soft-sand);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+/* Story Bottle Card & Quote */
+.about-bottle-card {
+  background: #FAF6F0;
+  border: 1px solid var(--soft-sand);
+  border-radius: 20px;
+  padding: 24px 20px 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px -6px rgba(34, 26, 20, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+.about-bottle-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(232, 206, 176, 0.45) 0%, rgba(242, 234, 223, 0) 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+.about-bottle-svg {
+  width: 130px;
+  height: 190px;
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 14px 20px rgba(50, 35, 20, 0.16));
+}
+.about-bottle-caption {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--peanut-bark);
+  margin-top: 12px;
+  position: relative;
+  z-index: 2;
+}
+.about-quote-box {
+  background: #F6EFE5;
+  border-left: 3px solid var(--peanut-gold);
+  border-radius: 0 12px 12px 0;
+  padding: 14px 16px;
+  margin-top: 14px;
+  text-align: left;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--dark-cocoa);
+}
+
+/* 3 Core Values Section */
+.about-values-section {
+  margin-top: 40px;
+  padding-top: 32px;
+  border-top: 1px solid var(--soft-sand);
+}
+.about-values-head {
+  margin-bottom: 24px;
+}
+.about-values-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--deep-olive);
+  display: block;
+  margin-bottom: 6px;
+}
+.about-values-title {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--forest-green);
+  margin-bottom: 6px;
+}
+.about-values-desc {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.about-values-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.about-value-card {
+  background: #FAF6F0;
+  border: 1px solid var(--soft-sand);
+  border-radius: 18px;
+  padding: 22px 20px;
+  box-shadow: 0 6px 18px -4px rgba(34, 26, 20, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.about-value-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px -4px rgba(34, 26, 20, 0.06);
+}
+.about-value-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.about-value-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #F0E6D8;
+  border: 1px solid var(--soft-sand);
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  color: var(--forest-green);
+}
+.about-value-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--peanut-bark);
+  letter-spacing: 0.1em;
+}
+.about-value-name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--dark-cocoa);
+  margin-bottom: 8px;
+}
+.about-value-text {
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+/* Desktop About Page Styles (>= 1024px) */
+@media (min-width: 1024px) {
+  .desktop-about-container {
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 56px 40px 72px;
+    width: 100%;
+  }
+  .desktop-about-hero {
+    text-align: center;
+    max-width: 820px;
+    margin: 0 auto 64px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid var(--soft-sand);
+  }
+  .desktop-about-hero .about-hero-title {
+    font-size: 38px;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .desktop-about-hero .about-hero-lead {
+    font-size: 16.5px;
+    line-height: 1.7;
+  }
+  .desktop-about-story {
+    display: grid;
+    grid-template-columns: 1.18fr 1fr;
+    gap: 56px;
+    align-items: center;
+    margin-bottom: 72px;
+  }
+  .desktop-about-story .about-story-text {
+    gap: 18px;
+  }
+  .desktop-about-story .about-story-title {
+    font-size: 28px;
+    line-height: 1.25;
+  }
+  .desktop-about-story .about-story-p {
+    font-size: 15px;
+    line-height: 1.72;
+  }
+  .desktop-about-story .about-bottle-card {
+    padding: 36px 30px 28px;
+    border-radius: 24px;
+  }
+  .desktop-about-story .about-bottle-svg {
+    width: 160px;
+    height: 230px;
+  }
+  .desktop-about-story .about-quote-box {
+    font-size: 15px;
+    padding: 16px 22px;
+    margin-top: 20px;
+  }
+  .desktop-about-values {
+    margin-top: 20px;
+    padding-top: 48px;
+    border-top: 1px solid var(--soft-sand);
+  }
+  .desktop-about-values .about-values-head {
+    margin-bottom: 36px;
+    max-width: 650px;
+  }
+  .desktop-about-values .about-values-title {
+    font-size: 28px;
+  }
+  .desktop-about-values .about-values-desc {
+    font-size: 15px;
+  }
+  .desktop-about-values .about-values-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  .desktop-about-values .about-value-card {
+    padding: 32px 28px;
+    border-radius: 20px;
+  }
+  .desktop-about-values .about-value-name {
+    font-size: 19px;
+    margin-bottom: 10px;
+  }
+  .desktop-about-values .about-value-text {
+    font-size: 14.5px;
+    line-height: 1.68;
+  }
+}
+
