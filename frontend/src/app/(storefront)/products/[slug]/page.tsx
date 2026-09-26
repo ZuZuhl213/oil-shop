@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState, use } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect -- browser hydration/API synchronization */
+
+import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { notFound } from 'next/navigation';
-import { getMockProductBySlug, mockProducts, mockCategories } from '@/lib/mock-data';
-import type { VariantDto } from '@/lib/api/contracts/types';
+import { getMockProductBySlug, mockProducts } from '@/lib/mock-data';
+import type { ExtendedProductDto } from '@/lib/mock-data';
+import { getCategories, getProductBySlug } from '@/lib/api/client';
+import { toUiProduct } from '@/lib/catalog-adapter';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { useCart } from '@/context/CartContext';
@@ -18,28 +21,62 @@ interface ProductDetailPageProps {
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = use(params);
   const router = useRouter();
-  const product = getMockProductBySlug(slug);
-
-  if (!product) {
-    notFound();
-  }
-
-  const { addItem, openCart } = useCart();
-  const isQuote = product.saleType === 'QUOTE';
-  const category = mockCategories.find((c) => c.id === product.categoryId);
-
-  const [selectedVariant, setSelectedVariant] = useState<VariantDto | undefined>(
-    product.variants[0]
+  const fallbackProduct = getMockProductBySlug(slug);
+  const [product, setProduct] = useState<ExtendedProductDto | undefined>(fallbackProduct);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const { addItem } = useCart();
+  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(
+    fallbackProduct?.variants[0]?.id,
   );
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<number>(
+    fallbackProduct?.variants[0]?.minQuantity ?? 1,
+  );
   const [show360Modal, setShow360Modal] = useState<boolean>(false);
   const [bottle360Angle, setBottle360Angle] = useState<number>(0);
 
+  useEffect(() => {
+    let active = true;
+    getProductBySlug(slug)
+      .then((apiProduct) =>
+        getCategories()
+          .catch(() => [])
+          .then((categories) => ({ apiProduct, categories })),
+      )
+      .then(({ apiProduct, categories }) => {
+        if (!active) return;
+        const category = categories.find((item) => item.id === apiProduct.categoryId);
+        setProduct(toUiProduct(apiProduct, category));
+        setLoadError(null);
+      })
+      .catch(() => {
+        if (!active) return;
+        if (!fallbackProduct) setLoadError('Không tìm thấy sản phẩm này.');
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [fallbackProduct, slug]);
+
+  useEffect(() => {
+    if (!product) return;
+    const firstVariant = product.variants[0];
+    setSelectedVariantId(firstVariant?.id);
+    setQuantity(firstVariant?.minQuantity ?? 1);
+  }, [product]);
+
+  const selectedVariant = product?.variants.find((variant) => variant.id === selectedVariantId)
+    ?? product?.variants[0];
+  const isQuote = product?.saleType === 'QUOTE';
   const currentPrice = selectedVariant?.price ?? 0;
   const totalPrice = currentPrice * quantity;
+  const categoryName = product?.categoryName || 'Nông Sản Bản Địa';
 
   const handleAddToCart = () => {
-    if (!selectedVariant || isQuote || !selectedVariant.price) return;
+    if (!product || !selectedVariant || isQuote || selectedVariant.price == null) return;
 
     addItem({
       productId: product.id,
@@ -49,23 +86,55 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       variantName: selectedVariant.name,
       price: selectedVariant.price,
       quantity,
+      minQuantity: selectedVariant.minQuantity,
+      quantityStep: selectedVariant.quantityStep,
+      saleType: product.saleType,
       thumbnailType: product.visualType,
     });
   };
 
   const handleBuyNow = () => {
+    if (!product || !selectedVariant) return;
     if (isQuote) {
-      router.push(`/contact?product=${encodeURIComponent(product.name)}`);
+      try {
+        window.sessionStorage.setItem(
+          'hm_quote_draft_v1',
+          JSON.stringify({
+            productId: product.id,
+            productName: product.name,
+            productSlug: product.slug,
+            variantId: selectedVariant.id,
+            variantName: selectedVariant.name,
+            quantity,
+            minQuantity: selectedVariant.minQuantity,
+            quantityStep: selectedVariant.quantityStep,
+            thumbnailType: product.visualType,
+          }),
+        );
+      } catch {
+        // Checkout still shows a recoverable message if session storage is unavailable.
+      }
+      router.push('/checkout?mode=quote');
       return;
     }
     handleAddToCart();
     router.push('/checkout');
   };
 
-  // Related products from same category
-  const relatedProducts = mockProducts
-    .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
-    .slice(0, 4);
+  const relatedProducts = product
+    ? mockProducts
+        .filter((item) => item.categoryId === product.categoryId && item.id !== product.id)
+        .slice(0, 4)
+    : [];
+
+  if (!product) {
+    return (
+      <div className="site-container py-20 text-center">
+        <p className="text-text-muted">{isLoading ? 'Đang tải sản phẩm…' : (loadError || 'Không tìm thấy sản phẩm.')}</p>
+        {!isLoading && <Link href="/products" className="btn-action-touch fixed-flow no-underline inline-flex mt-4">Quay lại danh mục</Link>}
+      </div>
+    );
+  }
 
   return (
     <div className="site-container py-4 pb-28">
@@ -84,7 +153,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
 
         {/* Product Information Body */}
         <div className="detail-body-content">
-          <span className="d-cat">{category?.name || 'Nông Sản Bản Địa'}</span>
+          <span className="d-cat">{categoryName}</span>
           <h1 className="d-title">{product.name}</h1>
           <p className="d-desc">{product.description || product.shortDescription}</p>
 
@@ -126,7 +195,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                     key={v.id}
                     type="button"
                     className={`var-pill ${selectedVariant?.id === v.id ? 'active' : ''}`}
-                    onClick={() => setSelectedVariant(v)}
+                    onClick={() => setSelectedVariantId(v.id)}
                   >
                     {v.name}
                   </button>
@@ -140,8 +209,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   <button
                     type="button"
                     className="qty-btn"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    aria-label="Giảm 1"
+                    onClick={() => setQuantity((q) => Math.max(selectedVariant?.minQuantity ?? 1, q - (selectedVariant?.quantityStep ?? 1)))}
+                    aria-label="Giảm theo quy cách"
                   >
                     −
                   </button>
@@ -149,8 +218,8 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   <button
                     type="button"
                     className="qty-btn"
-                    onClick={() => setQuantity((q) => q + 1)}
-                    aria-label="Tăng 1"
+                    onClick={() => setQuantity((q) => q + (selectedVariant?.quantityStep ?? 1))}
+                    aria-label="Tăng theo quy cách"
                   >
                     +
                   </button>

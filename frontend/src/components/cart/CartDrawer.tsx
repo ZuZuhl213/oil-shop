@@ -115,7 +115,7 @@ export function CartDrawer() {
                       type="button"
                       className="qty-btn"
                       style={{ width: 30, height: 30, fontSize: 15 }}
-                      onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.variantId, item.quantity - (item.quantityStep ?? 1))}
                       aria-label="Giảm"
                     >
                       −
@@ -127,7 +127,7 @@ export function CartDrawer() {
                       type="button"
                       className="qty-btn"
                       style={{ width: 30, height: 30, fontSize: 15 }}
-                      onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.variantId, item.quantity + (item.quantityStep ?? 1))}
                       aria-label="Tăng"
                     >
                       +

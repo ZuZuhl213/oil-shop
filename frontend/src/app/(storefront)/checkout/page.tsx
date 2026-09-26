@@ -1,17 +1,93 @@
 'use client';
 
-import React, { useState } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect -- hydrate quote draft from session storage */
+
+import React, { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import type { CartItem } from '@/context/CartContext';
+import { ApiClientError, createOrder, validateVoucher } from '@/lib/api/client';
+import type { CreateOrderRequest, OrderReceipt, PricePreview } from '@/lib/api/contracts/types';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 
-export default function CheckoutPage() {
-  const router = useRouter();
-  const { items, subtotal, clearCart } = useCart();
+interface QuoteDraft {
+  productId: string;
+  productName: string;
+  productSlug: string;
+  variantId: string;
+  variantName: string;
+  quantity: number;
+  minQuantity: number;
+  quantityStep: number;
+  thumbnailType: CartItem['thumbnailType'];
+}
 
-  // Form State
+type CheckoutLine = Omit<CartItem, 'price'> & { price: number | null };
+
+const PENDING_ORDER_KEY = 'hm_pending_order_v1';
+
+function isQuoteDraft(value: unknown): value is QuoteDraft {
+  if (!value || typeof value !== 'object') return false;
+  const draft = value as Partial<QuoteDraft>;
+  return (
+    typeof draft.productId === 'string' &&
+    typeof draft.productName === 'string' &&
+    typeof draft.productSlug === 'string' &&
+    typeof draft.variantId === 'string' &&
+    typeof draft.variantName === 'string' &&
+    typeof draft.quantity === 'number' &&
+    Number.isFinite(draft.quantity) &&
+    draft.quantity > 0 &&
+    typeof draft.minQuantity === 'number' &&
+    draft.minQuantity > 0 &&
+    typeof draft.quantityStep === 'number' &&
+    draft.quantityStep > 0 &&
+    typeof draft.thumbnailType === 'string'
+  );
+}
+
+function newIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return '00000000-0000-4000-8000-' + Math.random().toString(16).slice(2, 14).padEnd(12, '0');
+}
+
+function apiMessage(error: unknown, fallback: string): string {
+  if (error instanceof ApiClientError) {
+    const firstFieldError = Object.values(error.fieldErrors)[0];
+    return firstFieldError || error.message;
+  }
+  return fallback;
+}
+
+function CheckoutContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { items, subtotal, clearCart } = useCart();
+  const isQuoteMode = searchParams.get('mode') === 'quote';
+  const [quoteDraft, setQuoteDraft] = useState<QuoteDraft | null>(null);
+  const [pendingKey, setPendingKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isQuoteMode) return;
+    try {
+      const saved = window.sessionStorage.getItem('hm_quote_draft_v1');
+      if (!saved) return;
+      const parsed: unknown = JSON.parse(saved);
+      if (!isQuoteDraft(parsed)) return;
+      setQuoteDraft(parsed);
+    } catch {
+      // The empty-state below lets the customer return to the catalog.
+    }
+  }, [isQuoteMode]);
+
+  const checkoutItems: CheckoutLine[] = quoteDraft
+    ? [{ ...quoteDraft, price: null, saleType: 'QUOTE' }]
+    : items;
+  const isQuoteOrder = Boolean(quoteDraft);
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -19,70 +95,107 @@ export default function CheckoutPage() {
   const [channel, setChannel] = useState<'Zalo' | 'Phone'>('Zalo');
   const [note, setNote] = useState('');
   const [voucherCode, setVoucherCode] = useState('');
-  const [discountPercent, setDiscountPercent] = useState<number>(0);
+  const [pricePreview, setPricePreview] = useState<PricePreview | null>(null);
+  const [pricePreviewSignature, setPricePreviewSignature] = useState<string | null>(null);
   const [voucherMessage, setVoucherMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isVoucherLoading, setIsVoucherLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Shipping fee logic: free for orders >= 500k, otherwise 30k
-  const shippingFee = subtotal >= 500000 ? 0 : 30000;
-  const discountAmount = Math.round((subtotal * discountPercent) / 100);
-  const totalAmount = Math.max(0, subtotal - discountAmount + shippingFee);
+  const cartSignature = items.map((item) => item.variantId + ':' + item.quantity).join('|');
+  const voucherSignature = cartSignature + '|' + voucherCode.trim().toUpperCase();
+  const activePricePreview = pricePreviewSignature === voucherSignature ? pricePreview : null;
+  const discountAmount = isQuoteOrder ? 0 : activePricePreview?.discountAmount ?? 0;
+  const displaySubtotal = isQuoteOrder ? null : activePricePreview?.subtotal ?? subtotal;
+  const totalAmount = isQuoteOrder ? null : activePricePreview?.totalAmount ?? subtotal;
 
-  const handleApplyVoucher = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleApplyVoucher = async (event: React.FormEvent) => {
+    event.preventDefault();
     const code = voucherCode.trim().toUpperCase();
-    if (!code) return;
+    if (!code || isQuoteOrder || isVoucherLoading) return;
 
-    if (code === 'HMN10' || code === 'MOCBAN') {
-      setDiscountPercent(10);
-      setVoucherMessage({ type: 'success', text: `Áp dụng thành công mã ${code}: Giảm 10% giá trị đơn!` });
-    } else if (code === 'FREESHIP') {
-      setDiscountPercent(0);
-      setVoucherMessage({ type: 'success', text: 'Áp dụng mã FREESHIP thành công!' });
-    } else {
-      setVoucherMessage({ type: 'error', text: 'Mã giảm giá không hợp lệ hoặc đã hết lượt dùng.' });
+    setIsVoucherLoading(true);
+    setVoucherMessage(null);
+    try {
+      const preview = await validateVoucher({
+        code,
+        items: items.map((item) => ({ variantId: item.variantId, quantity: item.quantity })),
+      });
+      setPricePreview(preview);
+      setPricePreviewSignature(voucherSignature);
+      setVoucherMessage({
+        type: 'success',
+        text: preview.voucherCode
+          ? 'Áp dụng thành công mã ' + preview.voucherCode + '.'
+          : 'Mã giảm giá đã được kiểm tra.',
+      });
+    } catch (error) {
+      setPricePreview(null);
+      setPricePreviewSignature(null);
+      setVoucherMessage({
+        type: 'error',
+        text: apiMessage(error, 'Mã giảm giá không hợp lệ hoặc đã hết lượt dùng.'),
+      });
+    } finally {
+      setIsVoucherLoading(false);
     }
   };
 
-  const handleSubmitOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName.trim() || !phone.trim() || !address.trim()) {
-      alert('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ nhận hàng.');
+  const handleSubmitOrder = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!fullName.trim() || !phone.trim()) {
+      setSubmitError('Vui lòng điền Họ tên và Số điện thoại.');
+      return;
+    }
+    if (checkoutItems.length === 0) {
+      setSubmitError('Giỏ hàng đang trống.');
       return;
     }
 
+    const payload: CreateOrderRequest = {
+      orderType: isQuoteOrder ? 'QUOTE_REQUEST' : 'ORDER',
+      customerName: fullName.trim(),
+      phone: phone.trim(),
+      ...(address.trim() ? { address: address.trim() } : {}),
+      ...(note.trim() || channel ? { note: [note.trim(), 'Kênh xác nhận: ' + channel].filter(Boolean).join('\n') } : {}),
+      ...(!isQuoteOrder && voucherCode.trim() ? { voucherCode: voucherCode.trim().toUpperCase() } : {}),
+      items: checkoutItems.map((item) => ({ variantId: item.variantId, quantity: item.quantity })),
+    };
+    const key = pendingKey ?? newIdempotencyKey();
+    setPendingKey(key);
+    setSubmitError(null);
     setIsSubmitting(true);
 
-    // Canonical order code pattern from index.html: HMN-2026-9812
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const orderCode = `HMN-2026-${randomSuffix}`;
-
-    const orderRecord = {
-      orderCode,
-      createdAt: new Date().toISOString(),
-      customer: { fullName, phone, email, address, channel, note },
-      items,
-      subtotal,
-      shippingFee,
-      discountAmount,
-      totalAmount,
-      status: 'PENDING_CONFIRMATION',
-    };
-
     try {
-      localStorage.setItem(`hm_order_${orderCode}`, JSON.stringify(orderRecord));
-      localStorage.setItem('hm_latest_order_code', orderCode);
-    } catch {
-      // ignore
+      try {
+        window.sessionStorage.setItem(PENDING_ORDER_KEY, JSON.stringify({ key, payload }));
+      } catch {
+        // Keep the key in memory when session storage is unavailable.
+      }
+      const receipt: OrderReceipt = await createOrder(payload, key);
+      const orderRecord = {
+        ...receipt,
+        customer: { fullName: fullName.trim(), phone: phone.trim(), address: address.trim(), channel, note },
+        items: checkoutItems,
+        shippingFee: 0,
+      };
+      try {
+        window.sessionStorage.setItem('hm_order_receipt_' + receipt.orderCode, JSON.stringify(orderRecord));
+        window.sessionStorage.removeItem(PENDING_ORDER_KEY);
+        window.sessionStorage.removeItem('hm_quote_draft_v1');
+      } catch {
+        // The receipt is still in the URL; the page will explain if session storage was blocked.
+      }
+      if (!isQuoteOrder) clearCart();
+      router.push('/orders/' + receipt.orderCode);
+    } catch (error) {
+      setSubmitError(apiMessage(error, 'Chưa xác định được kết quả gửi đơn. Giữ nguyên thông tin để thử lại.'));
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setTimeout(() => {
-      clearCart();
-      router.push(`/orders/${orderCode}`);
-    }, 600);
   };
 
-  if (items.length === 0) {
+  if (checkoutItems.length === 0) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center space-y-4">
         <div style={{ fontSize: 48 }}>🛒</div>
@@ -107,7 +220,7 @@ export default function CheckoutPage() {
       {/* Header */}
       <div className="home-section-head" style={{ paddingTop: 14 }}>
         <div>
-          <span className="section-eyebrow">Kịch bản mua lẻ trực tiếp</span>
+          <span className="section-eyebrow">{isQuoteOrder ? 'Yêu cầu báo giá' : 'Kịch bản mua lẻ trực tiếp'}</span>
           <h2 className="section-title">Phiếu Đặt Hàng Nông Phẩm</h2>
         </div>
       </div>
@@ -115,7 +228,7 @@ export default function CheckoutPage() {
       <div className="form-screen-wrap">
         {/* Selected Products Summary */}
         <div className="space-y-3 mb-5">
-          {items.map((item, idx) => (
+          {checkoutItems.map((item, idx) => (
             <div key={idx} className="form-order-summary">
               <div className="order-item-thumb overflow-hidden bg-warm-cream flex items-center justify-center">
                 <ProductBottleImage type={item.thumbnailType || 'peanut'} alt={item.productName} />
@@ -128,7 +241,7 @@ export default function CheckoutPage() {
                   Quy cách: {item.variantName} • Số lượng: {item.quantity}
                 </span>
                 <div style={{ fontWeight: 700, color: 'var(--dark-cocoa)', fontSize: 14.5, marginTop: 2 }}>
-                  {formatCurrencyVnd(item.price * item.quantity)}
+                  {item.price == null ? 'Shop sẽ báo giá sau khi xác nhận' : formatCurrencyVnd(item.price * item.quantity)}
                 </div>
               </div>
             </div>
@@ -136,7 +249,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Voucher Code Box */}
-        <form onSubmit={handleApplyVoucher} className="mb-5 flex gap-2">
+        {!isQuoteOrder && <form onSubmit={handleApplyVoucher} className="mb-5 flex gap-2">
           <input
             type="text"
             className="form-field-input"
@@ -152,7 +265,7 @@ export default function CheckoutPage() {
           >
             Áp Dụng
           </button>
-        </form>
+        </form>}
 
         {voucherMessage && (
           <div
@@ -184,7 +297,7 @@ export default function CheckoutPage() {
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
             <span>Tạm tính tiền hàng:</span>
-            <span>{formatCurrencyVnd(subtotal)}</span>
+            <span>{formatCurrencyVnd(displaySubtotal)}</span>
           </div>
           {discountAmount > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--peanut-bark)', fontWeight: 600 }}>
@@ -193,8 +306,8 @@ export default function CheckoutPage() {
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-            <span>Phí vận chuyển tận bếp:</span>
-            <span>{shippingFee === 0 ? 'Miễn phí (Đơn ≥ 500k)' : formatCurrencyVnd(shippingFee)}</span>
+            <span>Phí giao nhận:</span>
+            <span>Shop xác nhận qua điện thoại</span>
           </div>
           <div
             style={{
@@ -212,6 +325,12 @@ export default function CheckoutPage() {
             <span>{formatCurrencyVnd(totalAmount)}</span>
           </div>
         </div>
+
+        {submitError && (
+          <div role="alert" style={{ padding: '8px 12px', borderRadius: 8, fontSize: 12, marginBottom: 14, background: '#FDF2F1', color: 'var(--error-crimson)', border: '1px solid var(--error-crimson)' }}>
+            {submitError}
+          </div>
+        )}
 
         {/* Customer Information Form */}
         <form onSubmit={handleSubmitOrder}>
@@ -257,14 +376,13 @@ export default function CheckoutPage() {
           </div>
 
           <div className="form-row-group">
-            <label className="form-field-label">Địa chỉ nhận hàng tận nơi *</label>
+            <label className="form-field-label">Địa chỉ nhận hàng tận nơi (Tùy chọn)</label>
             <input
               type="text"
               className="form-field-input"
               placeholder="Số nhà, tên đường, xã/phường, quận/huyện, tỉnh"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              required
             />
           </div>
 
@@ -334,10 +452,18 @@ export default function CheckoutPage() {
             disabled={isSubmitting}
             style={{ width: '100%', height: 46, fontSize: 14 }}
           >
-            {isSubmitting ? 'Đang gửi yêu cầu...' : 'Gửi Yêu Cầu Đặt Hàng'}
+            {isSubmitting ? 'Đang gửi yêu cầu...' : (isQuoteOrder ? 'Gửi Yêu Cầu Báo Giá' : 'Gửi Yêu Cầu Đặt Hàng')}
           </button>
         </form>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center text-text-muted">Đang tải phiếu đặt hàng...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }

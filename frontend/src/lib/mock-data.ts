@@ -51,6 +51,8 @@ export interface ExtendedProductDto extends ProductDto {
   specs: ProductSpec[];
   quoteTiers?: string[];
   featured?: boolean;
+  categoryName?: string;
+  categorySlug?: string;
 }
 
 // ─── Products ────────────────────────────────────────────────────────
@@ -72,9 +74,9 @@ export const mockProducts: ExtendedProductDto[] = [
     tag: 'Bán chạy nhất',
     featured: true,
     variants: [
-      { id: '1', productId: '1', name: '250ml', sku: 'DL-250', price: 95000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 0 },
-      { id: '2', productId: '1', name: '500ml', sku: 'DL-500', price: 165000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 1 },
-      { id: '3', productId: '1', name: '1000ml', sku: 'DL-1000', price: 310000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 2 },
+      { id: '1', productId: '1', name: '250ml', sku: 'DL-250', price: 95000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 0 },
+      { id: '2', productId: '1', name: '500ml', sku: 'DL-500', price: 165000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 1 },
+      { id: '3', productId: '1', name: '1000ml', sku: 'DL-1000', price: 310000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 2 },
     ],
     specs: [
       { label: 'Nguồn giống', value: 'Hạt lạc sẻ đỏ bản địa vỏ mỏng' },
@@ -99,9 +101,9 @@ export const mockProducts: ExtendedProductDto[] = [
     tag: 'Rang củi thủ công',
     featured: true,
     variants: [
-      { id: '4', productId: '2', name: '250ml', sku: 'DV-250', price: 145000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 0 },
-      { id: '5', productId: '2', name: '500ml', sku: 'DV-500', price: 260000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 1 },
-      { id: '6', productId: '2', name: '1000ml', sku: 'DV-1000', price: 490000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 2 },
+      { id: '4', productId: '2', name: '250ml', sku: 'DV-250', price: 145000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 0 },
+      { id: '5', productId: '2', name: '500ml', sku: 'DV-500', price: 260000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 1 },
+      { id: '6', productId: '2', name: '1000ml', sku: 'DV-1000', price: 490000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 2 },
     ],
     specs: [
       { label: 'Nguồn giống', value: 'Mè đen nương đồi thuần chủng' },
@@ -126,7 +128,7 @@ export const mockProducts: ExtendedProductDto[] = [
     tag: 'Dưỡng sinh Organic',
     featured: true,
     variants: [
-      { id: '7', productId: '3', name: '250ml', sku: 'SC-250', price: null, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 0 },
+      { id: '7', productId: '3', name: '250ml', sku: 'SC-250', price: null, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 0 },
     ],
     quoteTiers: [
       'Chai thủy tinh 250ml dùng thử gia đình',
@@ -156,8 +158,8 @@ export const mockProducts: ExtendedProductDto[] = [
     visualType: 'gac',
     tag: 'Giàu Beta-Carotene',
     variants: [
-      { id: '8', productId: '4', name: '100ml', sku: 'DG-100', price: 120000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 0 },
-      { id: '9', productId: '4', name: '250ml', sku: 'DG-250', price: 280000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 1 },
+      { id: '8', productId: '4', name: '100ml', sku: 'DG-100', price: 120000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 0 },
+      { id: '9', productId: '4', name: '250ml', sku: 'DG-250', price: 280000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 1 },
     ],
     specs: [
       { label: 'Nguyên liệu', value: 'Màng gấc nếp tươi chín đỏ' },
@@ -179,8 +181,8 @@ export const mockProducts: ExtendedProductDto[] = [
     sortOrder: 4,
     visualType: 'coconut',
     variants: [
-      { id: '10', productId: '5', name: '500ml', sku: 'DD-500', price: 95000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 0 },
-      { id: '11', productId: '5', name: '1000ml', sku: 'DD-1000', price: 180000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 1 },
+      { id: '10', productId: '5', name: '500ml', sku: 'DD-500', price: 95000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 0 },
+      { id: '11', productId: '5', name: '1000ml', sku: 'DD-1000', price: 180000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 1 },
     ],
     specs: [
       { label: 'Nguồn gốc', value: 'Dừa tươi Bến Tre chọn lọc' },
@@ -202,8 +204,8 @@ export const mockProducts: ExtendedProductDto[] = [
     sortOrder: 5,
     visualType: 'seeds',
     variants: [
-      { id: '12', productId: '6', name: '1kg túi mộc', sku: 'LD-1', price: 65000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 0 },
-      { id: '13', productId: '6', name: '5kg bao dứa', sku: 'LD-5', price: 300000, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 1 },
+      { id: '12', productId: '6', name: '1kg túi mộc', sku: 'LD-1', price: 65000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 0 },
+      { id: '13', productId: '6', name: '5kg bao dứa', sku: 'LD-5', price: 300000, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 1 },
     ],
     specs: [
       { label: 'Giống', value: 'Lạc sẻ đỏ thuần chủng vụ mùa mới' },
@@ -225,8 +227,8 @@ export const mockProducts: ExtendedProductDto[] = [
     visualType: 'byproduct',
     tag: 'Bán buôn / Đại lý',
     variants: [
-      { id: '14', productId: '7', name: 'Bao 25kg', sku: 'BL-25', price: null, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 0 },
-      { id: '15', productId: '7', name: 'Bao 50kg', sku: 'BL-50', price: null, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 1 },
+      { id: '14', productId: '7', name: 'Bao 25kg', sku: 'BL-25', price: null, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 0 },
+      { id: '15', productId: '7', name: 'Bao 50kg', sku: 'BL-50', price: null, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 1 },
     ],
     quoteTiers: [
       'Bao 25kg sấy khô mộc đóng bao kín',
@@ -254,7 +256,7 @@ export const mockProducts: ExtendedProductDto[] = [
     visualType: 'byproduct',
     tag: 'Phân bón sinh học',
     variants: [
-      { id: '16', productId: '8', name: 'Bao 25kg', sku: 'BV-25', price: null, minQuantity: '1', quantityStep: '1', isActive: true, sortOrder: 0 },
+      { id: '16', productId: '8', name: 'Bao 25kg', sku: 'BV-25', price: null, minQuantity: 1, quantityStep: 1, isActive: true, sortOrder: 0 },
     ],
     quoteTiers: [
       'Bao 25kg sấy khô',

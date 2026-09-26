@@ -4,12 +4,6 @@
  * Money is stored as Long (VND, no decimals) in the backend.
  */
 
-const vndFormatter = new Intl.NumberFormat('vi-VN', {
-  style: 'currency',
-  currency: 'VND',
-  maximumFractionDigits: 0,
-});
-
 const compactFormatter = new Intl.NumberFormat('vi-VN', {
   maximumFractionDigits: 0,
 });

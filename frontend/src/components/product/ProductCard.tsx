@@ -31,7 +31,10 @@ export function ProductCard({ product }: ProductCardProps) {
       variantId: defaultVariant.id,
       variantName: defaultVariant.name,
       price: defaultVariant.price,
-      quantity: 1,
+      quantity: defaultVariant.minQuantity,
+      minQuantity: defaultVariant.minQuantity,
+      quantityStep: defaultVariant.quantityStep,
+      saleType: product.saleType,
       thumbnailType: product.visualType,
     });
   };
@@ -59,7 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Card Body */}
       <div className="grid-card-body">
         <div>
-          <span className="g-cat-text">{category?.name || 'Nông Sản Bản Địa'}</span>
+          <span className="g-cat-text">{product.categoryName || category?.name || 'Nông Sản Bản Địa'}</span>
           <h4 className="g-title-text group-hover:text-peanut-bark transition-colors">
             {product.name}
           </h4>

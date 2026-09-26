@@ -1,28 +1,40 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import {
-  mockProducts,
-  mockCategories,
-  mockKnowledgeArticles,
-  ExtendedProductDto,
-} from '@/lib/mock-data';
+import { mockProducts, mockKnowledgeArticles } from '@/lib/mock-data';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { formatCurrencyVnd } from '@/lib/format/currency';
+import { getCategories, getProducts } from '@/lib/api/client';
+import { toUiProducts } from '@/lib/catalog-adapter';
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0);
   const [bottleTransform, setBottleTransform] = useState<string>('rotateX(0deg) rotateY(0deg)');
+  const [catalogProducts, setCatalogProducts] = useState(mockProducts);
   const carouselRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    let active = true;
+    Promise.all([getCategories(), getProducts({ page: 0, size: 100 })])
+      .then(([categories, page]) => {
+        if (active) setCatalogProducts(toUiProducts(page.content, categories));
+      })
+      .catch(() => {
+        // Keep the approved UI fixtures visible while the backend is unavailable.
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   // Hero carousel products
-  const heroSlideProducts = mockProducts.filter((p) => p.featured || p.id === '1' || p.id === '2' || p.id === '3');
+  const heroSlideProducts = catalogProducts.filter((p) => p.featured || p.id === '1' || p.id === '2' || p.id === '3');
 
   // Filter products by category
-  const filteredProducts = mockProducts.filter((product) => {
+  const filteredProducts = catalogProducts.filter((product) => {
     if (selectedCategory === 'all') return true;
     if (selectedCategory === 'peanut') return product.visualType === 'peanut';
     if (selectedCategory === 'sesame') return product.visualType === 'sesame';
@@ -268,7 +280,7 @@ export default function HomePage() {
             className={`cat-chip-btn ${selectedCategory === 'all' ? 'active' : ''}`}
             onClick={() => setSelectedCategory('all')}
           >
-            Tất Cả ({mockProducts.length})
+            Tất Cả ({catalogProducts.length})
           </button>
           <button
             type="button"

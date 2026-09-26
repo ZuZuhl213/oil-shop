@@ -1,21 +1,16 @@
 /**
- * API Contract Types — mirrors backend Spring Boot DTOs exactly.
+ * Frontend types for the public Spring Boot API.
  *
- * All `id` fields are serialized as decimal strings (Long → string).
- * Money fields are nullable Long (VND, no decimals).
- * Timestamps are ISO-8601 strings from Instant.
- * BigDecimal quantities are serialized as strings.
+ * Long identifiers are serialized as strings and BigDecimal quantities as JSON
+ * numbers by the backend contract. Money values are VND integers.
  */
-
-// ─── Enums ───────────────────────────────────────────────────────────
 
 export type SaleType = 'FIXED_PRICE' | 'QUOTE';
 export type ProductStatus = 'ACTIVE' | 'INACTIVE';
 export type OrderType = 'ORDER' | 'QUOTE_REQUEST';
 export type OrderStatus = 'NEW' | 'CONTACTED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
 export type DiscountType = 'FIXED' | 'PERCENT';
-
-// ─── Catalog ─────────────────────────────────────────────────────────
+export type FieldErrors = Record<string, string>;
 
 export interface CategoryDto {
   id: string;
@@ -32,8 +27,8 @@ export interface VariantDto {
   name: string;
   sku: string | null;
   price: number | null;
-  minQuantity: string;
-  quantityStep: string;
+  minQuantity: number;
+  quantityStep: number;
   isActive: boolean;
   sortOrder: number;
 }
@@ -47,7 +42,7 @@ export interface ProductDto {
   description: string | null;
   thumbnailUrl: string | null;
   saleType: SaleType;
-  status: string;
+  status: ProductStatus;
   sortOrder: number;
   variants: VariantDto[];
 }
@@ -60,11 +55,9 @@ export interface PageDto<T> {
   totalPages: number;
 }
 
-// ─── Orders ──────────────────────────────────────────────────────────
-
 export interface ItemInput {
   variantId: string;
-  quantity: string; // BigDecimal serialized as string
+  quantity: number;
 }
 
 export interface CreateOrderRequest {
@@ -84,15 +77,8 @@ export interface OrderReceipt {
   subtotal: number | null;
   discountAmount: number;
   totalAmount: number | null;
-  createdAt: string; // ISO-8601
+  createdAt: string;
 }
-
-export interface CreateResult {
-  receipt: OrderReceipt;
-  replayed: boolean;
-}
-
-// ─── Voucher ─────────────────────────────────────────────────────────
 
 export interface VoucherValidateRequest {
   code: string;
@@ -106,13 +92,14 @@ export interface PricePreview {
   voucherCode: string | null;
 }
 
-// ─── API Error ───────────────────────────────────────────────────────
+export interface CsrfResponse {
+  token: string;
+  headerName: string;
+}
 
 export interface ApiError {
-  status: number;
-  error: string;
+  code: string;
   message: string;
-  code?: string;
-  timestamp: string;
-  path: string;
+  fieldErrors: FieldErrors;
+  traceId?: string;
 }

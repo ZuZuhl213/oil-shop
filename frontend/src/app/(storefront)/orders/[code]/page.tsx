@@ -1,9 +1,34 @@
 'use client';
 
+/* eslint-disable react-hooks/set-state-in-effect -- browser hydration/API synchronization */
+
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
+import type { OrderReceipt } from '@/lib/api/contracts/types';
+
+interface ReceiptItem {
+  productId?: string;
+  productName: string;
+  variantId: string;
+  variantName: string;
+  price: number | null;
+  quantity: number;
+  thumbnailType: 'peanut' | 'sesame' | 'sachi' | 'byproduct' | 'gac' | 'coconut' | 'seeds';
+}
+
+interface StoredOrder extends OrderReceipt {
+  customer: {
+    fullName: string;
+    phone: string;
+    address: string;
+    channel: string;
+    note: string;
+  };
+  items: ReceiptItem[];
+  shippingFee: number;
+}
 
 interface OrderReceiptPageProps {
   params: Promise<{ code: string }>;
@@ -12,43 +37,22 @@ interface OrderReceiptPageProps {
 export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
   const { code } = use(params);
   const [copied, setCopied] = useState(false);
-  const [orderData, setOrderData] = useState<any>(null);
+  const [orderData, setOrderData] = useState<StoredOrder | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem(`hm_order_${code}`);
+      const saved = window.sessionStorage.getItem('hm_order_receipt_' + code);
       if (saved) {
-        setOrderData(JSON.parse(saved));
-      } else {
-        // Fallback demo mock order
-        setOrderData({
-          orderCode: code,
-          createdAt: new Date().toISOString(),
-          customer: {
-            fullName: 'Khách Hàng HM NATURALS',
-            phone: '0912 345 678',
-            address: 'Hà Nội',
-            channel: 'Zalo',
-            note: 'Giao trong giờ hành chính',
-          },
-          items: [
-            {
-              productName: 'Dầu Phộng Ép Lạnh Cối Đá',
-              variantName: '500ml',
-              price: 165000,
-              quantity: 1,
-              thumbnailType: 'peanut',
-            },
-          ],
-          subtotal: 165000,
-          shippingFee: 30000,
-          discountAmount: 0,
-          totalAmount: 195000,
-          status: 'PENDING_CONFIRMATION',
-        });
+        const parsed: unknown = JSON.parse(saved);
+        if (parsed && typeof parsed === 'object' && (parsed as { orderCode?: unknown }).orderCode === code) {
+          setOrderData(parsed as StoredOrder);
+        }
       }
     } catch {
-      // ignore
+      // A blocked session store should not crash the receipt page.
+    } finally {
+      setHasLoaded(true);
     }
   }, [code]);
 
@@ -102,10 +106,27 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
     },
   ];
 
-  if (!orderData) {
+  if (!hasLoaded) {
     return (
       <div className="py-20 text-center text-text-muted">
         Đang tải thông tin đơn hàng...
+      </div>
+    );
+  }
+
+  if (!orderData) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-20 text-center space-y-4">
+        <div style={{ fontSize: 42 }}>🧾</div>
+        <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--forest-green)' }}>
+          Biên nhận chỉ có trong phiên gửi đơn này
+        </h2>
+        <p style={{ fontSize: 13.5, color: 'var(--text-muted)' }}>
+          Không tìm thấy dữ liệu cục bộ cho mã {code}. Bạn có thể quay lại cửa hàng để tạo yêu cầu mới.
+        </p>
+        <Link href="/products" className="btn-action-touch fixed-flow no-underline inline-flex">
+          Quay lại danh mục
+        </Link>
       </div>
     );
   }
@@ -228,7 +249,7 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
 
       {/* ── Order Summary Card ── */}
       <div className="space-y-2 mb-4">
-        {orderData.items?.map((item: any, idx: number) => (
+        {orderData.items.map((item, idx) => (
           <div key={idx} className="form-order-summary">
             <div className="order-item-thumb bg-warm-cream flex items-center justify-center overflow-hidden">
               <ProductBottleImage type={item.thumbnailType || 'peanut'} alt={item.productName} />
@@ -241,7 +262,7 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
                 Quy cách: {item.variantName} • Số lượng: {item.quantity}
               </span>
               <div style={{ fontWeight: 700, color: 'var(--dark-cocoa)', fontSize: 14.5, marginTop: 2 }}>
-                {formatCurrencyVnd(item.price * item.quantity)}
+                {item.price == null ? 'Shop sẽ báo giá sau khi xác nhận' : formatCurrencyVnd(item.price * item.quantity)}
               </div>
             </div>
           </div>

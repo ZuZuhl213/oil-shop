@@ -46,7 +46,7 @@ frontend/
 │       ├── format/
 │       │   └── currency.ts                # VND formatting utilities
 │       └── mock-data.ts                   # Sample products for dev
-├── .env.local.example                     # Environment template
+├── .env.example                            # Server-only proxy environment template
 ├── package.json
 ├── tsconfig.json
 └── next.config.ts
@@ -57,8 +57,8 @@ frontend/
 | Route | Màn hình | Trạng thái |
 |-------|----------|------------|
 | `/` | Trang chủ | Stub ✅ |
-| `/products` | Danh sách sản phẩm | Stub + mock data ✅ |
-| `/products/[slug]` | Chi tiết sản phẩm | Stub + variants ✅ |
+| `/products` | Danh sách sản phẩm | API-first + mock fallback ✅ |
+| `/products/[slug]` | Chi tiết sản phẩm | API-first + mock fallback ✅ |
 | `/knowledge` | Góc kiến thức | Stub ✅ |
 | `/about` | Về chúng tôi | Stub ✅ |
 | `/contact` | Liên hệ | Stub ✅ |
@@ -74,13 +74,16 @@ Mở `http://localhost:3000`.
 
 ## API Backend
 
-Mặc định frontend gọi `http://localhost:8080`. Đổi bằng cách tạo `.env.local`:
+Browser chỉ gọi same-origin /api/v1/*. Next.js proxy đọc BACKEND_API_ORIGIN ở server để chuyển request tới Spring Boot, đồng thời giữ cookie session, CSRF và Idempotency-Key.
 
-```bash
-cp .env.local.example .env.local
-```
+Chạy:
 
-Khi backend chưa chạy, frontend dùng mock data.
+    cp .env.example .env.local
+    npm run dev
+
+Đặt BACKEND_API_ORIGIN trong .env.local, mặc định là http://localhost:8080.
+
+Catalog giữ mock data làm fallback khi backend chưa chạy. Checkout và voucher chỉ gửi request khi backend sẵn sàng; receipt đọc OrderReceipt vừa nhận trong session hiện tại.
 
 ## Trạng thái triển khai
 
@@ -120,7 +123,7 @@ Khi backend chưa chạy, frontend dùng mock data.
    - Form thông tin khách hàng: Họ tên, Số điện thoại, Địa chỉ giao hàng, Ghi chú
    - Hệ thống mã giảm giá (Voucher): Hỗ trợ mã `HMN10` (-10%) và `FREESHIP`
    - Phương thức thanh toán: COD (Tiền mặt khi nhận hàng) & Chuyển khoản VietQR
-   - Tóm tắt đơn hàng và tính phí vận chuyển tự động (Miễn phí cho đơn từ 500k)
+   - Tóm tắt đơn hàng; phí giao nhận được shop xác nhận qua điện thoại
 
 6. **Order Receipt & Status Screen (`/orders/[code]`)**:
    - Thông báo đặt hàng thành công + Nút sao chép mã đơn 1-chạm
@@ -139,11 +142,7 @@ Khi backend chưa chạy, frontend dùng mock data.
 
 ## Bước tiếp theo
 
-1. **Connect Real Backend API**:
-   - Chạy Spring Boot backend (`/home/hoang/web-dau-lac/backend`)
-   - Chuyển `client.ts` từ mock data sang gọi endpoints `/api/v1/categories`, `/api/v1/products`, `/api/v1/orders`
-
-2. **Admin Dashboard (`/admin`)**:
+1. Admin Dashboard (/admin):
    - Đăng nhập admin với cookie session
    - Quản lý danh mục, sản phẩm, quy cách
-   - Quản lý trạng thái đơn hàng (duyệt đơn qua 5 bước của Stepper) và quản lý voucher
+   - Quản lý trạng thái đơn hàng và voucher
