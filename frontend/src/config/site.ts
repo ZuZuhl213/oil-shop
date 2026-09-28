@@ -11,7 +11,7 @@ export const siteConfig = {
   phone: '0912 345 678',
   zalo: 'https://zalo.me/0912345678',
   email: 'lienhe@hmnaturals.com',
-  address: 'Hưng Yên, Việt Nam',
+  address: 'Cơ sở sản xuất & ép dầu Nam Đàn, Nghệ An',
 } as const;
 
 export const navLinks = [

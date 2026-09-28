@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import type { OrderReceipt } from '@/lib/api/contracts/types';
+import { readReceipt } from '@/lib/checkout-storage';
 
 interface ReceiptItem {
   productId?: string;
@@ -41,19 +42,8 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
   const [hasLoaded, setHasLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = window.sessionStorage.getItem('hm_order_receipt_' + code);
-      if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-        if (parsed && typeof parsed === 'object' && (parsed as { orderCode?: unknown }).orderCode === code) {
-          setOrderData(parsed as StoredOrder);
-        }
-      }
-    } catch {
-      // A blocked session store should not crash the receipt page.
-    } finally {
-      setHasLoaded(true);
-    }
+    setOrderData(readReceipt<StoredOrder>(undefined, code));
+    setHasLoaded(true);
   }, [code]);
 
   const handleCopyCode = () => {
@@ -122,7 +112,7 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
           Biên nhận chỉ có trong phiên gửi đơn này
         </h2>
         <p style={{ fontSize: 13.5, color: 'var(--text-muted)' }}>
-          Không tìm thấy dữ liệu cục bộ cho mã {code}. Bạn có thể quay lại cửa hàng để tạo yêu cầu mới.
+          Không tìm thấy biên nhận trong phiên này cho mã {code}. Hãy liên hệ shop và cung cấp mã này để xác nhận yêu cầu đã gửi.
         </p>
         <Link href="/products" className="btn-action-touch fixed-flow no-underline inline-flex">
           Quay lại danh mục
@@ -140,7 +130,7 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
           Đã Tiếp Nhận Yêu Cầu
         </span>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--forest-green)', margin: '4px 0 8px' }}>
-          Biên Nhận Đặt Hàng
+          {orderData.orderType === 'QUOTE_REQUEST' ? 'Biên Nhận Yêu Cầu Báo Giá' : 'Biên Nhận Đặt Hàng'}
         </h2>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
           Hệ thống xưởng đã ghi nhận yêu cầu đặt hàng. Xưởng HM NATURALS sẽ liên hệ trực tiếp để xác nhận thông tin chi tiết và thống nhất thời gian giao nhận trước khi xuất kho.
@@ -287,7 +277,7 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
           <span>Phí vận chuyển:</span>
-          <span>{orderData.shippingFee === 0 ? 'Miễn phí' : formatCurrencyVnd(orderData.shippingFee)}</span>
+          <span>Shop xác nhận qua điện thoại</span>
         </div>
         {orderData.discountAmount > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--peanut-bark)' }}>

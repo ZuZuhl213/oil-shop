@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect -- hydrate quote draft from session storage */
 
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
@@ -11,42 +11,12 @@ import { ApiClientError, createOrder, validateVoucher } from '@/lib/api/client';
 import type { CreateOrderRequest, OrderReceipt, PricePreview } from '@/lib/api/contracts/types';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
-
-interface QuoteDraft {
-  productId: string;
-  productName: string;
-  productSlug: string;
-  variantId: string;
-  variantName: string;
-  quantity: number;
-  minQuantity: number;
-  quantityStep: number;
-  thumbnailType: CartItem['thumbnailType'];
-}
+import {
+  clearPendingOrder, clearQuoteDraft, readPendingOrder, readQuoteDraft,
+  rememberReceipt, savePendingOrder, type PendingOrderAttempt, type QuoteDraft,
+} from '@/lib/checkout-storage';
 
 type CheckoutLine = Omit<CartItem, 'price'> & { price: number | null };
-
-const PENDING_ORDER_KEY = 'hm_pending_order_v1';
-
-function isQuoteDraft(value: unknown): value is QuoteDraft {
-  if (!value || typeof value !== 'object') return false;
-  const draft = value as Partial<QuoteDraft>;
-  return (
-    typeof draft.productId === 'string' &&
-    typeof draft.productName === 'string' &&
-    typeof draft.productSlug === 'string' &&
-    typeof draft.variantId === 'string' &&
-    typeof draft.variantName === 'string' &&
-    typeof draft.quantity === 'number' &&
-    Number.isFinite(draft.quantity) &&
-    draft.quantity > 0 &&
-    typeof draft.minQuantity === 'number' &&
-    draft.minQuantity > 0 &&
-    typeof draft.quantityStep === 'number' &&
-    draft.quantityStep > 0 &&
-    typeof draft.thumbnailType === 'string'
-  );
-}
 
 function newIdempotencyKey(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -69,25 +39,25 @@ function CheckoutContent() {
   const { items, subtotal, clearCart } = useCart();
   const isQuoteMode = searchParams.get('mode') === 'quote';
   const [quoteDraft, setQuoteDraft] = useState<QuoteDraft | null>(null);
-  const [pendingKey, setPendingKey] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isQuoteMode) return;
-    try {
-      const saved = window.sessionStorage.getItem('hm_quote_draft_v1');
-      if (!saved) return;
-      const parsed: unknown = JSON.parse(saved);
-      if (!isQuoteDraft(parsed)) return;
-      setQuoteDraft(parsed);
-    } catch {
-      // The empty-state below lets the customer return to the catalog.
-    }
-  }, [isQuoteMode]);
-
-  const checkoutItems: CheckoutLine[] = quoteDraft
+  const [pendingAttempt, setPendingAttempt] = useState<PendingOrderAttempt | null>(null);
+  const [checkoutHydrated, setCheckoutHydrated] = useState(false);
+  const submittingRef = useRef(false);
+  const draftItems: CheckoutLine[] = isQuoteMode && quoteDraft
     ? [{ ...quoteDraft, price: null, saleType: 'QUOTE' }]
-    : items;
-  const isQuoteOrder = Boolean(quoteDraft);
+    : isQuoteMode ? [] : items;
+  const checkoutItems: CheckoutLine[] = pendingAttempt
+    ? pendingAttempt.payload.items.map((line) => {
+      const local = draftItems.find((item) => item.variantId === line.variantId);
+      return local ? { ...local, quantity: line.quantity } : {
+        productId: '', productName: 'Sản phẩm trong yêu cầu đã gửi', productSlug: '',
+        variantId: line.variantId, variantName: '#' + line.variantId, quantity: line.quantity,
+        price: null, thumbnailType: 'peanut',
+      };
+    })
+    : draftItems;
+  const isQuoteOrder = pendingAttempt
+    ? pendingAttempt.payload.orderType === 'QUOTE_REQUEST'
+    : isQuoteMode;
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -101,13 +71,35 @@ function CheckoutContent() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isVoucherLoading, setIsVoucherLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionSucceeded, setSubmissionSucceeded] = useState(false);
+  const submissionSucceededRef = useRef(false);
+
+  useEffect(() => {
+    const attempt = readPendingOrder();
+    setPendingAttempt(attempt);
+    setQuoteDraft(isQuoteMode ? readQuoteDraft() : null);
+    if (attempt) {
+      setFullName(attempt.payload.customerName);
+      setPhone(attempt.payload.phone);
+      setAddress(attempt.payload.address ?? '');
+      const savedNote = attempt.payload.note ?? '';
+      setChannel(savedNote.endsWith('Kênh xác nhận: Phone') ? 'Phone' : 'Zalo');
+      setNote(savedNote.replace(/(?:^|\n)Kênh xác nhận: (?:Phone|Zalo)$/, ''));
+      setVoucherCode(attempt.payload.voucherCode ?? '');
+    }
+    setCheckoutHydrated(true);
+  }, [isQuoteMode]);
 
   const cartSignature = items.map((item) => item.variantId + ':' + item.quantity).join('|');
   const voucherSignature = cartSignature + '|' + voucherCode.trim().toUpperCase();
   const activePricePreview = pricePreviewSignature === voucherSignature ? pricePreview : null;
+  const retrySubtotal = checkoutItems.every((item) => item.price != null)
+    ? checkoutItems.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0)
+    : null;
+  const estimatedSubtotal = pendingAttempt ? retrySubtotal : subtotal;
   const discountAmount = isQuoteOrder ? 0 : activePricePreview?.discountAmount ?? 0;
-  const displaySubtotal = isQuoteOrder ? null : activePricePreview?.subtotal ?? subtotal;
-  const totalAmount = isQuoteOrder ? null : activePricePreview?.totalAmount ?? subtotal;
+  const displaySubtotal = isQuoteOrder ? null : activePricePreview?.subtotal ?? estimatedSubtotal;
+  const totalAmount = isQuoteOrder ? null : activePricePreview?.totalAmount ?? estimatedSubtotal;
 
   const handleApplyVoucher = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -143,7 +135,8 @@ function CheckoutContent() {
 
   const handleSubmitOrder = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!fullName.trim() || !phone.trim()) {
+    if (!checkoutHydrated || submittingRef.current || submissionSucceededRef.current) return;
+    if (!pendingAttempt && (!fullName.trim() || !phone.trim())) {
       setSubmitError('Vui lòng điền Họ tên và Số điện thoại.');
       return;
     }
@@ -152,7 +145,7 @@ function CheckoutContent() {
       return;
     }
 
-    const payload: CreateOrderRequest = {
+    const payload: CreateOrderRequest = pendingAttempt?.payload ?? {
       orderType: isQuoteOrder ? 'QUOTE_REQUEST' : 'ORDER',
       customerName: fullName.trim(),
       phone: phone.trim(),
@@ -161,49 +154,62 @@ function CheckoutContent() {
       ...(!isQuoteOrder && voucherCode.trim() ? { voucherCode: voucherCode.trim().toUpperCase() } : {}),
       items: checkoutItems.map((item) => ({ variantId: item.variantId, quantity: item.quantity })),
     };
-    const key = pendingKey ?? newIdempotencyKey();
-    setPendingKey(key);
+    const key = pendingAttempt?.key ?? newIdempotencyKey();
+    const attempt = { key, payload };
+    submittingRef.current = true;
+    setPendingAttempt(attempt);
     setSubmitError(null);
     setIsSubmitting(true);
 
     try {
-      try {
-        window.sessionStorage.setItem(PENDING_ORDER_KEY, JSON.stringify({ key, payload }));
-      } catch {
-        // Keep the key in memory when session storage is unavailable.
-      }
+      savePendingOrder(undefined, attempt);
       const receipt: OrderReceipt = await createOrder(payload, key);
       const orderRecord = {
         ...receipt,
-        customer: { fullName: fullName.trim(), phone: phone.trim(), address: address.trim(), channel, note },
+        customer: { fullName: payload.customerName, phone: payload.phone, address: payload.address ?? '', channel, note: payload.note ?? '' },
         items: checkoutItems,
         shippingFee: 0,
       };
+      rememberReceipt(receipt.orderCode, orderRecord);
       try {
         window.sessionStorage.setItem('hm_order_receipt_' + receipt.orderCode, JSON.stringify(orderRecord));
-        window.sessionStorage.removeItem(PENDING_ORDER_KEY);
-        window.sessionStorage.removeItem('hm_quote_draft_v1');
       } catch {
-        // The receipt is still in the URL; the page will explain if session storage was blocked.
+        // The next page reads the receipt from memory when storage is unavailable.
       }
-      if (!isQuoteOrder) clearCart();
+      clearPendingOrder();
+      clearQuoteDraft();
+      submissionSucceededRef.current = true;
+      setSubmissionSucceeded(true);
+      setPendingAttempt(null);
+      if (payload.orderType === 'ORDER' && JSON.stringify(payload.items) === JSON.stringify(items.map(({ variantId, quantity }) => ({ variantId, quantity })))) clearCart();
       router.push('/orders/' + receipt.orderCode);
     } catch (error) {
-      setSubmitError(apiMessage(error, 'Chưa xác định được kết quả gửi đơn. Giữ nguyên thông tin để thử lại.'));
+      const definitiveRejection = error instanceof ApiClientError
+        && (error.status === 422 || (!pendingAttempt && [400, 401, 403, 404].includes(error.status)));
+      if (definitiveRejection) {
+        clearPendingOrder();
+        setPendingAttempt(null);
+        setSubmitError(apiMessage(error, 'Vui lòng kiểm tra lại thông tin.'));
+      } else {
+        setSubmitError('Chưa xác định được kết quả gửi đơn. Thử lại để kiểm tra yêu cầu đã gửi; thông tin của lần gửi này được giữ nguyên.');
+      }
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
+
+  if (!checkoutHydrated) return <div className="py-20 text-center text-text-muted">Đang tải phiếu đặt hàng...</div>;
 
   if (checkoutItems.length === 0) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center space-y-4">
         <div style={{ fontSize: 48 }}>🛒</div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--forest-green)' }}>
-          Giỏ hàng của bạn đang trống
+          {isQuoteMode ? 'Chưa có sản phẩm báo giá' : 'Giỏ hàng của bạn đang trống'}
         </h2>
         <p style={{ fontSize: 13.5, color: 'var(--text-muted)' }}>
-          Vui lòng chọn sản phẩm vào giỏ trước khi gửi phiếu đặt hàng.
+          {isQuoteMode ? 'Vui lòng quay lại sản phẩm và chọn quy cách để gửi yêu cầu báo giá.' : 'Vui lòng chọn sản phẩm vào giỏ trước khi gửi phiếu đặt hàng.'}
         </p>
         <Link
           href="/products"
@@ -249,7 +255,7 @@ function CheckoutContent() {
         </div>
 
         {/* Voucher Code Box */}
-        {!isQuoteOrder && <form onSubmit={handleApplyVoucher} className="mb-5 flex gap-2">
+        {!isQuoteOrder && !pendingAttempt && <form onSubmit={handleApplyVoucher} className="mb-5 flex gap-2">
           <input
             type="text"
             className="form-field-input"
@@ -334,6 +340,8 @@ function CheckoutContent() {
 
         {/* Customer Information Form */}
         <form onSubmit={handleSubmitOrder}>
+          {pendingAttempt && <p role="status" className="mb-4 text-sm">Đang kiểm tra yêu cầu đã gửi. Thử lại với cùng thông tin để tránh tạo đơn trùng.</p>}
+          <fieldset disabled={Boolean(pendingAttempt)} style={{ border: 0, padding: 0, margin: 0 }}>
           <div className="form-row-group">
             <label className="form-field-label">Họ và tên người nhận *</label>
             <input
@@ -446,13 +454,14 @@ function CheckoutContent() {
             />
           </div>
 
+          </fieldset>
           <button
             type="submit"
             className="btn-action-touch fixed-flow"
-            disabled={isSubmitting}
+            disabled={isSubmitting || submissionSucceeded}
             style={{ width: '100%', height: 46, fontSize: 14 }}
           >
-            {isSubmitting ? 'Đang gửi yêu cầu...' : (isQuoteOrder ? 'Gửi Yêu Cầu Báo Giá' : 'Gửi Yêu Cầu Đặt Hàng')}
+            {isSubmitting ? 'Đang gửi yêu cầu...' : pendingAttempt ? 'Thử Lại Yêu Cầu Đã Gửi' : (isQuoteOrder ? 'Gửi Yêu Cầu Báo Giá' : 'Gửi Yêu Cầu Đặt Hàng')}
           </button>
         </form>
       </div>

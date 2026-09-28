@@ -111,6 +111,13 @@ describe('apiFetch', () => {
     await expect(apiFetch('/csrf')).resolves.toBeUndefined();
   });
 
+  it('keeps a structured 401 response for the auth caller', async () => {
+    vi.stubGlobal('fetch',vi.fn().mockResolvedValue(Response.json({
+      code:'UNAUTHENTICATED',message:'Login required',fieldErrors:{},traceId:'auth-trace',
+    },{status:401})));
+    await expect(apiFetch('/admin/auth/me')).rejects.toMatchObject({status:401,code:'UNAUTHENTICATED',traceId:'auth-trace'});
+  });
+
   it('exposes the original status on ApiClientError', () => {
     const error = new ApiClientError(409, {
       code: 'IDEMPOTENCY_CONFLICT',

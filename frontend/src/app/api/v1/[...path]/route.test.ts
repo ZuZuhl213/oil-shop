@@ -4,7 +4,74 @@ import { GET, OPTIONS, POST } from './route';
 const context = (path: string[]) => ({ params: Promise.resolve({ path }) });
 
 describe('API proxy route', () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.useRealTimers(); });
+
+  it('preserves separate cookies including an Expires date and disables admin caching', async () => {
+    const headers = new Headers({'cache-control':'public, max-age=3600'});
+    headers.append('set-cookie','JSESSIONID=one; Path=/api; HttpOnly');
+    headers.append('set-cookie','other=two; Expires=Wed, 21 Oct 2030 07:28:00 GMT; Path=/');
+    vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response('{}',{headers})));
+    const response = await GET(new Request('http://localhost/api/v1/admin/auth/me'),context(['admin','auth','me']));
+    expect(response.headers.getSetCookie()).toEqual([
+      'JSESSIONID=one; Path=/api; HttpOnly',
+      'other=two; Expires=Wed, 21 Oct 2030 07:28:00 GMT; Path=/',
+    ]);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('aborts slow upstream requests and returns a structured 503', async () => {
+    vi.useFakeTimers(); vi.stubEnv('PROXY_TIMEOUT_MS','20');
+    vi.stubGlobal('fetch',vi.fn((_url: string, init: RequestInit) => new Promise((_resolve,reject) => {
+      init.signal!.addEventListener('abort',()=>reject(new DOMException('Timeout','AbortError')));
+    })));
+    const pending = GET(new Request('http://localhost/api/v1/products'),context(['products']));
+    await vi.advanceTimersByTimeAsync(25);
+    const response = await pending;
+    expect(response.status).toBe(503);
+    await expect(response.json()).resolves.toMatchObject({code:'SERVICE_UNAVAILABLE',fieldErrors:{},traceId:expect.any(String)});
+  });
+
+  it('keeps the timeout active when upstream sends headers but stalls the body', async () => {
+    vi.useFakeTimers(); vi.stubEnv('PROXY_TIMEOUT_MS','20');
+    vi.stubGlobal('fetch',vi.fn(async (_url:string,init:RequestInit) => new Response(new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('{'));
+        init.signal!.addEventListener('abort',()=>controller.error(new DOMException('Timeout','AbortError')));
+      },
+    }),{headers:{'content-type':'application/json'}})));
+    const pending=GET(new Request('http://localhost/api/v1/products'),context(['products']));
+    await vi.advanceTimersByTimeAsync(25);
+    expect((await pending).status).toBe(503);
+  });
+
+  it('forwards Origin and structured authorization errors without caching', async () => {
+    const error = {code:'UNAUTHENTICATED',message:'Login required',fieldErrors:{},traceId:'trace-auth'};
+    const fetchMock = vi.fn().mockResolvedValue(Response.json(error,{status:401}));
+    vi.stubGlobal('fetch',fetchMock);
+    const response = await POST(new Request('http://localhost/api/v1/admin/auth/login',{
+      method:'POST',headers:{origin:'http://localhost','content-type':'application/json'},body:'{}',
+    }),context(['admin','auth','login']));
+    expect(new Headers(fetchMock.mock.calls[0][1].headers).get('origin')).toBe('http://localhost');
+    expect(response.status).toBe(401);
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    await expect(response.json()).resolves.toEqual(error);
+  });
+
+  it('rejects bodies above the configured limit before contacting upstream', async () => {
+    vi.stubEnv('PROXY_MAX_BODY_BYTES','8');
+    const fetchMock = vi.fn().mockResolvedValue(Response.json({})); vi.stubGlobal('fetch',fetchMock);
+    const response = await POST(new Request('http://localhost/api/v1/orders',{method:'POST',body:'123456789'}),context(['orders']));
+    expect(response.status).toBe(413);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('rejects disallowed methods and traversal without contacting upstream', async () => {
+    const fetchMock = vi.fn(); vi.stubGlobal('fetch',fetchMock);
+    const response = await POST(new Request('http://localhost/api/v1/categories',{method:'POST',body:'{}'}),context(['categories']));
+    expect(response.status).toBe(404);
+    expect((await GET(new Request('http://localhost/api/v1/products'),context(['products','..']))).status).toBe(404);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 
   it('forwards public GETs to the server-only backend origin', async () => {
     vi.stubEnv('BACKEND_API_ORIGIN', 'http://backend.internal');

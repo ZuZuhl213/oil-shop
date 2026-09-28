@@ -1,9 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getMockArticleBySlug, getMockProductBySlug, mockKnowledgeArticles } from '@/lib/mock-data';
+import { getMockArticleBySlug, mockKnowledgeArticles } from '@/lib/mock-data';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
-import { ProductCard } from '@/components/product/ProductCard';
+import { ProductCardBySlug } from '@/components/product/ProductCard';
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -17,9 +17,7 @@ export default async function KnowledgeArticlePage({ params }: ArticlePageProps)
     notFound();
   }
 
-  const relatedProduct = article.relatedProductSlug
-    ? getMockProductBySlug(article.relatedProductSlug)
-    : null;
+  const relatedProduct = article.relatedProductSlug;
 
   const relatedArticles = mockKnowledgeArticles
     .filter((a) => a.id !== article.id && a.categoryKey === article.categoryKey)
@@ -82,7 +80,7 @@ export default async function KnowledgeArticlePage({ params }: ArticlePageProps)
             Sản Phẩm Khuyên Dùng
           </h3>
           <div className="max-w-xs">
-            <ProductCard product={relatedProduct} />
+            <ProductCardBySlug slug={relatedProduct} />
           </div>
         </div>
       )}

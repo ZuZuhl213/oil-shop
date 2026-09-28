@@ -2,46 +2,56 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { mockProducts, mockKnowledgeArticles } from '@/lib/mock-data';
+import { mockKnowledgeArticles } from '@/lib/mock-data';
+import type { ExtendedProductDto } from '@/lib/mock-data';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { getCategories, getProducts } from '@/lib/api/client';
 import { toUiProducts } from '@/lib/catalog-adapter';
+import type { CategoryDto } from '@/lib/api/contracts/types';
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0);
   const [bottleTransform, setBottleTransform] = useState<string>('rotateX(0deg) rotateY(0deg)');
-  const [catalogProducts, setCatalogProducts] = useState(mockProducts);
+  const [catalogProducts, setCatalogProducts] = useState<ExtendedProductDto[]>([]);
+  const [catalogCategories, setCatalogCategories] = useState<CategoryDto[]>([]);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const requestKey = selectedCategory + ':' + retry;
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const catalogLoading = loadedKey !== requestKey;
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let active = true;
-    Promise.all([getCategories(), getProducts({ page: 0, size: 100 })])
+    Promise.all([getCategories(), getProducts({ page: 0, size: 12, category: selectedCategory === 'all' ? undefined : selectedCategory })])
       .then(([categories, page]) => {
-        if (active) setCatalogProducts(toUiProducts(page.content, categories));
+        if (active) {
+          setCatalogProducts(toUiProducts(page.content, categories));
+          setCatalogCategories(categories);
+          setCatalogError(null);
+          setLoadedKey(requestKey);
+        }
       })
       .catch(() => {
-        // Keep the approved UI fixtures visible while the backend is unavailable.
+        if (active) {
+          setCatalogProducts([]);
+          setCatalogError('Không tải được sản phẩm. Vui lòng thử lại.');
+          setLoadedKey(requestKey);
+        }
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [selectedCategory, requestKey]);
 
   // Hero carousel products
   const heroSlideProducts = catalogProducts.filter((p) => p.featured || p.id === '1' || p.id === '2' || p.id === '3');
 
   // Filter products by category
-  const filteredProducts = catalogProducts.filter((product) => {
-    if (selectedCategory === 'all') return true;
-    if (selectedCategory === 'peanut') return product.visualType === 'peanut';
-    if (selectedCategory === 'sesame') return product.visualType === 'sesame';
-    if (selectedCategory === 'sachi') return product.visualType === 'sachi';
-    if (selectedCategory === 'byproduct') return product.visualType === 'byproduct';
-    return true;
-  });
+  const filteredProducts = catalogLoading ? [] : catalogProducts;
 
   const featuredArticles = mockKnowledgeArticles.slice(0, 3);
 
@@ -282,37 +292,23 @@ export default function HomePage() {
           >
             Tất Cả ({catalogProducts.length})
           </button>
-          <button
-            type="button"
-            className={`cat-chip-btn ${selectedCategory === 'peanut' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('peanut')}
-          >
-            Dầu Đậu Phộng
-          </button>
-          <button
-            type="button"
-            className={`cat-chip-btn ${selectedCategory === 'sesame' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('sesame')}
-          >
-            Dầu Mè
-          </button>
-          <button
-            type="button"
-            className={`cat-chip-btn ${selectedCategory === 'sachi' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('sachi')}
-          >
-            Dầu Hạt Sachi
-          </button>
-          <button
-            type="button"
-            className={`cat-chip-btn ${selectedCategory === 'byproduct' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('byproduct')}
-          >
-            Phụ Phẩm Sạch
-          </button>
+          {catalogCategories.map((category) => (
+            <button key={category.id} type="button"
+              className={`cat-chip-btn ${selectedCategory === category.slug ? 'active' : ''}`}
+              aria-pressed={selectedCategory === category.slug}
+              onClick={() => setSelectedCategory(category.slug)}>
+              {category.name}
+            </button>
+          ))}
         </div>
 
         {/* 2-Col Mobile / 4-Col Desktop Grid */}
+        {catalogLoading && <p role="status">Đang tải sản phẩm…</p>}
+        {!catalogLoading && !catalogError && filteredProducts.length === 0 && <p role="status">Chưa có sản phẩm trong danh mục này.</p>}
+        {!catalogLoading && catalogError && <div role="alert" className="mb-4">
+          <p>{catalogError}</p>
+          <button type="button" className="btn-action-touch fixed-flow" onClick={() => setRetry((value) => value + 1)}>Thử lại</button>
+        </div>}
         <div className="product-grid-2col">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />

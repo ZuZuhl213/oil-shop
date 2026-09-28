@@ -32,6 +32,14 @@ function CartProbe() {
 }
 
 describe('CartProvider', () => {
+  it('does not migrate the old demo cart array into a real order cart', async () => {
+    window.localStorage.setItem('hm_naturals_cart_v1', JSON.stringify([{
+      productId:'1',productName:'Demo oil',productSlug:'demo',variantId:'1',variantName:'1L',
+      price:90000,quantity:1,thumbnailType:'peanut',
+    }]));
+    render(<CartProvider><CartProbe /></CartProvider>);
+    await waitFor(() => expect(screen.getByTestId('count')).toHaveTextContent('0'));
+  });
   it('drops malformed stored data and does not seed fake products', async () => {
     window.localStorage.setItem('hm_naturals_cart_v1', '{}');
     render(

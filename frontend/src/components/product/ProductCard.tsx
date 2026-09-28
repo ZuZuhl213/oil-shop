@@ -1,8 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ExtendedProductDto, mockCategories } from '@/lib/mock-data';
+import type { ExtendedProductDto } from '@/lib/mock-data';
+import { getCategories, getProductBySlug } from '@/lib/api/client';
+import { toUiProduct } from '@/lib/catalog-adapter';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { useCart } from '@/context/CartContext';
@@ -11,18 +13,31 @@ interface ProductCardProps {
   product: ExtendedProductDto;
 }
 
+export function ProductCardBySlug({ slug }: { slug: string }) {
+  const [loaded, setLoaded] = useState<{ slug: string; product: ExtendedProductDto } | null>(null);
+  useEffect(() => {
+    let active = true;
+    Promise.all([getProductBySlug(slug), getCategories().catch(() => [])])
+      .then(([product, categories]) => {
+        if (active) setLoaded({ slug, product: toUiProduct(product, categories.find((category) => category.id === product.categoryId)) });
+      })
+      .catch(() => { /* An unavailable recommendation must not expose demo variants. */ });
+    return () => { active = false; };
+  }, [slug]);
+  return loaded?.slug === slug ? <ProductCard product={loaded.product} /> : null;
+}
+
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
 
   const isQuote = product.saleType === 'QUOTE';
-  const defaultVariant = product.variants[0];
-  const displayPrice = defaultVariant?.price ? formatCurrencyVnd(defaultVariant.price) : 'Liên hệ';
-  const category = mockCategories.find((c) => c.id === product.categoryId);
+  const defaultVariant = product.variants.find((variant) => variant.isActive);
+  const displayPrice = formatCurrencyVnd(defaultVariant?.price);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!defaultVariant || isQuote || !defaultVariant.price) return;
+    if (!defaultVariant || isQuote || defaultVariant.price == null) return;
 
     addItem({
       productId: product.id,
@@ -62,7 +77,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Card Body */}
       <div className="grid-card-body">
         <div>
-          <span className="g-cat-text">{product.categoryName || category?.name || 'Nông Sản Bản Địa'}</span>
+          <span className="g-cat-text">{product.categoryName || 'Nông Sản Bản Địa'}</span>
           <h4 className="g-title-text group-hover:text-peanut-bark transition-colors">
             {product.name}
           </h4>
@@ -88,6 +103,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <button
               type="button"
               onClick={handleQuickAdd}
+              disabled={!defaultVariant || defaultVariant.price == null}
               className="btn-card-action fixed"
               aria-label={`Chọn mua ${product.name}`}
             >

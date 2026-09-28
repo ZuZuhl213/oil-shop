@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 type RouteContext = { params: Promise<{ path?: string[] }> | { path?: string[] } };
 
-const MAX_BODY_BYTES = 1_048_576;
+const DEFAULT_MAX_BODY_BYTES = 1_048_576;
 const DEFAULT_TIMEOUT_MS = 10_000;
 const FORWARDED_REQUEST_HEADERS = [
   'accept',
@@ -33,6 +33,7 @@ function routeRule(path: string, method: string): boolean {
   if (path === 'products' || /^products\/[^/]+$/.test(path)) {
     return normalizedMethod === 'GET';
   }
+  if (path === 'health') return normalizedMethod === 'GET';
   if (path === 'csrf') return normalizedMethod === 'GET';
   if (path === 'vouchers/validate' || path === 'orders') return normalizedMethod === 'POST';
   if (path === 'admin/auth/login') return normalizedMethod === 'POST';
@@ -97,8 +98,10 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
     return errorResponse(404, 'NOT_FOUND', 'Resource not found');
   }
 
+  const configuredLimit = Number(process.env.PROXY_MAX_BODY_BYTES ?? DEFAULT_MAX_BODY_BYTES);
+  const maxBodyBytes = Number.isSafeInteger(configuredLimit) && configuredLimit > 0 ? configuredLimit : DEFAULT_MAX_BODY_BYTES;
   const contentLength = Number(request.headers.get('content-length') ?? '0');
-  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_BYTES) {
+  if (Number.isFinite(contentLength) && contentLength > maxBodyBytes) {
     return errorResponse(413, 'REQUEST_TOO_LARGE', 'Request body is too large');
   }
 
@@ -111,7 +114,7 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
   let body: ArrayBuffer | undefined;
   if (!['GET', 'HEAD'].includes(method)) {
     body = await request.arrayBuffer();
-    if (body.byteLength > MAX_BODY_BYTES) {
+    if (body.byteLength > maxBodyBytes) {
       return errorResponse(413, 'REQUEST_TOO_LARGE', 'Request body is too large');
     }
   }
@@ -125,6 +128,7 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   let upstream: Response;
+  let responseBody: ArrayBuffer | null;
   try {
     upstream = await fetch(
       upstreamOrigin() + '/api/v1/' + path + new URL(request.url).search,
@@ -134,8 +138,10 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
         body,
         signal: controller.signal,
         redirect: 'manual',
+        cache: 'no-store',
       },
     );
+    responseBody = upstream.body === null ? null : await upstream.arrayBuffer();
   } catch (error) {
     return errorResponse(
       503,
@@ -165,7 +171,7 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
     responseHeaders.set('cache-control', 'no-store');
   }
 
-  return new Response(upstream.body, {
+  return new Response(responseBody, {
     status: upstream.status,
     statusText: upstream.statusText,
     headers: responseHeaders,

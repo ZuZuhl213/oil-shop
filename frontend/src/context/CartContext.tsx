@@ -80,9 +80,7 @@ function readStoredItems(): CartItem[] {
     const saved = window.localStorage.getItem(CART_STORAGE_KEY);
     if (!saved) return [];
     const parsed: unknown = JSON.parse(saved);
-    const items = Array.isArray(parsed)
-      ? parsed
-      : parsed && typeof parsed === 'object' && (parsed as Partial<StoredCart>).version === 1
+    const items = parsed && !Array.isArray(parsed) && typeof parsed === 'object' && (parsed as Partial<StoredCart>).version === 1
         ? (parsed as Partial<StoredCart>).items
         : null;
     if (!Array.isArray(items) || !items.every(isCartItem)) {

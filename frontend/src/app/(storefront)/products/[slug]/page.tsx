@@ -4,11 +4,11 @@
 
 import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { getMockProductBySlug, mockProducts } from '@/lib/mock-data';
+import { notFound, useRouter } from 'next/navigation';
 import type { ExtendedProductDto } from '@/lib/mock-data';
-import { getCategories, getProductBySlug } from '@/lib/api/client';
-import { toUiProduct } from '@/lib/catalog-adapter';
+import { ApiClientError, getCategories, getProductBySlug, getProducts } from '@/lib/api/client';
+import { toUiProduct, toUiProducts } from '@/lib/catalog-adapter';
+import { saveQuoteDraft } from '@/lib/checkout-storage';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { useCart } from '@/context/CartContext';
@@ -21,17 +21,17 @@ interface ProductDetailPageProps {
 export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { slug } = use(params);
   const router = useRouter();
-  const fallbackProduct = getMockProductBySlug(slug);
-  const [product, setProduct] = useState<ExtendedProductDto | undefined>(fallbackProduct);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const requestKey = slug + ':' + retry;
+  const [result, setResult] = useState<{ key: string; product?: ExtendedProductDto; error?: string; notFound?: boolean } | null>(null);
+  const [related, setRelated] = useState<{ key: string; products: ExtendedProductDto[] } | null>(null);
+  const current = result?.key === requestKey ? result : null;
+  const product = current?.product;
+  const isLoading = !current;
+  const loadError = current?.error;
   const { addItem } = useCart();
-  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>(
-    fallbackProduct?.variants[0]?.id,
-  );
-  const [quantity, setQuantity] = useState<number>(
-    fallbackProduct?.variants[0]?.minQuantity ?? 1,
-  );
+  const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
+  const [quantity, setQuantity] = useState<number>(1);
   const [show360Modal, setShow360Modal] = useState<boolean>(false);
   const [bottle360Angle, setBottle360Angle] = useState<number>(0);
 
@@ -46,37 +46,41 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       .then(({ apiProduct, categories }) => {
         if (!active) return;
         const category = categories.find((item) => item.id === apiProduct.categoryId);
-        setProduct(toUiProduct(apiProduct, category));
-        setLoadError(null);
+        setResult({ key: requestKey, product: toUiProduct(apiProduct, category) });
+        if (category) {
+          getProducts({ category: category.slug, size: 5 })
+            .then((page) => {
+              if (active) setRelated({ key: requestKey, products: toUiProducts(page.content.filter((item) => item.id !== apiProduct.id), categories).slice(0, 4) });
+            })
+            .catch(() => { if (active) setRelated({ key: requestKey, products: [] }); });
+        }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!active) return;
-        if (!fallbackProduct) setLoadError('Không tìm thấy sản phẩm này.');
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
+        const notFound = error instanceof ApiClientError && error.status === 404;
+        setResult({ key: requestKey, notFound, error: notFound ? 'Không tìm thấy sản phẩm này.' : 'Không tải được sản phẩm. Vui lòng thử lại.' });
       });
     return () => {
       active = false;
     };
-  }, [fallbackProduct, slug]);
+  }, [slug, retry, requestKey]);
 
   useEffect(() => {
     if (!product) return;
-    const firstVariant = product.variants[0];
+    const firstVariant = product.variants.find((variant) => variant.isActive);
     setSelectedVariantId(firstVariant?.id);
     setQuantity(firstVariant?.minQuantity ?? 1);
   }, [product]);
 
-  const selectedVariant = product?.variants.find((variant) => variant.id === selectedVariantId)
-    ?? product?.variants[0];
+  const selectedVariant = product?.variants.find((variant) => variant.id === selectedVariantId && variant.isActive)
+    ?? product?.variants.find((variant) => variant.isActive);
   const isQuote = product?.saleType === 'QUOTE';
-  const currentPrice = selectedVariant?.price ?? 0;
-  const totalPrice = currentPrice * quantity;
+  const currentPrice = selectedVariant?.price ?? null;
+  const totalPrice = currentPrice == null ? null : currentPrice * quantity;
   const categoryName = product?.categoryName || 'Nông Sản Bản Địa';
 
   const handleAddToCart = () => {
-    if (!product || !selectedVariant || isQuote || selectedVariant.price == null) return;
+    if (!product || !selectedVariant?.isActive || isQuote || selectedVariant.price == null) return;
 
     addItem({
       productId: product.id,
@@ -94,12 +98,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   };
 
   const handleBuyNow = () => {
-    if (!product || !selectedVariant) return;
+    if (!product || !selectedVariant || !selectedVariant.isActive) return;
     if (isQuote) {
-      try {
-        window.sessionStorage.setItem(
-          'hm_quote_draft_v1',
-          JSON.stringify({
+      saveQuoteDraft(undefined, {
             productId: product.id,
             productName: product.name,
             productSlug: product.slug,
@@ -109,11 +110,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             minQuantity: selectedVariant.minQuantity,
             quantityStep: selectedVariant.quantityStep,
             thumbnailType: product.visualType,
-          }),
-        );
-      } catch {
-        // Checkout still shows a recoverable message if session storage is unavailable.
-      }
+      });
       router.push('/checkout?mode=quote');
       return;
     }
@@ -121,16 +118,15 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
     router.push('/checkout');
   };
 
-  const relatedProducts = product
-    ? mockProducts
-        .filter((item) => item.categoryId === product.categoryId && item.id !== product.id)
-        .slice(0, 4)
-    : [];
+  const relatedProducts = related?.key === requestKey ? related.products : [];
+
+  if (current?.notFound) notFound();
 
   if (!product) {
     return (
       <div className="site-container py-20 text-center">
-        <p className="text-text-muted">{isLoading ? 'Đang tải sản phẩm…' : (loadError || 'Không tìm thấy sản phẩm.')}</p>
+        <p role={loadError ? 'alert' : 'status'} className="text-text-muted">{isLoading ? 'Đang tải sản phẩm…' : (loadError || 'Không tìm thấy sản phẩm.')}</p>
+        {!isLoading && !current?.notFound && <button type="button" className="btn-action-touch fixed-flow mt-4" onClick={() => setRetry((value) => value + 1)}>Thử lại</button>}
         {!isLoading && <Link href="/products" className="btn-action-touch fixed-flow no-underline inline-flex mt-4">Quay lại danh mục</Link>}
       </div>
     );
@@ -156,6 +152,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           <span className="d-cat">{categoryName}</span>
           <h1 className="d-title">{product.name}</h1>
           <p className="d-desc">{product.description || product.shortDescription}</p>
+          {selectedVariant?.sku && <p className="text-sm text-text-muted">SKU: {selectedVariant.sku}</p>}
 
           {/* 360 Degree View Interactive Button */}
           <div>
@@ -186,7 +183,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           </div>
 
           {/* Variant Selector */}
-          {!isQuote && product.variants.length > 0 && (
+          {product.variants.length > 0 && (
             <div id="detailVariantBlock">
               <div className="variant-section-title">Chọn Dung Tích / Quy Cách:</div>
               <div className="variant-pills-row">
@@ -195,7 +192,9 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                     key={v.id}
                     type="button"
                     className={`var-pill ${selectedVariant?.id === v.id ? 'active' : ''}`}
-                    onClick={() => setSelectedVariantId(v.id)}
+                    onClick={() => { setSelectedVariantId(v.id); setQuantity(v.minQuantity); }}
+                    disabled={!v.isActive}
+                    aria-pressed={selectedVariant?.id === v.id}
                   >
                     {v.name}
                   </button>
@@ -209,7 +208,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   <button
                     type="button"
                     className="qty-btn"
-                    onClick={() => setQuantity((q) => Math.max(selectedVariant?.minQuantity ?? 1, q - (selectedVariant?.quantityStep ?? 1)))}
+                    onClick={() => setQuantity((q) => Math.max(selectedVariant?.minQuantity ?? 1, Number((q - (selectedVariant?.quantityStep ?? 1)).toFixed(6))))}
                     aria-label="Giảm theo quy cách"
                   >
                     −
@@ -218,7 +217,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
                   <button
                     type="button"
                     className="qty-btn"
-                    onClick={() => setQuantity((q) => q + (selectedVariant?.quantityStep ?? 1))}
+                    onClick={() => setQuantity((q) => Number((q + (selectedVariant?.quantityStep ?? 1)).toFixed(6)))}
                     aria-label="Tăng theo quy cách"
                   >
                     +
@@ -290,6 +289,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               type="button"
               className="btn-action-touch quote-flow"
               onClick={handleAddToCart}
+              disabled={!selectedVariant?.isActive || selectedVariant.price == null}
               style={{ padding: '0 16px' }}
             >
               + Giỏ Hàng
@@ -299,6 +299,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
             type="button"
             className="btn-action-touch fixed-flow"
             onClick={handleBuyNow}
+            disabled={!selectedVariant?.isActive}
             style={{ padding: '0 20px' }}
           >
             {isQuote ? 'Gửi Yêu Cầu Báo Giá' : 'Đặt Mua Ngay'}

@@ -1,10 +1,8 @@
 'use client';
 
-/* eslint-disable react-hooks/set-state-in-effect -- browser hydration/API synchronization */
-
-import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { mockProducts } from '@/lib/mock-data';
+import type { CategoryDto, PageDto, ProductDto } from '@/lib/api/contracts/types';
 import type { ExtendedProductDto } from '@/lib/mock-data';
 import { ProductCard } from '@/components/product/ProductCard';
 import { getCategories, getProducts } from '@/lib/api/client';
@@ -12,74 +10,72 @@ import { toUiProducts } from '@/lib/catalog-adapter';
 
 function ProductsContent() {
   const searchParams = useSearchParams();
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    searchParams.get('category') || 'all',
-  );
-  const [keyword, setKeyword] = useState<string>(searchParams.get('q') || '');
-  const [catalogProducts, setCatalogProducts] = useState<ExtendedProductDto[]>(mockProducts);
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const requestSequence = useRef(0);
+  const selectedCategory = searchParams.get('category') || 'all';
+  const keyword = searchParams.get('q') || '';
+  const [keywordInput, setKeywordInput] = useState(keyword);
+  const requestedPage = Number(searchParams.get('page') || 0);
+  const currentPage = Number.isSafeInteger(requestedPage) && requestedPage >= 0 ? requestedPage : 0;
+  const [retry, setRetry] = useState(0);
+  const requestKey = JSON.stringify([selectedCategory, keyword.trim(), currentPage, retry]);
+  const [result, setResult] = useState<{
+    key: string; products: ExtendedProductDto[]; categories: CategoryDto[];
+    page?: PageDto<ProductDto>; error?: string;
+  } | null>(null);
+  const current = result?.key === requestKey ? result : null;
+  const isLoading = !current;
+  const loadError = current?.error;
+  const filteredProducts = current?.products ?? [];
+
+  const updateQuery = (changes: { category?: string; q?: string; page?: number }) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (changes.category !== undefined) {
+      if (changes.category === 'all') params.delete('category');
+      else params.set('category', changes.category);
+    }
+    if (changes.q !== undefined) {
+      setKeywordInput(changes.q);
+      if (changes.q) params.set('q', changes.q);
+      else params.delete('q');
+    } else if (keywordInput) {
+      params.set('q', keywordInput);
+    } else {
+      params.delete('q');
+    }
+    params.set('page', String(changes.page ?? 0));
+    // These filters load through the client API; native history avoids racing RSC navigations.
+    window.history.replaceState(null, '', '/products?' + params.toString());
+  };
 
   useEffect(() => {
-    const q = searchParams.get('q');
-    const category = searchParams.get('category');
-    if (q !== null) setKeyword(q);
-    if (category !== null) setSelectedCategory(category);
-  }, [searchParams]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reflect external URL/back navigation
+    setKeywordInput(keyword);
+  }, [keyword]);
 
   useEffect(() => {
     let active = true;
-    const sequence = ++requestSequence.current;
-    setIsLoading(true);
     Promise.all([
       getCategories(),
-      getProducts({ page: 0, size: 100, keyword: keyword.trim() || undefined }),
+      getProducts({ page: currentPage, size: 12, category: selectedCategory === 'all' ? undefined : selectedCategory, keyword: keyword.trim() || undefined }),
     ])
       .then(([categories, page]) => {
-        if (!active || sequence !== requestSequence.current) return;
-        setCatalogProducts(toUiProducts(page.content, categories));
-        setLoadError(null);
+        if (!active) return;
+        if (selectedCategory !== 'all' && !categories.some((category) => category.slug === selectedCategory && category.isActive)) {
+          setResult({ key: requestKey, products: [], categories, error: 'Không tìm thấy danh mục này.' });
+          return;
+        }
+        setResult({ key: requestKey, products: toUiProducts(page.content, categories), categories, page });
       })
       .catch(() => {
-        if (!active || sequence !== requestSequence.current) return;
-        setCatalogProducts(mockProducts);
-        setLoadError('Không kết nối được dữ liệu mới; đang hiển thị danh mục gần nhất.');
-      })
-      .finally(() => {
-        if (active && sequence === requestSequence.current) setIsLoading(false);
+        if (!active) return;
+        setResult({ key: requestKey, products: [], categories: [], error: 'Không tải được danh mục. Vui lòng thử lại.' });
       });
     return () => {
       active = false;
     };
-  }, [keyword]);
-
-  const filteredProducts = useMemo(() => {
-    let result = catalogProducts.filter((product) => product.status === 'ACTIVE');
-
-    if (selectedCategory !== 'all') {
-      const visualCategory = new Set(['peanut', 'sesame', 'sachi', 'byproduct', 'gac', 'coconut', 'seeds']);
-      result = visualCategory.has(selectedCategory)
-        ? result.filter((product) => product.visualType === selectedCategory)
-        : result.filter((product) => product.categorySlug === selectedCategory || product.categoryId === selectedCategory);
-    }
-
-    if (keyword.trim()) {
-      const kw = keyword.toLowerCase().trim();
-      result = result.filter(
-        (product) =>
-          product.name.toLowerCase().includes(kw) ||
-          product.shortDescription?.toLowerCase().includes(kw) ||
-          product.description?.toLowerCase().includes(kw),
-      );
-    }
-
-    return result;
-  }, [catalogProducts, selectedCategory, keyword]);
+  }, [requestKey, currentPage, selectedCategory, keyword]);
 
   const handleReset = () => {
-    setSelectedCategory('all');
-    setKeyword('');
+    updateQuery({ category: 'all', q: '', page: 0 });
   };
 
   return (
@@ -90,7 +86,7 @@ function ProductsContent() {
           <h2 className="section-title">Danh Mục Đầy Đủ</h2>
         </div>
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {isLoading ? 'Đang tải…' : String(filteredProducts.length) + ' sản phẩm'}
+          {isLoading ? 'Đang tải…' : String(current?.page?.totalElements ?? 0) + ' sản phẩm'}
         </span>
       </div>
 
@@ -102,8 +98,10 @@ function ProductsContent() {
           </svg>
           <input
             type="text"
-            value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
+            value={keywordInput}
+            onChange={(event) => {
+              updateQuery({ q: event.target.value });
+            }}
             placeholder="Tìm theo tên dầu, mè, đậu phộng..."
             aria-label="Tìm kiếm sản phẩm"
           />
@@ -114,44 +112,26 @@ function ProductsContent() {
         <button
           type="button"
           className={'cat-chip-btn ' + (selectedCategory === 'all' ? 'active' : '')}
-          onClick={() => setSelectedCategory('all')}
+          aria-pressed={selectedCategory === 'all'}
+          onClick={() => updateQuery({ category: 'all' })}
         >
           Tất Cả
         </button>
-        <button
-          type="button"
-          className={'cat-chip-btn ' + (selectedCategory === 'peanut' ? 'active' : '')}
-          onClick={() => setSelectedCategory('peanut')}
-        >
-          Dầu Đậu Phộng
-        </button>
-        <button
-          type="button"
-          className={'cat-chip-btn ' + (selectedCategory === 'sesame' ? 'active' : '')}
-          onClick={() => setSelectedCategory('sesame')}
-        >
-          Dầu Mè
-        </button>
-        <button
-          type="button"
-          className={'cat-chip-btn ' + (selectedCategory === 'sachi' ? 'active' : '')}
-          onClick={() => setSelectedCategory('sachi')}
-        >
-          Dầu Hạt Sachi
-        </button>
-        <button
-          type="button"
-          className={'cat-chip-btn ' + (selectedCategory === 'byproduct' ? 'active' : '')}
-          onClick={() => setSelectedCategory('byproduct')}
-        >
-          Phụ Phẩm Sạch
-        </button>
+        {(current?.categories ?? result?.categories ?? []).map((category) => (
+          <button key={category.id} type="button"
+            aria-pressed={selectedCategory === category.slug}
+            className={'cat-chip-btn ' + (selectedCategory === category.slug ? 'active' : '')}
+            onClick={() => updateQuery({ category: category.slug })}>
+            {category.name}
+          </button>
+        ))}
       </div>
 
       {loadError && (
-        <p role="status" style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 12 }}>
-          {loadError}
-        </p>
+        <div role="alert" style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 12 }}>
+          <p>{loadError}</p>
+          <button type="button" className="btn-action-touch fixed-flow" onClick={() => setRetry((value) => value + 1)}>Thử lại</button>
+        </div>
       )}
 
       {filteredProducts.length > 0 ? (
@@ -160,7 +140,7 @@ function ProductsContent() {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
-      ) : (
+      ) : !isLoading && !loadError ? (
         <div className="empty-search-alert" style={{ display: 'block' }}>
           <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
           <h4
@@ -180,6 +160,13 @@ function ProductsContent() {
             Xem Lại Tất Cả
           </button>
         </div>
+      ) : isLoading ? <p role="status">Đang tải sản phẩm…</p> : null}
+      {!!current?.page && current.page.totalPages > 1 && (
+        <nav aria-label="Phân trang sản phẩm" className="flex items-center justify-center gap-4 mt-6">
+          <button type="button" className="cat-chip-btn" disabled={currentPage === 0} onClick={() => updateQuery({ page: currentPage - 1 })}>Trang trước</button>
+          <span>Trang {currentPage + 1} / {current.page.totalPages}</span>
+          <button type="button" className="cat-chip-btn" disabled={currentPage + 1 >= current.page.totalPages} onClick={() => updateQuery({ page: currentPage + 1 })}>Trang sau</button>
+        </nav>
       )}
     </div>
   );

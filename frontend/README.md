@@ -1,148 +1,71 @@
 # HM Naturals — Frontend
 
-## Trạng thái
+Next.js App Router, React, TypeScript và Tailwind CSS. Giữ giao diện HM Naturals do người dùng tạo; catalog dùng API Spring Boot qua proxy cùng origin.
 
-✅ **Foundation đã triển khai** — Next.js App Router + TypeScript + Tailwind CSS v4.
+## Trạng thái plan 08 — 28/09/2026
 
-Đã hoàn thành:
-- Khởi tạo Next.js 16 với App Router, TypeScript strict, Tailwind CSS v4
-- Design tokens chuyển từ prototype `index.html` (palette, typography, spacing)
-- Google Fonts: Be Vietnam Pro (body) + Playfair Display (display)
-- Storefront layout shell: Header + Footer + responsive navigation
-- Routing: tất cả storefront routes với page stubs
-- API contracts: TypeScript types matching backend Spring Boot DTOs
-- API client: typed HTTP client cho `/api/v1/*`
-- Mock data: 8 sản phẩm mẫu (3 categories, FIXED_PRICE + QUOTE)
-- Currency formatting (VND)
-- SEO: metadata, OpenGraph, Vietnamese locale
+Đã triển khai và kiểm chứng chức năng storefront/proxy. Phần Git delivery còn chờ người dùng commit/push; tài liệu trong docs/ giữ local.
 
-## Cấu trúc
+- Trang chủ tải sản phẩm và danh mục từ API; chọn danh mục gọi API tương ứng, có loading/empty/error/retry.
+- /products hỗ trợ category, q, page trong URL. Native History API đồng bộ filter với Next useSearchParams, tránh mất từ khóa khi điều hướng chậm.
+- /categories/[slug] chuyển đến /products?category=<slug>&page=0. Danh mục không tồn tại có thông báo và không hiển thị sản phẩm không liên quan.
+- /products/[slug] hiển thị giá, SKU, quantity min/step theo variant; QUOTE là giá nullable; giá 0 VND vẫn hợp lệ. Không có variant bán được thì khóa nút mua.
+- Upstream product 404 dùng Next not-found boundary và noindex. Do dữ liệu được lấy ở client, HTTP document ban đầu có thể là 200; đây không phải triển khai SSR trả HTTP404 trước khi stream.
+- Proxy Node chỉ chuyển các path/method trong allowlist, giữ Cookie/Set-Cookie/CSRF/Origin/Idempotency-Key và HTTP status; API admin/auth/mutation dùng no-store. Timeout bao gồm đọc body upstream.
+- Ảnh SVG hiện tại là minh họa. Ảnh thật/Supabase và Three.js hoãn theo yêu cầu người dùng; không coi đã kiểm chứng image host production.
 
-```text
-frontend/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx                     # Root layout (fonts, metadata)
-│   │   ├── globals.css                    # Tailwind v4 + design tokens
-│   │   └── (storefront)/                  # Customer-facing routes
-│   │       ├── layout.tsx                 # Header + Footer shell
-│   │       ├── page.tsx                   # / — Trang chủ
-│   │       ├── products/
-│   │       │   ├── page.tsx               # /products — Danh sách sản phẩm
-│   │       │   └── [slug]/page.tsx        # /products/:slug — Chi tiết sản phẩm
-│   │       ├── knowledge/page.tsx         # /knowledge — Góc kiến thức
-│   │       ├── about/page.tsx             # /about — Về chúng tôi
-│   │       └── contact/page.tsx           # /contact — Liên hệ
-│   ├── components/
-│   │   └── layout/
-│   │       ├── Header.tsx                 # Sticky navbar + brand + nav links
-│   │       └── Footer.tsx                 # 3-column footer + copyright
-│   ├── config/
-│   │   └── site.ts                        # Site name, contact, nav links
-│   └── lib/
-│       ├── api/
-│       │   ├── client.ts                  # Typed fetch client → Spring Boot
-│       │   └── contracts/types.ts         # TypeScript ↔ Java DTO contract
-│       ├── format/
-│       │   └── currency.ts                # VND formatting utilities
-│       └── mock-data.ts                   # Sample products for dev
-├── .env.example                            # Server-only proxy environment template
-├── package.json
-├── tsconfig.json
-└── next.config.ts
-```
-
-## Routes
-
-| Route | Màn hình | Trạng thái |
-|-------|----------|------------|
-| `/` | Trang chủ | Stub ✅ |
-| `/products` | Danh sách sản phẩm | API-first + mock fallback ✅ |
-| `/products/[slug]` | Chi tiết sản phẩm | API-first + mock fallback ✅ |
-| `/knowledge` | Góc kiến thức | Stub ✅ |
-| `/about` | Về chúng tôi | Stub ✅ |
-| `/contact` | Liên hệ | Stub ✅ |
-
-## Chạy dev
+## Chạy local
 
 ```bash
 cd frontend
+cp .env.example .env.local
 npm run dev
 ```
 
-Mở `http://localhost:3000`.
+Nếu .env.local đã có cấu hình, giữ file hiện tại thay vì ghi đè. Backend chạy bằng Gradle; xem backend/README.md.
 
-## API Backend
+Các biến server-only:
+- BACKEND_API_ORIGIN: mặc định http://localhost:8080.
+- PROXY_TIMEOUT_MS: mặc định 10000, bao phủ header và body response.
+- PROXY_MAX_BODY_BYTES: mặc định 1048576.
 
-Browser chỉ gọi same-origin /api/v1/*. Next.js proxy đọc BACKEND_API_ORIGIN ở server để chuyển request tới Spring Boot, đồng thời giữ cookie session, CSRF và Idempotency-Key.
+Browser chỉ gọi /api/v1. Không đặt backend origin hoặc secret trong NEXT_PUBLIC_*.
 
-Chạy:
+## Kiểm chứng
 
-    cp .env.example .env.local
-    npm run dev
+```bash
+npm test
+npm run lint
+npm run typecheck
+npm run build
+npm run test:e2e -- --workers=2
+```
 
-Đặt BACKEND_API_ORIGIN trong .env.local, mặc định là http://localhost:8080.
+Ngày 28/09/2026: 55 Vitest tests, lint, typecheck và production build đạt; 20 Playwright tests desktop/mobile đạt. E2E dùng fixture API, không ghi PostgreSQL. Playwright tự build và chạy server riêng tại port3100; PLAYWRIGHT_BASE_URL dùng server đã chạy.
 
-Catalog giữ mock data làm fallback khi backend chưa chạy. Checkout và voucher chỉ gửi request khi backend sẵn sàng; receipt đọc OrderReceipt vừa nhận trong session hiện tại.
+Smoke read-only qua Next đến backend thật:
+```bash
+# Cần backend và frontend đang chạy; mặc định frontend port3100.
+node scripts/proxy-smoke.mjs
+# Hoặc:
+SMOKE_FRONTEND_ORIGIN=http://localhost:3000 node scripts/proxy-smoke.mjs
+```
 
-## Trạng thái triển khai
+Smoke kiểm tra CSRF200, JSESSIONID và reuse session, admin chưa đăng nhập401 JSON/no-store, categories/products200. Không in token/cookie và không tạo đơn. Không thay thế kiểm thử đăng nhập/quản trị của plan10.
 
-### Đã hoàn thành (Screens & Components hoàn chỉnh) ✅
+## Cấu trúc chính
 
-1. **Cart System & Slide-over Drawers**:
-   - `CartContext` (`localStorage` persistence, tính tạm tính, freeship progress tracker, cập nhật số lượng)
-   - `CartDrawer` (slide-over trượt từ phải sang với nút tăng/giảm, xóa, tính phí ship và nút Đặt Hàng)
-   - `MobileNavDrawer` (thực đơn điều hướng mobile với hotline xưởng & liên hệ Zalo)
+- src/app/(storefront)/: giao diện khách hàng; categories/[slug] là alias đến listing.
+- src/components/product/: card và hình minh họa.
+- src/lib/api/client.ts, contracts/types.ts: API client và kiểu DTO.
+- src/app/api/v1/[...path]/: proxy và test.
+- src/app/(storefront)/catalog.test.tsx, e2e/storefront.spec.ts: kiểm chứng catalog/UI.
+- src/config/site.ts: thông tin thương hiệu/liên hệ do người dùng quản lý.
 
-2. **HomeScreen (`/`)**:
-   - Hero Showcase: Giới thiệu Dầu Phộng Ép Lạnh Cối Đá, badge Vụ Mùa 2026, 3 chỉ số niềm tin (100% Cơ học, Lọc 48h vải mộc, Chắn UV)
-   - Category Rail: Lọc tương tác danh mục thời gian thực
-   - 2–4 Cột Product Grid: Hiển thị sản phẩm với hình ảnh SVG chai dầu thủ công
-   - 3 Nguyên Tắc Sản Xuất: Ép cơ học chậm, lọc vải mộc 48h, bảo quản chai thủy tinh tối màu
-   - Brand Story Banner: Nền xanh rừng đậm, tôn vinh hạt nông sản bản địa
-   - Góc Kiến Thức: 3 bài viết cẩm nang nổi bật với thời gian đọc & điểm cốt lõi
-   - Trust Pillars: 4 cam kết chất lượng
+## Ngoài phạm vi nghiệm thu plan 08
 
-3. **ProductListScreen (`/products`)**:
-   - Thanh tìm kiếm trực tiếp (live search debounced) theo tên dầu, mè, đậu phộng...
-   - Bộ lọc danh mục (Tất cả, Dầu thực vật, Hạt bản địa, Phụ phẩm sạch)
-   - Sắp xếp: Mặc định, Giá tăng dần, Giá giảm dần
-   - Trạng thái rỗng (empty search alert) với nút "Xem lại tất cả"
+Repo đã có UI/cart/checkout/receipt đang được ghép API. Các phần này thuộc plan09 và phải được nghiệm thu riêng. Pending checkout lưu {key,payload}, có memory fallback khi sessionStorage bị chặn; memory không sống qua reload. Backend chưa có public GET order.
 
-4. **ProductDetailScreen (`/products/[slug]`)**:
-   - Gallery ảnh chai dầu chuẩn tỉ lệ 4:3 với nhãn minh họa
-   - Bộ chọn quy cách (dung tích 250ml, 500ml, 1000ml) với cập nhật giá tức thì
-   - Bộ điều khiển số lượng (+ / -)
-   - Bảng thông số kỹ thuật (Nguồn giống, Phương pháp ép, Quy cách đóng gói, Hạn dùng)
-   - Thêm vào giỏ hàng kích hoạt CartDrawer
-   - **Sticky Bottom Purchase Bar**: Thanh đặt mua dính đáy màn hình trên thiết bị di động
-   - Đăng ký báo giá sỉ cho sản phẩm QUOTE (Dầu Sachi, Bã lạc, Bã mè)
-   - Sản phẩm liên quan cùng danh mục
+Knowledge/about/contact/tracking chứa nội dung UI local; không coi là tính năng quản trị hay tracking trực tiếp từ backend. Bước tiếp theo: nghiệm thu plan09, rồi plan10 admin.
 
-5. **Order & Checkout Screen (`/checkout`)**:
-   - Form thông tin khách hàng: Họ tên, Số điện thoại, Địa chỉ giao hàng, Ghi chú
-   - Hệ thống mã giảm giá (Voucher): Hỗ trợ mã `HMN10` (-10%) và `FREESHIP`
-   - Phương thức thanh toán: COD (Tiền mặt khi nhận hàng) & Chuyển khoản VietQR
-   - Tóm tắt đơn hàng; phí giao nhận được shop xác nhận qua điện thoại
-
-6. **Order Receipt & Status Screen (`/orders/[code]`)**:
-   - Thông báo đặt hàng thành công + Nút sao chép mã đơn 1-chạm
-   - **Timeline Stepper 5 bước theo dõi đơn**: Tiếp nhận -> Xác nhận -> Ép dầu & đóng chai -> Đang giao -> Hoàn tất
-   - Tóm tắt sản phẩm đã đặt và địa chỉ nhận hàng
-   - Hotline hỗ trợ trực tiếp xưởng
-
-7. **Knowledge Hub (`/knowledge` & `/knowledge/[slug]`)**:
-   - Danh sách bài viết cẩm nang phân theo chủ đề
-   - Trang đọc bài viết hoàn chỉnh với hộp "Điểm Cốt Lõi Cần Nhớ" và khối giới thiệu sản phẩm liên quan
-
-8. **Tra cứu đơn hàng (`/tracking`)**, **Về chúng tôi (`/about`)**, **Liên hệ (`/contact`)**:
-   - Trang tra cứu nhanh trạng thái đơn hàng bằng mã đơn
-   - Trang giới thiệu câu chuyện thương hiệu và 3 giá trị cốt lõi
-   - Trang liên hệ với kênh Zalo, hotline, thời gian tiếp khách tại xưởng và form gửi tin nhắn
-
-## Bước tiếp theo
-
-1. Admin Dashboard (/admin):
-   - Đăng nhập admin với cookie session
-   - Quản lý danh mục, sản phẩm, quy cách
-   - Quản lý trạng thái đơn hàng và voucher
+Cần bổ sung sau: ảnh sản phẩm thật và host Supabase nếu dùng, xác nhận nội dung thương hiệu/liên hệ trước khi public, thông tin deploy ở plan13.
