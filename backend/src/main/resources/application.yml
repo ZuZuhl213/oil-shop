@@ -39,3 +39,15 @@ management:
       group:
         readiness:
           include: readinessState,db
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    custom-css: /swagger-custom.css
+    operations-sorter: method
+    tags-sorter: alpha
+    doc-expansion: none
+    filter: true
+    try-it-out-enabled: true
+  api-docs:
+    path: /v3/api-docs
