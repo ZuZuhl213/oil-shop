@@ -66,25 +66,25 @@ export function MobileNavDrawer() {
           </Link>
 
           <Link
+            href="/products"
+            onClick={closeNav}
+            className={`drawer-nav-row ${pathname.startsWith('/products') ? 'active' : ''}`}
+          >
+            <div className="drawer-row-left">
+              <span className="drawer-row-icon">🏺</span>
+              <span className="drawer-row-label">Sản Phẩm</span>
+            </div>
+            <span className="drawer-row-arrow">›</span>
+          </Link>
+
+          <Link
             href="/about"
             onClick={closeNav}
             className={`drawer-nav-row ${pathname === '/about' ? 'active' : ''}`}
           >
             <div className="drawer-row-left">
               <span className="drawer-row-icon">🌿</span>
-              <span className="drawer-row-label">Về HM Naturals</span>
-            </div>
-            <span className="drawer-row-arrow">›</span>
-          </Link>
-
-          <Link
-            href="/products"
-            onClick={closeNav}
-            className={`drawer-nav-row ${pathname.startsWith('/products') && pathname !== '/products/dau-sachi-ep-song' ? 'active' : ''}`}
-          >
-            <div className="drawer-row-left">
-              <span className="drawer-row-icon">🏺</span>
-              <span className="drawer-row-label">Sản Phẩm</span>
+              <span className="drawer-row-label">Câu Chuyện</span>
             </div>
             <span className="drawer-row-arrow">›</span>
           </Link>
@@ -98,7 +98,6 @@ export function MobileNavDrawer() {
               <span className="drawer-row-icon">📖</span>
               <span className="drawer-row-label">Góc Kiến Thức</span>
             </div>
-            <span className="drawer-row-badge">Mới</span>
             <span className="drawer-row-arrow">›</span>
           </Link>
 

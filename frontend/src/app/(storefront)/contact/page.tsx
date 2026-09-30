@@ -4,7 +4,7 @@ import ContactForm from '@/components/contact/ContactForm';
 
 export const metadata: Metadata = {
   title: 'Liên Hệ & Hỗ Trợ Đặt Hàng — HM Naturals',
-  description: 'Liên hệ xưởng ép dầu lạc, mè đen nguyên bản HM Naturals tại Nam Đàn, Nghệ An. Hotline tư vấn, Zalo xưởng trưởng và gửi lời nhắn đặt hàng.',
+  description: 'Liên hệ xưởng ép dầu lạc, mè đen nguyên bản HM Naturals tại Sơn Nam, Hưng Yên. Hotline tư vấn, Zalo xưởng trưởng và gửi lời nhắn đặt hàng.',
 };
 
 export default function ContactPage() {

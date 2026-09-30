@@ -28,11 +28,26 @@ export default function KnowledgePage() {
     <div className="site-container py-4 pb-20">
       {/* Header */}
       <div className="knowledge-listing-head">
-        <span className="section-eyebrow">Cẩm nang ẩm thực &amp; mẹo vặt</span>
+        <span className="section-eyebrow">Cẩm nang ẩm thực &amp; cơ sở khoa học</span>
         <h2 className="section-title">Góc Kiến Thức</h2>
         <p style={{ fontSize: 13.5, color: 'var(--text-muted)', margin: '4px 0 0', lineHeight: 1.5 }}>
-          Kinh nghiệm chọn dầu, mẹo nấu nướng thực tế và cách bảo quản nguyên bản.
+          Tổng hợp kiến thức dinh dưỡng, cơ sở khoa học từ WHO, Harvard và kinh nghiệm sử dụng dầu nông sản nguyên bản.
         </p>
+      </div>
+
+      {/* Scientific & Dietary Disclaimer */}
+      <div className="knowledge-scientific-disclaimer" style={{ margin: '14px 0 16px' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+          <span style={{ fontSize: 18, lineHeight: 1.2 }}>📋</span>
+          <div>
+            <strong style={{ display: 'block', fontSize: 13, color: 'var(--forest-green)', marginBottom: 2 }}>
+              Cơ sở khoa học &amp; Định hướng dinh dưỡng
+            </strong>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.55, margin: 0 }}>
+              Các nội dung được tổng hợp đối chiếu theo khuyến nghị của <strong>WHO</strong>, <strong>Harvard T.H. Chan</strong> và <strong>AHA</strong> về chất béo không bão hòa và chế độ ăn cân bằng. Thông tin mang tính chất phổ biến kiến thức, không thay thế chẩn đoán hay phác đồ điều trị y khoa.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -93,17 +108,18 @@ export default function KnowledgePage() {
       {filteredArticles.length > 0 ? (
         <div className="knowledge-featured-list" style={{ marginTop: 14 }}>
           {filteredArticles.map((art) => (
-            <Link
+            <article
               key={art.id}
-              href={`/knowledge/${art.slug}`}
               className="knowledge-card"
             >
-              <div className="knowledge-card-media">
+              <Link href={`/knowledge/${art.slug}`} className="knowledge-card-media block">
                 <ProductBottleImage type={art.thumbnailType ?? 'peanut'} alt={art.title} />
                 <span className="knowledge-cat-badge">{art.categoryName}</span>
-              </div>
+              </Link>
               <div className="knowledge-card-body">
-                <h4 className="knowledge-card-title">{art.title}</h4>
+                <Link href={`/knowledge/${art.slug}`} className="no-underline">
+                  <h4 className="knowledge-card-title">{art.title}</h4>
+                </Link>
                 <p className="knowledge-card-excerpt">{art.excerpt}</p>
 
                 <div className="article-takeaway-box" style={{ margin: '8px 0 0', padding: '10px 12px' }}>
@@ -113,12 +129,34 @@ export default function KnowledgePage() {
                   </div>
                 </div>
 
+                {art.sources && art.sources.length > 0 && (
+                  <div style={{ marginTop: 8, fontSize: 11.5, color: 'var(--text-muted)' }}>
+                    <span>Tham khảo: </span>
+                    {art.sources.map((s, idx, arr) => (
+                      <span key={idx}>
+                        <a
+                          href={s.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline"
+                          style={{ color: 'var(--peanut-bark)', fontWeight: 500 }}
+                        >
+                          {s.name} ↗
+                        </a>
+                        {idx < arr.length - 1 ? ', ' : ''}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
                 <div className="knowledge-card-meta">
                   <span>⏱ {art.readTime}</span>
-                  <span>Đọc tiếp →</span>
+                  <Link href={`/knowledge/${art.slug}`} style={{ color: 'var(--peanut-bark)', fontWeight: 600 }}>
+                    Đọc tiếp →
+                  </Link>
                 </div>
               </div>
-            </Link>
+            </article>
           ))}
         </div>
       ) : (

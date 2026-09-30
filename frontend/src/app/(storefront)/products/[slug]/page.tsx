@@ -13,6 +13,7 @@ import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { useCart } from '@/context/CartContext';
 import { ProductCard } from '@/components/product/ProductCard';
+import Product360Modal from '@/components/product/Product360Modal';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -33,7 +34,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
   const [quantity, setQuantity] = useState<number>(1);
   const [show360Modal, setShow360Modal] = useState<boolean>(false);
-  const [bottle360Angle, setBottle360Angle] = useState<number>(0);
 
   useEffect(() => {
     let active = true;
@@ -309,60 +309,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
 
       {/* ── 360 View Interactive Modal ── */}
       {show360Modal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-dark-cocoa/60 backdrop-blur-xs"
-          onClick={() => setShow360Modal(false)}
-        >
-          <div
-            className="bg-white rounded-3xl p-6 max-w-md w-full border border-soft-sand shadow-2xl relative"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between pb-3 border-b border-soft-sand mb-4">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">🔄</span>
-                <h3 className="font-display font-bold text-base text-forest-green">
-                  Mô Phỏng 360° Chai Dầu HM NATURALS
-                </h3>
-              </div>
-              <button
-                type="button"
-                className="w-8 h-8 rounded-full border border-soft-sand flex items-center justify-center text-text-muted hover:text-dark-cocoa cursor-pointer"
-                onClick={() => setShow360Modal(false)}
-                aria-label="Đóng"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="py-4 text-center">
-              <div
-                className="aspect-square max-w-[240px] mx-auto bg-warm-cream/50 rounded-2xl flex items-center justify-center relative overflow-hidden transition-transform duration-100"
-                style={{ transform: `rotateY(${bottle360Angle}deg)` }}
-              >
-                <ProductBottleImage type={product.visualType} alt={product.name} />
-              </div>
-
-              {/* Angle slider */}
-              <div className="mt-6 space-y-2">
-                <label className="text-xs font-semibold text-text-muted block">
-                  Kéo để xoay 360 độ: {bottle360Angle}°
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="360"
-                  value={bottle360Angle}
-                  onChange={(e) => setBottle360Angle(Number(e.target.value))}
-                  className="w-full accent-forest-green"
-                />
-              </div>
-
-              <p className="text-xs text-text-muted mt-3">
-                Chai thủy tinh hổ phách chắn sáng 90%, nắp nút bần gỗ sồi chống tràn và nhãn giấy mỹ thuật mộc.
-              </p>
-            </div>
-          </div>
-        </div>
+        <Product360Modal productName={product.name} visualType={product.visualType} onClose={() => setShow360Modal(false)} />
       )}
     </div>
   );

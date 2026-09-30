@@ -53,7 +53,7 @@ export function ProductBottleImage({ type, className = 'w-full h-full object-con
             ĐẬU PHỘNG
           </text>
           <text x="300" y="316" fontFamily="sans-serif" fontSize="7" fill="#6E7448" textAnchor="middle">
-            ÉP LẠNH THÔ
+            ÉP CƠ HỌC
           </text>
         </svg>
       );
@@ -227,7 +227,7 @@ export function ProductBottleImage({ type, className = 'w-full h-full object-con
             DẦU DỪA
           </text>
           <text x="300" y="316" fontFamily="sans-serif" fontSize="6.5" fill="#474E2B" textAnchor="middle">
-            ÉP LẠNH NGUYÊN CHẤT
+            ÉP CƠ HỌC
           </text>
         </svg>
       );

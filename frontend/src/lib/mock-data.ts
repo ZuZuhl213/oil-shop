@@ -271,6 +271,11 @@ export const mockProducts: ExtendedProductDto[] = [
 
 // ─── Knowledge Articles ──────────────────────────────────────────────
 
+export interface ScientificSource {
+  name: string;
+  url: string;
+}
+
 export interface KnowledgeArticleDto {
   id: string;
   slug: string;
@@ -282,12 +287,135 @@ export interface KnowledgeArticleDto {
   excerpt: string;
   takeaway: string;
   bodyHtml: string;
+  sources?: ScientificSource[];
+  disclaimer?: string;
   relatedProductSlug?: string;
   featured?: boolean;
   thumbnailType?: 'peanut' | 'sesame' | 'sachi' | 'gac' | 'coconut' | 'byproduct' | 'seeds';
 }
 
 export const mockKnowledgeArticles: KnowledgeArticleDto[] = [
+  {
+    id: 'unsaturated-fats-guide',
+    slug: 'unsaturated-fats-guide',
+    title: 'Chất béo không bão hòa là gì? Phân biệt chất béo không bão hòa đơn và đa',
+    categoryKey: 'oil-knowledge',
+    categoryName: 'Kiến thức dinh dưỡng chất béo',
+    date: 'Cập nhật 2026',
+    readTime: '4 phút đọc',
+    excerpt: 'Tìm hiểu vai trò của chất béo không bão hòa đơn (MUFA) và đa (PUFA), cùng nguyên tắc thay thế một phần chất béo bão hòa trong chế độ ăn cân bằng theo khuyến nghị y khoa.',
+    takeaway: 'Tổ chức Y tế Thế giới (WHO) và Hiệp hội Tim mạch Hoa Kỳ (AHA) khuyến nghị thay thế chất béo bão hòa bằng chất béo không bão hòa (MUFA và PUFA) trong chế độ ăn uống tổng thể lành mạnh.',
+    sources: [
+      { name: 'WHO Guidelines on Fats and Carbohydrates (2023)', url: 'https://www.who.int/news/item/17-07-2023-who-updates-guidelines-on-fats-and-carbohydrates' },
+      { name: 'Harvard T.H. Chan School of Public Health - Types of Fat', url: 'https://nutritionsource.hsph.harvard.edu/what-should-you-eat/fats-and-cholesterol/types-of-fat/' },
+    ],
+    disclaimer: 'Lưu ý khoa học: Tài liệu này cung cấp kiến thức dinh dưỡng tổng quát, không chứng minh hay bảo đảm hàm lượng dưỡng chất hoặc công dụng y tế của bất kỳ sản phẩm cụ thể nào của HM NATURALS.',
+    bodyHtml: `
+      <p>Chất béo là một trong ba nhóm đa lượng thiết yếu cấu thành năng lượng cho cơ thể cùng với carbohydrate và protein. Tuy nhiên, không phải mọi loại chất béo đều có cấu trúc sinh hóa và tác động chuyển hóa giống nhau.</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">1. Chất béo không bão hòa đơn (MUFA) và đa (PUFA)</h3>
+      <p>Theo phân tích từ <b>Harvard Nutrition Source</b>, chất béo không bão hòa có các liên kết đôi trong chuỗi carbon, thường ở dạng lỏng ở nhiệt độ phòng. Chúng được chia làm hai nhóm chính:</p>
+      <ul class="list-disc pl-5 space-y-1.5 text-sm my-3">
+        <li><b>Chất béo không bão hòa đơn (Monounsaturated Fatty Acids - MUFA):</b> Chỉ có một liên kết đôi. Axit oleic trong dầu lạc, dầu ô liu và quả bơ là ví dụ tiêu biểu.</li>
+        <li><b>Chất béo không bão hòa đa (Polyunsaturated Fatty Acids - PUFA):</b> Có từ hai liên kết đôi trở lên, bao gồm các axit béo thiết yếu cơ thể không tự tổng hợp được như axit linoleic (Omega-6) và axit alpha-linolenic (Omega-3).</li>
+      </ul>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">2. Nguyên tắc thay thế trong chế độ ăn cân bằng</h3>
+      <p>Khuyến nghị năm 2023 của <b>Tổ chức Y tế Thế giới (WHO)</b> nhấn mạnh: ưu tiên thay thế một phần chất béo bão hòa (thường có nhiều trong mỡ động vật, bơ, dầu cọ) bằng chất béo không bão hòa có nguồn gốc từ thực vật trong khẩu phần ăn hàng ngày.</p>
+    `,
+    relatedProductSlug: 'dau-lac-nguyen-chat',
+    thumbnailType: 'peanut',
+    featured: true,
+  },
+  {
+    id: 'peanut-oil-diet-balance',
+    slug: 'peanut-oil-diet-balance',
+    title: 'Dầu lạc trong chế độ ăn cân bằng: hiểu đúng về thành phần chất béo',
+    categoryKey: 'oil-knowledge',
+    categoryName: 'Khoa học thực phẩm',
+    date: 'Cập nhật 2026',
+    readTime: '5 phút đọc',
+    excerpt: 'Phân tích cấu trúc axit béo tự nhiên trong dầu hạt họ đậu và cách kết hợp dầu thực vật vào thực đơn gia đình một cách điều độ, khoa học.',
+    takeaway: 'Dầu lạc tự nhiên chứa phần lớn là axit béo không bão hòa đơn (axit oleic) cùng một phần chất béo không bão hòa đa. Việc sử dụng dầu cần kết hợp trong tổng thể khẩu phần ăn đa dạng, hợp lý.',
+    sources: [
+      { name: 'Harvard T.H. Chan School of Public Health - Fats and Cholesterol', url: 'https://nutritionsource.hsph.harvard.edu/what-should-you-eat/fats-and-cholesterol/types-of-fat/' },
+      { name: 'American Heart Association - Healthy Cooking Oils', url: 'https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/fats/healthy-cooking-oils' },
+    ],
+    disclaimer: 'Lưu ý khoa học: Quy trình ép nhiệt là phương pháp cơ học truyền thống giúp tạo hương vị đặc trưng, không có nghĩa là làm dầu tự động giàu dinh dưỡng hơn hay có tác dụng chữa bệnh.',
+    bodyHtml: `
+      <p>Dầu lạc (dầu đậu phộng) là loại dầu thực vật quen thuộc trong văn hóa ẩm thực truyền thống của người Việt, đặc biệt ở các vùng duyên hải miền Trung nơi đất cát phù sa trù phú.</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">1. Thành phần axit béo tự nhiên trong dầu lạc</h3>
+      <p>Theo dữ liệu dinh dưỡng từ <b>American Heart Association (AHA)</b>, dầu đậu phộng chứa khoảng 46–50% axit béo không bão hòa đơn (MUFA), khoảng 30–33% axit béo không bão hòa đa (PUFA), và khoảng 17–20% axit béo bão hòa. Tỉ lệ này giúp dầu lạc có tính bền nhiệt tương đối tốt hơn so với các loại dầu giàu PUFA không bền khác.</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">2. Hiểu đúng về quy trình ép nhiệt</h3>
+      <p>HM NATURALS sử dụng phương pháp ép nhiệt cơ học truyền thống. Quá trình này giúp giải phóng hương thơm đặc trưng của hạt đậu phộng sẻ. Cần lưu ý rõ ràng: <i>ép nhiệt không làm dầu tự động trở nên bổ dưỡng hơn hay tạo ra đặc tính chữa bệnh</i>. Giá trị thực sự của dầu lạc nằm ở hương vị mộc mạc và sự nguyên chất không pha tạp.</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">3. Sử dụng điều độ trong bữa ăn</h3>
+      <p>Dù là dầu thực vật, mỗi gam chất béo vẫn cung cấp khoảng 9 kcal năng lượng. Do đó, nguyên tắc quan trọng nhất vẫn là sử dụng với lượng vừa phải, kết hợp đa dạng các nguồn thực phẩm tươi sống trong mỗi bữa ăn.</p>
+    `,
+    relatedProductSlug: 'dau-lac-nguyen-chat',
+    thumbnailType: 'peanut',
+    featured: true,
+  },
+  {
+    id: 'saturated-vs-unsaturated-guide',
+    slug: 'saturated-vs-unsaturated-guide',
+    title: 'Phân biệt chất béo bão hòa và không bão hòa khi lựa chọn dầu ăn',
+    categoryKey: 'kitchen-tips',
+    categoryName: 'Mẹo tiêu dùng',
+    date: 'Cập nhật 2026',
+    readTime: '4 phút đọc',
+    excerpt: 'Cách nhận biết các nhóm chất béo trong thực phẩm hàng ngày và nguyên lý thay thế chất béo bão hòa bằng dầu thực vật chưa bão hòa theo khuyến nghị AHA 2026.',
+    takeaway: 'Theo khuyến nghị chế độ ăn uống 2026 của AHA, giảm tiêu thụ chất béo bão hòa từ mỡ động vật và thay thế bằng các nguồn chất béo không bão hòa từ thực vật là một phần quan trọng của lối sống lành mạnh.',
+    sources: [
+      { name: 'AHA 2026 Dietary Guidance to Improve Cardiovascular Health', url: 'https://professional.heart.org/en/science-news/2026-dietary-guidance-to-improve-cardiovascular-health/top-things-to-know' },
+      { name: 'WHO Guidelines on Dietary Fats (2023)', url: 'https://www.who.int/news/item/17-07-2023-who-updates-guidelines-on-fats-and-carbohydrates' },
+    ],
+    disclaimer: 'Lưu ý khoa học: Thông tin mang tính giáo dục tiêu dùng, không thay thế cho tư vấn y khoa cá nhân hóa từ chuyên gia dinh dưỡng hoặc bác sĩ.',
+    bodyHtml: `
+      <p>Khi đứng trước các lựa chọn chất béo trong gian bếp, người tiêu dùng thường bối rối giữa chất béo bão hòa (saturated fat) và chất béo không bão hòa (unsaturated fat).</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">1. Đặc điểm phân biệt đơn giản</h3>
+      <ul class="list-disc pl-5 space-y-1.5 text-sm my-3">
+        <li><b>Chất béo bão hòa:</b> Không có liên kết đôi trong chuỗi axit béo, thường đông đặc ở nhiệt độ phòng. Phổ biến trong mỡ heo, mỡ bò, bơ động vật, dầu dừa và dầu cọ.</li>
+        <li><b>Chất béo không bão hòa:</b> Có ít nhất một liên kết đôi, thường ở thể lỏng ở nhiệt độ phòng. Phổ biến trong dầu lạc, dầu mè, dầu hạt sachi, các loại hạt và cá béo.</li>
+      </ul>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">2. Khuyến nghị dinh dưỡng cập nhật năm 2026 của AHA</h3>
+      <p>Tài liệu hướng dẫn dinh dưỡng 2026 của <b>American Heart Association</b> nhấn mạnh rằng việc giảm chất béo bão hòa sẽ mang lại lợi ích rõ rệt nhất khi được thay thế bằng chất béo không bão hòa, chứ không phải thay thế bằng carbohydrate tinh chế hoặc đường bột.</p>
+    `,
+    relatedProductSlug: 'dau-vung-ep-lanh',
+    thumbnailType: 'sesame',
+    featured: true,
+  },
+  {
+    id: 'cooking-oil-usage-guide',
+    slug: 'cooking-oil-usage-guide',
+    title: 'Cách lựa chọn và sử dụng dầu thực vật phù hợp trong nấu nướng',
+    categoryKey: 'recipes',
+    categoryName: 'Thực hành nhà bếp',
+    date: 'Cập nhật 2026',
+    readTime: '5 phút đọc',
+    excerpt: 'Hướng dẫn thực tế về nhiệt độ nấu ăn, cách bảo quản và nguyên tắc phối hợp các loại dầu hạt thực vật cho từng phương thức chế biến gia đình.',
+    takeaway: 'Mỗi loại dầu thực vật có đặc tính mùi vị và ngưỡng nhiệt sử dụng khác nhau. Không đun dầu quá điểm bốc khói và không tái sử dụng dầu nhiều lần là nguyên tắc cốt lõi bảo vệ chất lượng món ăn.',
+    sources: [
+      { name: 'American Heart Association - Healthy Cooking Oils', url: 'https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/fats/healthy-cooking-oils' },
+      { name: 'Harvard Nutrition Source - Cooking with Healthy Oils', url: 'https://nutritionsource.hsph.harvard.edu/what-should-you-eat/fats-and-cholesterol/types-of-fat/' },
+    ],
+    disclaimer: 'Lưu ý khoa học: Tài liệu giáo dục thực hành nấu ăn lành mạnh, bảo tồn hương vị món ăn mà không làm biến đổi dầu ăn.',
+    bodyHtml: `
+      <p>Trong căn bếp gia đình, việc sử dụng đúng loại dầu cho từng kiểu chế biến vừa giúp tôn lên hương vị món ăn, vừa hạn chế tối đa quá trình oxy hóa chất béo do nhiệt độ.</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">1. Dầu lạc: Thích hợp xào nấu lửa vừa</h3>
+      <p>Nhờ cấu trúc giàu axit béo không bão hòa đơn (MUFA), dầu lạc có độ bền nhiệt khá tốt, thích hợp cho các món chiên xào gia đình trên lửa vừa, phi hành tỏi và ướp thịt nướng dậy mùi bùi béo tự nhiên.</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">2. Dầu mè đen: Thơm đượm cho món ướp và nêm sau nấu</h3>
+      <p>Dầu mè đen rang mộc có hương thơm rất đậm đà. Cách dùng tối ưu là thêm vào cuối quá trình nấu nướng (như nhỏ vài giọt vào bát canh, tô phở, đĩa mì xào) hoặc ướp thớ thịt trước khi nướng.</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">3. Dầu Sachi: Ưu tiên dùng trực tiếp</h3>
+      <p>Dầu hạt Sachi chứa nhiều axit béo không bão hòa đa (PUFA), rất nhạy cảm với nhiệt độ cao. Vì vậy, loại dầu này phù hợp nhất để rưới trực tiếp lên salad, trộn vào súp ấm hoặc cháo ăn dặm của trẻ nhỏ.</p>
+      <h3 class="text-base font-bold text-forest-green mt-4 mb-2">4. Quy tắc an toàn bắt buộc</h3>
+      <ul class="list-disc pl-5 space-y-1.5 text-sm my-3">
+        <li>Không đun dầu đến mức bốc khói xanh dày đặc.</li>
+        <li>Không tái sử dụng dầu đã qua chiên rán nhiều lần.</li>
+        <li>Bảo quản chai dầu ở nơi thoáng mát, tránh ánh sáng mặt trời trực tiếp.</li>
+      </ul>
+    `,
+    relatedProductSlug: 'dau-sachi-ep-song',
+    thumbnailType: 'sachi',
+    featured: true,
+  },
   {
     id: '1',
     slug: 'smoke-point-guide',

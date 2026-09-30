@@ -43,7 +43,7 @@ export function Header() {
       <div className="desktop-top-bar" role="region" aria-label="Thông báo xưởng">
         <div className="desktop-top-bar-inner">
           <span>🌿 <b>HM NATURALS:</b> Dầu thực vật ép cơ học nguyên bản từ nông sản bản địa Việt Nam</span>
-          <span>Cơ sở sản xuất &amp; ép dầu tự nhiên Nam Đàn, Nghệ An</span>
+          <span>Cơ sở sản xuất &amp; ép dầu tự nhiên Sơn Nam, Hưng Yên</span>
         </div>
       </div>
 
@@ -74,18 +74,18 @@ export function Header() {
               </li>
               <li>
                 <Link
-                  href="/about"
-                  className={`desktop-nav-link ${pathname === '/about' ? 'active' : ''}`}
+                  href="/products"
+                  className={`desktop-nav-link ${pathname.startsWith('/products') ? 'active' : ''}`}
                 >
-                  Về HM Naturals
+                  Sản Phẩm
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/products"
-                  className={`desktop-nav-link ${pathname.startsWith('/products') && pathname !== '/products/dau-sachi-ep-song' ? 'active' : ''}`}
+                  href="/about"
+                  className={`desktop-nav-link ${pathname === '/about' ? 'active' : ''}`}
                 >
-                  Sản Phẩm
+                  Câu Chuyện
                 </Link>
               </li>
               <li>
@@ -94,22 +94,6 @@ export function Header() {
                   className={`desktop-nav-link ${pathname.startsWith('/knowledge') ? 'active' : ''}`}
                 >
                   Góc Kiến Thức
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/products/dau-sachi-ep-song"
-                  className={`desktop-nav-link ${pathname === '/products/dau-sachi-ep-song' ? 'active' : ''}`}
-                >
-                  Báo Giá Sỉ
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/tracking"
-                  className={`desktop-nav-link ${pathname === '/tracking' ? 'active' : ''}`}
-                >
-                  Tra Cứu Đơn
                 </Link>
               </li>
               <li>
@@ -185,7 +169,7 @@ export function Header() {
               href="/products/dau-lac-nguyen-chat"
               className="desktop-cta-btn no-underline"
             >
-              Gửi Yêu Cầu Mua
+              Đặt hàng ngay
             </Link>
 
             {/* Menu Trigger */}

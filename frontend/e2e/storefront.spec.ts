@@ -40,6 +40,93 @@ async function fillCustomer(page: Page) {
   await page.getByPlaceholder('Ví dụ: 0912 345 678').fill('0912345678');
 }
 
+test('3D viewer rotates, resets and releases the modal with keyboard focus restored', async ({ page, isMobile }, testInfo) => {
+  await fixtureApi(page);
+  await page.goto('/products/dau-lac-api');
+  const trigger = page.getByRole('button', { name: 'Xem 360 độ chai dầu HM NATURALS' });
+  await expect(trigger).toBeVisible();
+  await expect(page.locator('canvas')).toHaveCount(0);
+  await trigger.click();
+  const modal = page.getByRole('dialog', { name: 'Xem chai dầu 360°' });
+  await expect(modal).toBeVisible();
+  const reset = modal.getByRole('button', { name: 'Đặt lại góc nhìn' });
+  await expect(reset).toBeEnabled();
+  const canvas = modal.locator('canvas');
+  await expect(canvas).toBeVisible();
+  const initial = await canvas.screenshot();
+  await modal.screenshot({ path: testInfo.outputPath('viewer.png') });
+  const angle = modal.getByRole('slider', { name: /Góc xoay/ });
+  await angle.focus();
+  await angle.press('End');
+  await angle.press('ArrowLeft');
+  await expect(angle).toHaveValue('345');
+  await expect.poll(async () => (await canvas.screenshot()).equals(initial)).toBe(false);
+  await reset.click();
+  await expect(angle).toHaveValue('0');
+  await expect.poll(async () => (await canvas.screenshot()).equals(initial)).toBe(true);
+  const bounds = (await canvas.boundingBox())!;
+  const start = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
+  if (isMobile) {
+    const session = await page.context().newCDPSession(page);
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] });
+    await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: start.x + 70, y: start.y }] });
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await session.detach();
+  } else {
+    await page.mouse.move(start.x, start.y);
+    await page.mouse.down();
+    await page.mouse.move(start.x + 70, start.y, { steps: 5 });
+    await page.mouse.up();
+  }
+  await expect.poll(async () => (await canvas.screenshot()).equals(initial)).toBe(false);
+  await reset.click();
+  await expect.poll(async () => (await canvas.screenshot()).equals(initial)).toBe(true);
+  await page.keyboard.press('Tab');
+  await expect(modal.getByRole('button', { name: 'Đóng' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(modal).toHaveCount(0);
+  await expect(canvas).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(reset).toBeEnabled();
+  await expect(modal.locator('canvas')).toHaveCount(1);
+  await modal.getByRole('button', { name: 'Đóng' }).click();
+  await expect(trigger).toBeFocused();
+  await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden');
+});
+
+test('3D viewer falls back to an image when WebGL is unavailable', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+      value: function (this: HTMLCanvasElement, ...args: unknown[]) {
+        if (String(args[0]).startsWith('webgl')) return null;
+        return Reflect.apply(original, this, args);
+      },
+    });
+  });
+  await fixtureApi(page);
+  await page.goto('/products/dau-lac-api');
+  await page.getByRole('button', { name: 'Xem 360 độ chai dầu HM NATURALS' }).click();
+  const modal = page.getByRole('dialog');
+  await expect(modal.getByText(/Không thể hiển thị 3D/)).toBeVisible();
+  await expect(modal.getByRole('img', { name: product.name })).toBeVisible();
+  await expect(modal.getByRole('slider')).toHaveCount(0);
+  await modal.getByRole('button', { name: 'Đóng' }).click();
+  await expect(page.getByRole('button', { name: 'Đặt Mua Ngay' })).toBeEnabled();
+});
+
+test('3D viewer recovers to an image after context loss', async ({ page }) => {
+  await fixtureApi(page);
+  await page.goto('/products/dau-lac-api');
+  await page.getByRole('button', { name: 'Xem 360 độ chai dầu HM NATURALS' }).click();
+  const modal = page.getByRole('dialog');
+  await expect(modal.getByRole('button', { name: 'Đặt lại góc nhìn' })).toBeEnabled();
+  await modal.locator('canvas').evaluate(canvas => canvas.dispatchEvent(new Event('webglcontextlost', { cancelable: true })));
+  await expect(modal.getByText(/Không thể hiển thị 3D/)).toBeVisible();
+  await expect(modal.locator('canvas')).toHaveCount(0);
+});
+
 test('category links resolve to the shared listing and unknown categories show an error', async ({page}) => {
   await fixtureApi(page);
   await page.goto('/categories/nguyen-lieu');

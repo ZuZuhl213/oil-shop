@@ -1,140 +1,87 @@
 import type { Metadata } from 'next';
+import { UnlabeledBottle } from '@/components/home/UnlabeledBottle';
 
 export const metadata: Metadata = {
-  title: 'Về chúng tôi — Câu chuyện thương hiệu',
-  description: 'HM Naturals — Gìn giữ hạt nông sản thuần bản địa và phương pháp ép mộc cối đá cổ truyền.',
+  title: 'Câu chuyện thương hiệu — Về HM NATURALS',
+  description:
+    'HM NATURALS — Gìn giữ hạt nông sản thuần bản địa và phương pháp ép nhiệt cơ học nguyên bản từ nông hộ Việt Nam.',
 };
 
 export default function AboutPage() {
   return (
     <div className="about-view-container desktop-about-container">
-      {/* Hero / Brand Intro */}
-      <div className="about-hero-section desktop-about-hero">
+      {/* ── 1. Hero / Brand Intro ── */}
+      <section className="about-hero-section desktop-about-hero" aria-labelledby="aboutHeroTitle">
         <span className="about-hero-eyebrow">
-          <span>🌿</span>
+          <span aria-hidden="true">🌿</span>
           <span>Câu Chuyện Thương Hiệu</span>
         </span>
-        <h1 className="about-hero-title">Gìn Giữ Hạt Nông Sản Thuần Bản Địa</h1>
+        <h1 className="about-hero-title" id="aboutHeroTitle">
+          Gìn Giữ Hạt Nông Sản Thuần Bản Địa
+        </h1>
         <p className="about-hero-lead">
-          Chúng tôi không tìm kiếm sự hào nhoáng công nghiệp, mà kiên định đồng hành cùng người nông dân giữ gìn giống hạt bản địa và phương pháp ép mộc cối đá cổ truyền.
+          Chúng tôi không tìm kiếm sự hào nhoáng công nghiệp, mà kiên định đồng hành cùng người nông dân giữ gìn giống hạt bản địa và phương pháp ép nhiệt cơ học truyền thống.
         </p>
-      </div>
+      </section>
 
-      {/* 2-Column Asymmetric Story Section */}
-      <div className="about-story-section desktop-about-story">
+      {/* ── 2. Two-Column Asymmetric Story Section ── */}
+      <section className="about-story-section desktop-about-story" aria-labelledby="storyHeading">
         {/* Left Column: Story narrative */}
         <div className="about-story-text">
           <span className="about-story-eyebrow">TÂM HUYẾT XƯỞNG ÉP</span>
-          <h2 className="about-story-title">Từ Vạt Đất Phù Sa Đến Gian Bếp Ấm Lành</h2>
+          <h2 className="about-story-title" id="storyHeading">
+            Từ Vạt Đất Phù Sa Đến Gian Bếp Ấm Lành
+          </h2>
           <p className="about-story-p">
-            HM Naturals ra đời tại vùng bãi bồi sông Đáy nơi đất cát pha màu mỡ nuôi dưỡng những mẻ lạc sẻ đỏ vỏ mỏng, giàu dầu và nức tiếng thơm bùi.
+            HM NATURALS ra đời tại vùng bãi bồi sông Đáy nơi đất cát pha màu mỡ nuôi dưỡng những mẻ lạc sẻ đỏ vỏ mỏng, giàu dầu và nức tiếng thơm bùi.
           </p>
           <p className="about-story-p">
-            Nhận thấy người tiêu dùng ngày càng lo ngại trước dầu ăn công nghiệp tinh luyện nhiều hóa chất, xưởng chọn con đường ép cơ học chậm tự nhiên — giữ nguyên độ sánh, sắc vàng mật ong và hương vị mộc chân thật nhất.
+            Nhận thấy người tiêu dùng ngày càng lo ngại trước dầu ăn công nghiệp tinh luyện nhiều hóa chất, xưởng chọn con đường ép nhiệt cơ học nguyên chất — giữ nguyên độ sánh, sắc vàng tự nhiên và hương vị mộc chân thật nhất.
           </p>
           <div className="about-tags-row">
-            <span className="about-tag-pill">🌱 Ép cơ học chậm</span>
-            <span className="about-tag-pill">🪨 Lọc vải mộc 48h</span>
-            <span className="about-tag-pill">🏺 Chai thủy tinh hổ phách</span>
+            <span className="about-tag-pill">🌱 Ép nhiệt cơ học</span>
+            <span className="about-tag-pill">🪨 Lắng lọc vải mộc</span>
+            <span className="about-tag-pill">🏺 Chai thủy tinh tối màu</span>
           </div>
         </div>
 
         {/* Right Column: Premium Showcase Bottle Card */}
         <div className="about-bottle-card">
-          <div className="about-bottle-glow" />
-          <svg className="about-bottle-svg" viewBox="180 50 240 370" xmlns="http://www.w3.org/2000/svg">
-            <radialGradient id="aboutDeskG" cx="50%" cy="45%" r="60%">
-              <stop offset="0%" stopColor="#FFE8C2" stopOpacity="0.8" />
-              <stop offset="60%" stopColor="#E8CEB0" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#F2EADF" stopOpacity="0" />
-            </radialGradient>
-            <ellipse cx="300" cy="400" rx="90" ry="16" fill="#3D3024" opacity="0.22" />
-            <path
-              d="M245 105 h110 v35 l30 55 v180 c0 16 -12 28 -28 28 h-114 c-16 0 -28 -12 -28 -28 v-180 l30 -55 z"
-              fill="#8C4E15"
+          <div className="about-bottle-glow" aria-hidden="true" />
+
+          {/* Approved Unlabeled Clear Glass Bottle Artwork */}
+          <div className="py-2 flex items-center justify-center">
+            <UnlabeledBottle
+              type="peanut"
+              className="w-[180px] h-[240px] drop-shadow-lg"
+              ariaLabel="Chai dầu thủy tinh không nhãn minh họa HM NATURALS"
             />
-            <path
-              d="M252 195 h96 v170 c0 12 -10 22 -22 22 h-52 c-12 0 -22 -10 -22 -22 z"
-              fill="#D98A2B"
-              opacity="0.95"
-            />
-            <path d="M256 198 v165" stroke="#FFFFFF" strokeWidth="6" opacity="0.45" strokeLinecap="round" />
-            <path d="M344 205 v158" stroke="#FFE7BA" strokeWidth="3.5" opacity="0.4" strokeLinecap="round" />
-            <rect x="268" y="65" width="64" height="42" rx="5" fill="#422915" />
-            <rect x="272" y="70" width="56" height="8" rx="2" fill="#C88B3A" opacity="0.85" />
-            <rect x="256" y="220" width="88" height="135" rx="4" fill="#FAF6EE" stroke="#D9CDBF" />
-            <text
-              x="300"
-              y="246"
-              fontFamily="'Playfair Display', serif"
-              fontSize="10.5"
-              fontWeight="bold"
-              fill="#26402F"
-              textAnchor="middle"
-              letterSpacing="1"
-            >
-              HM NATURALS
-            </text>
-            <line x1="268" y1="254" x2="332" y2="254" stroke="#C88B3A" strokeWidth="1.2" />
-            <circle cx="300" cy="278" r="14" fill="#F0E5D4" stroke="#7A4B13" strokeWidth="1" />
-            <text x="300" y="283" fontFamily="sans-serif" fontSize="12" textAnchor="middle">
-              🥜
-            </text>
-            <text
-              x="300"
-              y="310"
-              fontFamily="'Playfair Display', serif"
-              fontSize="9"
-              fontWeight="bold"
-              fill="#221A14"
-              textAnchor="middle"
-            >
-              DẦU ĐẬU PHỘNG
-            </text>
-            <text
-              x="300"
-              y="324"
-              fontFamily="'Be Vietnam Pro', sans-serif"
-              fontSize="7"
-              fontWeight="600"
-              fill="#474E2B"
-              textAnchor="middle"
-              letterSpacing="1"
-            >
-              ÉP CƠ HỌC MỘC
-            </text>
-            <text
-              x="300"
-              y="340"
-              fontFamily="'Be Vietnam Pro', sans-serif"
-              fontSize="7"
-              fill="#7A4B13"
-              textAnchor="middle"
-            >
-              500ml • Chai Thủy Tinh
-            </text>
-          </svg>
-          <div className="about-bottle-caption">500ml • Chai Thủy Tinh Hổ Phách</div>
+          </div>
+
+          <div className="about-bottle-caption">500ml • Chai Thủy Tinh Mộc</div>
           <div className="about-quote-box">
             &ldquo;Mỗi giọt dầu là kết tinh của mùa vụ bản địa và bàn tay người ép mộc.&rdquo;
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 3 Core Values Section */}
-      <div className="about-values-section desktop-about-values">
+      {/* ── 3. Three Core Values Section ── */}
+      <section className="about-values-section desktop-about-values" aria-labelledby="valuesHeading">
         <div className="about-values-head">
           <span className="about-values-eyebrow">CAM KẾT PHẨM CHẤT</span>
-          <h2 className="about-values-title">Ba Giá Trị Cốt Lõi</h2>
+          <h2 className="about-values-title" id="valuesHeading">
+            Ba Giá Trị Cốt Lõi
+          </h2>
           <p className="about-values-desc">
             Nền tảng định hình mọi quyết định của xưởng, từ khâu chọn hạt đến lúc đóng chai.
           </p>
         </div>
 
         <div className="about-values-grid">
+          {/* Value 01 */}
           <div className="about-value-card">
             <div className="about-value-card-head">
-              <div className="about-value-icon">🛡️</div>
+              <div className="about-value-icon" aria-hidden="true">🛡️</div>
               <span className="about-value-num">01</span>
             </div>
             <h3 className="about-value-name">Trung Thực</h3>
@@ -143,9 +90,10 @@ export default function AboutPage() {
             </p>
           </div>
 
+          {/* Value 02 */}
           <div className="about-value-card">
             <div className="about-value-card-head">
-              <div className="about-value-icon">🌾</div>
+              <div className="about-value-icon" aria-hidden="true">🌾</div>
               <span className="about-value-num">02</span>
             </div>
             <h3 className="about-value-name">Bản Địa</h3>
@@ -154,18 +102,35 @@ export default function AboutPage() {
             </p>
           </div>
 
+          {/* Value 03 */}
           <div className="about-value-card">
             <div className="about-value-card-head">
-              <div className="about-value-icon">🌿</div>
+              <div className="about-value-icon" aria-hidden="true">🏺</div>
               <span className="about-value-num">03</span>
             </div>
-            <h3 className="about-value-name">Bền Vững</h3>
+            <h3 className="about-value-name">Chỉn Chu Từng Sản Phẩm</h3>
             <p className="about-value-text">
-              Tôn trọng môi trường từ khâu đóng chai thủy tinh sẫm màu tái sử dụng được, đến việc tận dụng phụ phẩm bã đậu làm thức ăn gia súc và phân bón hữu cơ.
+              Tỉ mỉ trong từng công đoạn từ khâu chọn hạt nông sản, kiểm soát nhiệt độ ép, đến lắng lọc tự nhiên qua vải mộc và đóng chai thủy tinh tối màu giúp bảo quản chất lượng nguyên bản.
             </p>
           </div>
         </div>
-      </div>
+
+        {/* Content Transparency Notice */}
+        <div
+          style={{
+            marginTop: 28,
+            padding: '12px 18px',
+            background: '#FAF6EE',
+            borderRadius: 12,
+            border: '1px solid var(--soft-sand)',
+            fontSize: 12,
+            color: 'var(--text-muted)',
+            lineHeight: 1.6,
+          }}
+        >
+          <strong>Quy chuẩn thông tin trung thực:</strong> Các thông số kỹ thuật sản xuất chi tiết (nhiệt độ ép cụ thể, thời gian lắng lọc theo mùa vụ) được công bố dựa trên nhật ký vận hành thực tế của xưởng ép và luôn minh bạch với khách hàng.
+        </div>
+      </section>
     </div>
   );
 }

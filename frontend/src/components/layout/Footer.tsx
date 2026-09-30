@@ -27,7 +27,7 @@ export function Footer() {
           </div>
 
           <p className="text-xs text-warm-cream/80 leading-relaxed">
-            Dầu ăn ép cơ học nguyên bản từ đậu phộng sẻ và mè đen bản địa. Không tinh luyện hóa chất, lưu giữ trọn vẹn vị mộc truyền thống.
+            Dầu ăn ép cơ học nguyên bản từ đậu phộng sẻ và mè đen, không tinh luyện hóa chất, trọn vị mộc mạc.
           </p>
 
           {/* Quick Contact Buttons (Strict 44px touch) */}
@@ -76,7 +76,7 @@ export function Footer() {
           {/* Mobile Copyright */}
           <div className="pt-4 border-t border-white/10 text-[11px] text-warm-cream/60 flex flex-col gap-1">
             <div>© {new Date().getFullYear()} HM NATURALS. Thuần nông bản địa Việt Nam.</div>
-            <div>Cơ sở sản xuất: Nam Đàn, Nghệ An</div>
+            <div>Cơ sở sản xuất: Sơn Nam, Hưng Yên</div>
           </div>
         </div>
       </footer>
@@ -102,7 +102,7 @@ export function Footer() {
               </div>
 
               <p className="text-sm text-warm-cream/80 leading-[1.75] max-w-[26rem]">
-                Dầu ăn ép cơ học nguyên bản từ nguồn đậu phộng sẻ và mè đen bản địa. Không tinh luyện hóa chất, giữ trọn sắc sánh và hương vị mộc mạc cho gian bếp gia đình.
+                Dầu ăn ép cơ học nguyên bản từ đậu phộng sẻ và mè đen, không tinh luyện hóa chất, trọn vị mộc mạc.
               </p>
 
               {/* Craftsmanship badges */}
@@ -113,8 +113,12 @@ export function Footer() {
                 </span>
                 <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-peanut-gold font-medium">
                   <Sparkles className="w-3.5 h-3.5" />
-                  Ép Cơ Học Mộc Cối Đá
+                  Quy Trình Ép Nhiệt Cơ Học
                 </span>
+              </div>
+
+              <div className="text-xs text-warm-cream/50 pt-1">
+                © {new Date().getFullYear()} HM NATURALS. Gìn giữ hạt nông sản thuần bản địa Việt Nam.
               </div>
             </div>
 
@@ -133,19 +137,19 @@ export function Footer() {
                 <li>
                   <Link href="/products" className="hover:text-peanut-gold transition-colors no-underline inline-flex items-center gap-1.5 group">
                     <span className="text-peanut-gold opacity-0 group-hover:opacity-100 transition-opacity">›</span>
-                    Tuyển Phẩm Vụ Mùa
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/knowledge" className="hover:text-peanut-gold transition-colors no-underline inline-flex items-center gap-1.5 group">
-                    <span className="text-peanut-gold opacity-0 group-hover:opacity-100 transition-opacity">›</span>
-                    Góc Kiến Thức Dầu Lành
+                    Danh Mục Nông Sản
                   </Link>
                 </li>
                 <li>
                   <Link href="/about" className="hover:text-peanut-gold transition-colors no-underline inline-flex items-center gap-1.5 group">
                     <span className="text-peanut-gold opacity-0 group-hover:opacity-100 transition-opacity">›</span>
-                    Ba Nguyên Tắc Sản Xuất
+                    Câu Chuyện Thương Hiệu
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/knowledge" className="hover:text-peanut-gold transition-colors no-underline inline-flex items-center gap-1.5 group">
+                    <span className="text-peanut-gold opacity-0 group-hover:opacity-100 transition-opacity">›</span>
+                    Góc Kiến Thức Dinh Dưỡng
                   </Link>
                 </li>
                 <li>
@@ -174,7 +178,7 @@ export function Footer() {
                     <MapPin className="w-4 h-4" />
                   </div>
                   <span className="leading-snug">
-                    Cơ sở sản xuất &amp; ép dầu tự nhiên Nam Đàn, Nghệ An
+                    Cơ sở sản xuất &amp; ép dầu tự nhiên Sơn Nam, Hưng Yên
                   </span>
                 </div>
 
@@ -226,20 +230,6 @@ export function Footer() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Bottom Bar: Copyright & Principles */}
-          <div className="mt-14 pt-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-xs text-warm-cream/60 gap-4">
-            <div>
-              © {new Date().getFullYear()} HM NATURALS. Gìn giữ hạt nông sản thuần bản địa Việt Nam.
-            </div>
-            <div className="flex items-center gap-4 text-warm-cream/50">
-              <span>Ép cơ học chậm</span>
-              <span>•</span>
-              <span>Lọc vải mộc 48h</span>
-              <span>•</span>
-              <span>Chai thủy tinh hổ phách</span>
             </div>
           </div>
         </div>

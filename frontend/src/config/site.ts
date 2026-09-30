@@ -3,21 +3,22 @@
  */
 
 export const siteConfig = {
-  name: 'HM Naturals',
-  tagline: 'Dầu Ăn & Nông Sản Tự Nhiên',
+  name: 'HM NATURALS',
+  tagline: 'DẦU NÔNG SẢN NGUYÊN BẢN',
   description:
-    'HM Naturals — Dầu ăn ép lạnh & nông sản tự nhiên từ Việt Nam. Dầu lạc, dầu vừng, dầu gấc nguyên chất.',
+    'HM NATURALS — Dầu thực vật ép cơ học nguyên bản từ nông sản bản địa Việt Nam. Đậu phộng sẻ và mè đen thuần nông, không hóa chất tinh luyện.',
   url: 'https://hmnaturals.com',
-  phone: '0912 345 678',
-  zalo: 'https://zalo.me/0912345678',
+  phone: '0836 501 863',
+  zalo: 'https://zalo.me/0836501863',
   email: 'lienhe@hmnaturals.com',
-  address: 'Cơ sở sản xuất & ép dầu Nam Đàn, Nghệ An',
+  address: 'Cơ sở sản xuất & ép dầu Sơn Nam, Hưng Yên',
 } as const;
 
 export const navLinks = [
   { label: 'Trang chủ', href: '/' },
   { label: 'Sản phẩm', href: '/products' },
+  { label: 'Câu chuyện', href: '/about' },
   { label: 'Góc kiến thức', href: '/knowledge' },
-  { label: 'Về chúng tôi', href: '/about' },
   { label: 'Liên hệ', href: '/contact' },
 ] as const;
+

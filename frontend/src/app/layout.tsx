@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   description: siteConfig.description,
   keywords: [
     'dầu lạc', 'dầu vừng', 'dầu gấc', 'dầu dừa',
-    'dầu ăn tự nhiên', 'ép lạnh', 'nông sản Việt Nam',
+    'dầu ăn tự nhiên', 'ép nhiệt cơ học', 'dầu nông sản nguyên bản', 'nông sản Việt Nam',
     'HM Naturals',
   ],
   authors: [{ name: siteConfig.name }],

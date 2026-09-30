@@ -72,6 +72,51 @@ export default async function KnowledgeArticlePage({ params }: ArticlePageProps)
         dangerouslySetInnerHTML={{ __html: article.bodyHtml }}
       />
 
+      {/* Scientific References */}
+      {article.sources && article.sources.length > 0 && (
+        <div
+          style={{
+            marginTop: 24,
+            padding: '16px 18px',
+            background: 'var(--white-pure)',
+            border: '1px solid var(--soft-sand)',
+            borderRadius: 14,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <span style={{ fontSize: 15 }}>📚</span>
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--forest-green)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Tài Liệu Tham Khảo Khoa Học
+            </span>
+          </div>
+          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.65 }}>
+            {article.sources.map((src, i) => (
+              <li key={i}>
+                <a
+                  href={src.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'var(--peanut-bark)', fontWeight: 500, textDecoration: 'none' }}
+                  className="hover:underline"
+                >
+                  {src.name} ↗
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Scientific & Dietary Disclaimer */}
+      <div
+        className="knowledge-scientific-disclaimer"
+        style={{ marginTop: 16 }}
+      >
+        <p style={{ margin: 0, fontSize: 12, lineHeight: 1.55, color: 'var(--text-muted)' }}>
+          {article.disclaimer || '⚠️ Lưu ý y khoa: Thông tin trong bài viết nhằm mục đích phổ biến kiến thức dinh dưỡng tổng quát dựa trên các hướng dẫn của WHO và AHA. Sản phẩm dầu nông sản là thực phẩm phục vụ nấu ăn hàng ngày, không phải thuốc và không có tác dụng thay thế thuốc chữa bệnh.'}
+        </p>
+      </div>
+
       {/* Related Products Section */}
       {relatedProduct && (
         <div className="article-related-box" id="artRelatedProductsBox">
