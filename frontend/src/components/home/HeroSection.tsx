@@ -100,9 +100,9 @@ export function HeroSection() {
 
             {/* Compact Value Indicators (Free of Unverified Medical Claims) */}
             <div className="ref-hero-indicators">
-              <span className="ref-indicator-pill">🌱 100% Nông sản Việt</span>
-              <span className="ref-indicator-pill">⚙️ Quy trình ép nhiệt</span>
-              <span className="ref-indicator-pill">🏺 Thủy tinh tối màu</span>
+              <span className="ref-indicator-pill">100% Nông sản Việt</span>
+              <span className="ref-indicator-pill">Ép nhiệt cơ học</span>
+              <span className="ref-indicator-pill">Chai thủy tinh tối màu</span>
             </div>
 
             {/* Dual Action Buttons */}
@@ -208,10 +208,9 @@ export function HeroSection() {
               </button>
             </div>
 
-            {/* Bottom Drag Indicator */}
+            {/* Bottom Drag Indicator — subtle, no false promise */}
             <div className="ref-drag-indicator">
-              <span>🖱️</span>
-              <span>Kéo hoặc chạm để tương tác 3D</span>
+              <span>Di chuyển chuột để nghiêng chai</span>
             </div>
           </div>
         </div>
@@ -246,21 +245,21 @@ export function HeroSection() {
             className={`ref-mobile-sel-btn ${selectedProduct === 'peanut' ? 'active' : ''}`}
             onClick={() => setSelectedProduct('peanut')}
           >
-            <span>🥜</span> <span>Dầu Lạc</span>
+            <span>Dầu Lạc</span>
           </button>
           <button
             type="button"
             className={`ref-mobile-sel-btn ${selectedProduct === 'sesame' ? 'active' : ''}`}
             onClick={() => setSelectedProduct('sesame')}
           >
-            <span>🌾</span> <span>Dầu Mè</span>
+            <span>Dầu Mè</span>
           </button>
           <button
             type="button"
             className={`ref-mobile-sel-btn ${selectedProduct === 'sachi' ? 'active' : ''}`}
             onClick={() => setSelectedProduct('sachi')}
           >
-            <span>⭐</span> <span>Dầu Sachi</span>
+            <span>Dầu Sachi</span>
           </button>
           <button
             type="button"
@@ -275,9 +274,9 @@ export function HeroSection() {
 
         {/* Compact Value Indicators */}
         <div className="ref-hero-indicators" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', margin: '4px 0 8px' }}>
-          <span className="ref-indicator-pill">🌱 100% Nông sản Việt</span>
-          <span className="ref-indicator-pill">⚙️ Quy trình ép nhiệt</span>
-          <span className="ref-indicator-pill">🏺 Thủy tinh tối màu</span>
+          <span className="ref-indicator-pill">100% Nông sản Việt</span>
+          <span className="ref-indicator-pill">Ép nhiệt cơ học</span>
+          <span className="ref-indicator-pill">Chai thủy tinh tối màu</span>
         </div>
 
         {/* Dual CTAs */}

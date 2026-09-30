@@ -38,7 +38,12 @@ export default function KnowledgePage() {
       {/* Scientific & Dietary Disclaimer */}
       <div className="knowledge-scientific-disclaimer" style={{ margin: '14px 0 16px' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-          <span style={{ fontSize: 18, lineHeight: 1.2 }}>📋</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--forest-green)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}>
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+            <rect x="9" y="3" width="6" height="4" rx="2" />
+            <line x1="9" y1="12" x2="15" y2="12" />
+            <line x1="9" y1="16" x2="12" y2="16" />
+          </svg>
           <div>
             <strong style={{ display: 'block', fontSize: 13, color: 'var(--forest-green)', marginBottom: 2 }}>
               Cơ sở khoa học &amp; Định hướng dinh dưỡng
@@ -123,7 +128,7 @@ export default function KnowledgePage() {
                 <p className="knowledge-card-excerpt">{art.excerpt}</p>
 
                 <div className="article-takeaway-box" style={{ margin: '8px 0 0', padding: '10px 12px' }}>
-                  <div className="article-takeaway-title">💡 Điểm cốt lõi</div>
+                  <div className="article-takeaway-title">Điểm cốt lõi</div>
                   <div className="article-takeaway-text" style={{ fontSize: 12.5 }}>
                     {art.takeaway}
                   </div>
@@ -150,7 +155,7 @@ export default function KnowledgePage() {
                 )}
 
                 <div className="knowledge-card-meta">
-                  <span>⏱ {art.readTime}</span>
+                  <span>{art.readTime}</span>
                   <Link href={`/knowledge/${art.slug}`} style={{ color: 'var(--peanut-bark)', fontWeight: 600 }}>
                     Đọc tiếp →
                   </Link>
@@ -162,7 +167,10 @@ export default function KnowledgePage() {
       ) : (
         /* Empty State */
         <div className="empty-search-alert" style={{ display: 'block', margin: '16px var(--screen-pad)' }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--soft-sand)" strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom: 8, display: 'block' }} aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
           <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--forest-green)', marginBottom: 4 }}>
             Không Tìm Thấy Bài Viết
           </h4>

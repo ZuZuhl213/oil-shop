@@ -7,13 +7,38 @@ export const metadata: Metadata = {
     'HM NATURALS — Gìn giữ hạt nông sản thuần bản địa và phương pháp ép nhiệt cơ học nguyên bản từ nông hộ Việt Nam.',
 };
 
+function IconShield() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <polyline points="9 12 11 14 15 10" />
+    </svg>
+  );
+}
+function IconSeedling() {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22V12" />
+      <path d="M12 12C12 7 7 4 2 5c0 5 3 9 10 7Z" />
+      <path d="M12 12c0-5 5-8 10-7-1 5-4 9-10 7Z" />
+    </svg>
+  );
+}
+function IconBottle() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 3h6M10 3v2.5a4 4 0 0 0-2 3.5v9a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V9a4 4 0 0 0-2-3.5V3" />
+      <line x1="8" y1="13" x2="16" y2="13" />
+    </svg>
+  );
+}
+
 export default function AboutPage() {
   return (
     <div className="about-view-container desktop-about-container">
       {/* ── 1. Hero / Brand Intro ── */}
       <section className="about-hero-section desktop-about-hero" aria-labelledby="aboutHeroTitle">
         <span className="about-hero-eyebrow">
-          <span aria-hidden="true">🌿</span>
           <span>Câu Chuyện Thương Hiệu</span>
         </span>
         <h1 className="about-hero-title" id="aboutHeroTitle">
@@ -28,7 +53,7 @@ export default function AboutPage() {
       <section className="about-story-section desktop-about-story" aria-labelledby="storyHeading">
         {/* Left Column: Story narrative */}
         <div className="about-story-text">
-          <span className="about-story-eyebrow">TÂM HUYẾT XƯỞNG ÉP</span>
+          <span className="about-story-eyebrow">Tâm huyết xưởng ép</span>
           <h2 className="about-story-title" id="storyHeading">
             Từ Vạt Đất Phù Sa Đến Gian Bếp Ấm Lành
           </h2>
@@ -39,9 +64,9 @@ export default function AboutPage() {
             Nhận thấy người tiêu dùng ngày càng lo ngại trước dầu ăn công nghiệp tinh luyện nhiều hóa chất, xưởng chọn con đường ép nhiệt cơ học nguyên chất — giữ nguyên độ sánh, sắc vàng tự nhiên và hương vị mộc chân thật nhất.
           </p>
           <div className="about-tags-row">
-            <span className="about-tag-pill">🌱 Ép nhiệt cơ học</span>
-            <span className="about-tag-pill">🪨 Lắng lọc vải mộc</span>
-            <span className="about-tag-pill">🏺 Chai thủy tinh tối màu</span>
+            <span className="about-tag-pill">Ép nhiệt cơ học</span>
+            <span className="about-tag-pill">Lắng lọc vải mộc</span>
+            <span className="about-tag-pill">Chai thủy tinh tối màu</span>
           </div>
         </div>
 
@@ -68,7 +93,7 @@ export default function AboutPage() {
       {/* ── 3. Three Core Values Section ── */}
       <section className="about-values-section desktop-about-values" aria-labelledby="valuesHeading">
         <div className="about-values-head">
-          <span className="about-values-eyebrow">CAM KẾT PHẨM CHẤT</span>
+          <span className="about-values-eyebrow">Cam kết phẩm chất</span>
           <h2 className="about-values-title" id="valuesHeading">
             Ba Giá Trị Cốt Lõi
           </h2>
@@ -78,11 +103,10 @@ export default function AboutPage() {
         </div>
 
         <div className="about-values-grid">
-          {/* Value 01 */}
+          {/* Value: Trung Thực */}
           <div className="about-value-card">
             <div className="about-value-card-head">
-              <div className="about-value-icon" aria-hidden="true">🛡️</div>
-              <span className="about-value-num">01</span>
+              <div className="about-value-icon"><IconShield /></div>
             </div>
             <h3 className="about-value-name">Trung Thực</h3>
             <p className="about-value-text">
@@ -90,11 +114,10 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Value 02 */}
+          {/* Value: Bản Địa */}
           <div className="about-value-card">
             <div className="about-value-card-head">
-              <div className="about-value-icon" aria-hidden="true">🌾</div>
-              <span className="about-value-num">02</span>
+              <div className="about-value-icon"><IconSeedling /></div>
             </div>
             <h3 className="about-value-name">Bản Địa</h3>
             <p className="about-value-text">
@@ -102,11 +125,10 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Value 03 */}
+          {/* Value: Chỉn Chu */}
           <div className="about-value-card">
             <div className="about-value-card-head">
-              <div className="about-value-icon" aria-hidden="true">🏺</div>
-              <span className="about-value-num">03</span>
+              <div className="about-value-icon"><IconBottle /></div>
             </div>
             <h3 className="about-value-name">Chỉn Chu Từng Sản Phẩm</h3>
             <p className="about-value-text">

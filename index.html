@@ -6,7 +6,7 @@
   <title>HM NATURALS — Dầu Ăn & Nông Sản Tự Nhiên</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Caveat:wght@600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
 
   <style>
 /* OD-LAYOUT-PRIMITIVES v1 — structure only */
@@ -42,6 +42,7 @@
       /* Typography Tokens */
       --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
       --font-body: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-script: 'Caveat', 'Dancing Script', cursive;
 
       /* Responsive Dimensions */
       --phone-width: 390px;
@@ -2571,159 +2572,584 @@
       background: var(--peanut-gold-surface);
     }
 
-    /* Desktop Editorial Hero Layout (Asymmetrical Grid) */
-    .desktop-hero-wrap {
-      max-width: 1260px;
+    /* =========================================================
+       HM NATURALS MINIMALIST WARM-SUNLIGHT HERO & HOMEPAGE
+       ========================================================= */
+    .ref-hero-wrap {
+      max-width: 1360px;
       margin: 0 auto;
-      padding: 44px 40px 60px;
+      padding: 40px 48px 48px;
       display: grid;
-      grid-template-columns: 1.15fr 1fr;
-      gap: 48px;
+      grid-template-columns: 1.05fr 1.15fr;
+      gap: 40px;
       align-items: center;
+      position: relative;
+      background: radial-gradient(ellipse at 85% 20%, rgba(255, 245, 225, 0.95) 0%, rgba(250, 240, 225, 0.5) 45%, rgba(242, 234, 223, 0) 75%);
     }
-    .desktop-hero-content {
+    .ref-hero-left {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      z-index: 2;
     }
-    .desktop-eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+    .ref-eyebrow {
       font-size: 12px;
       font-weight: 700;
-      color: var(--deep-olive);
-      letter-spacing: 0.14em;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
+      color: var(--deep-olive);
+      margin-bottom: 2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .desktop-hero-title {
+    .ref-hero-title {
       font-family: var(--font-display);
-      font-size: 44px;
-      line-height: 1.16;
-      color: var(--forest-green);
+      font-size: 58px;
+      font-weight: 700;
+      line-height: 1.06;
+      color: var(--dark-cocoa);
       margin: 0;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.015em;
     }
-    .desktop-hero-desc {
+    .ref-hero-title span {
+      display: block;
+    }
+    .ref-hero-desc {
       font-size: 16px;
-      line-height: 1.65;
-      color: var(--text-muted);
+      line-height: 1.62;
+      color: #5D5347;
       margin: 0;
-      max-width: 540px;
+      max-width: 480px;
     }
-    .desktop-hero-ctas {
+
+    /* Compact Value Indicators in Hero */
+    .ref-hero-indicators {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 4px 0 6px;
+    }
+    .ref-indicator-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--forest-green);
+      background: #FAF6F0;
+      border: 1px solid var(--soft-sand);
+      border-radius: 999px;
+      padding: 6px 14px;
+      line-height: 1;
+    }
+
+    /* Action Buttons Row */
+    .ref-ctas-row {
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-top: 8px;
+      margin-top: 10px;
       flex-wrap: wrap;
     }
-    .btn-hero-primary {
-      background: var(--forest-green);
-      color: #FFF;
+    .ref-btn-order {
+      background: #1C1713;
+      color: #FFFFFF;
       border: none;
-      padding: 13px 26px;
-      border-radius: 99px;
-      font-size: 14.5px;
+      padding: 14px 30px;
+      border-radius: 999px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      transition: background 0.15s, transform 0.1s;
-      box-shadow: 0 4px 14px rgba(38, 64, 47, 0.2);
+      transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 6px 18px rgba(28, 23, 19, 0.22);
       white-space: nowrap;
+      text-decoration: none;
     }
-    .btn-hero-primary:hover { background: var(--forest-green-dark); transform: translateY(-1px); }
-    .btn-hero-secondary {
-      background: var(--white-pure);
-      color: var(--dark-cocoa);
-      border: 1.5px solid var(--soft-sand);
-      padding: 12px 22px;
-      border-radius: 99px;
-      font-size: 14.5px;
+    .ref-btn-order:hover {
+      background: #2E251E;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(28, 23, 19, 0.3);
+    }
+    .ref-btn-order:active {
+      transform: translateY(0);
+    }
+    .ref-btn-explore {
+      background: rgba(235, 226, 214, 0.6);
+      border: 1.5px solid #CFC0AD;
+      color: #201A15;
+      padding: 13px 26px;
+      border-radius: 999px;
+      font-size: 15px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      transition: background 0.15s, border-color 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .ref-btn-explore:hover {
+      background: #E8DCCB;
+      border-color: #B8A690;
+    }
+
+    /* Separate Visual Stage for Future Blender GLB Integration */
+    .ref-stage-wrap {
+      position: relative;
+      width: 100%;
+      min-height: 540px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1100px;
+      user-select: none;
+    }
+    .ref-stage-ambient-glow {
+      position: absolute;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 440px;
+      height: 440px;
+      background: radial-gradient(circle, rgba(255, 238, 204, 0.7) 0%, rgba(246, 236, 220, 0.3) 50%, rgba(242, 234, 223, 0) 75%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .ref-stage-floor-shadow {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      height: 36px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(60, 42, 24, 0.18) 0%, rgba(60, 42, 24, 0) 70%);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Isolated Unlabeled Bottle Container (Separated layer for Blender GLB swap) */
+    .unlabeled-bottle-container {
+      position: relative;
+      z-index: 3;
+      transform-style: preserve-3d;
+      transition: transform 0.14s ease-out;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .unlabeled-bottle-container:active {
+      cursor: grabbing;
+    }
+    .unlabeled-bottle-container.spinning-360 {
+      animation: refSpin360 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+    @keyframes refSpin360 {
+      0% { transform: perspective(1000px) rotateY(0deg); }
+      100% { transform: perspective(1000px) rotateY(360deg); }
+    }
+    .unlabeled-bottle-svg {
+      width: 440px;
+      height: 500px;
+      display: block;
+      filter: drop-shadow(0 20px 28px rgba(50, 35, 20, 0.15));
+    }
+
+    /* Subtle Script Quote (Reduced Prominence) */
+    .subtle-script-quote {
+      position: absolute;
+      right: 76px;
+      bottom: 46px;
+      font-family: var(--font-script);
+      font-size: 19px;
+      font-weight: 600;
+      color: #554A3F;
+      opacity: 0.75;
+      font-style: italic;
+      margin: 0;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* Compact Right-Side Product Selector */
+    .compact-prod-selector {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+    }
+    .compact-sel-btn {
+      width: 68px;
+      padding: 8px 6px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid rgba(217, 205, 191, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 10px rgba(34, 26, 20, 0.04);
+      outline: none;
+    }
+    .compact-sel-btn:hover {
+      background: #FFFFFF;
+      border-color: var(--peanut-gold);
+      transform: translateX(-2px);
+    }
+    .compact-sel-btn.active {
+      background: #FFFFFF;
+      border-color: var(--peanut-gold);
+      box-shadow: 0 6px 16px rgba(200, 139, 58, 0.25);
+      transform: scale(1.04);
+    }
+    .compact-sel-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      margin-bottom: 4px;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    .compact-sel-dot.peanut { background: #FFBA3B; }
+    .compact-sel-dot.sesame { background: #873800; }
+    .compact-sel-dot.sachi  { background: #95C93D; }
+    .compact-sel-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--dark-cocoa);
+      line-height: 1.1;
+      text-align: center;
       white-space: nowrap;
     }
-    .btn-hero-secondary:hover {
-      background: var(--peanut-gold-surface);
-      border-color: var(--forest-green);
-      color: var(--forest-green);
+    .compact-sel-vol {
+      font-size: 8px;
+      color: var(--text-muted);
+      margin-top: 1px;
     }
-    .desktop-trust-pillars {
+    .compact-360-btn {
+      margin-top: 4px;
+      background: rgba(255, 255, 255, 0.85);
+      border: 1.5px solid #D5C7B4;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: var(--dark-cocoa);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s, transform 0.15s;
+      white-space: nowrap;
+    }
+    .compact-360-btn:hover {
+      background: #FFFFFF;
+      transform: scale(1.05);
+    }
+
+    /* Section B: Compact Three-Value Section */
+    .compact-values-section {
+      background: #FAF6F0;
+      border-top: 1px solid var(--soft-sand);
+      border-bottom: 1px solid var(--soft-sand);
+      padding: 30px 40px;
+      margin: 16px 0 28px;
+    }
+    .compact-values-grid {
+      max-width: 1260px;
+      margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      padding-top: 20px;
-      border-top: 1px solid var(--soft-sand);
-      margin-top: 8px;
+      gap: 32px;
     }
-    .pillar-card {
+    .compact-val-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .compact-val-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #F0E6D8;
+      border: 1px solid var(--soft-sand);
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      color: var(--forest-green);
+    }
+    .compact-val-body {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
-    .pillar-card strong {
-      font-size: 13px;
+    .compact-val-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
       color: var(--dark-cocoa);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      margin: 0;
     }
-    .pillar-card span {
-      font-size: 12px;
+    .compact-val-desc {
+      font-size: 13.5px;
+      line-height: 1.55;
       color: var(--text-muted);
-      line-height: 1.45;
+      margin: 0;
     }
 
-    /* Three.js Dedicated 3D Bottle Stage */
-    .desktop-3d-stage {
-      background: radial-gradient(circle at 50% 50%, rgba(200, 139, 58, 0.12) 0%, rgba(242, 234, 223, 0.45) 60%, rgba(242, 234, 223, 0.9) 100%), #FFFFFF;
+    /* Section D & E: Teasers */
+    .home-teaser-section {
+      max-width: 1260px;
+      margin: 0 auto 28px;
+      padding: 0 40px;
+    }
+    .teaser-content-box {
+      background: #FAF6F0;
       border: 1px solid var(--soft-sand);
-      border-radius: 28px;
-      padding: 32px 24px;
-      position: relative;
+      border-radius: 18px;
+      padding: 26px 30px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 520px;
-      box-shadow: 0 16px 40px -10px rgba(34, 26, 20, 0.08);
-      perspective: 900px;
-      cursor: grab;
-      user-select: none;
+      gap: 8px;
     }
-    .desktop-bottle-wrapper {
-      position: relative;
-      transition: transform 0.12s ease-out;
-      transform-style: preserve-3d;
+    .teaser-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--peanut-bark);
+    }
+    .teaser-title {
+      font-family: var(--font-display);
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--forest-green);
+      margin: 0;
+    }
+    .teaser-desc {
+      font-size: 14.5px;
+      line-height: 1.65;
+      color: var(--text-muted);
+      margin: 4px 0 8px;
+      max-width: 780px;
+    }
+    .teaser-link {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--forest-green);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      width: fit-content;
+      transition: color 0.15s, transform 0.15s;
+    }
+    .teaser-link:hover {
+      color: var(--peanut-gold);
+      transform: translateX(2px);
+    }
+
+    /* Scientific Knowledge Hub Educational Box */
+    .knowledge-scientific-disclaimer {
+      background: #F4EFE6;
+      border-left: 3px solid var(--deep-olive);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .knowledge-source-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--forest-green);
+      font-weight: 600;
+      text-decoration: underline;
+      margin-right: 12px;
+      margin-top: 6px;
+    }
+
+    /* Mobile Refined Hero Adaptations */
+    .ref-mobile-hero {
+      padding: 24px var(--screen-pad) 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: radial-gradient(ellipse at 85% 15%, rgba(255, 245, 225, 0.95) 0%, rgba(250, 240, 225, 0.5) 45%, var(--warm-cream) 80%);
+    }
+    .ref-mobile-hero .ref-hero-eyebrow {
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+    .ref-mobile-hero .ref-hero-headline {
+      font-size: 34px;
+      line-height: 1.12;
+    }
+    .ref-mobile-hero .ref-hero-sub {
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .ref-mobile-hero .ref-stage-wrap {
+      min-height: 330px;
+      margin: 4px 0 8px;
+    }
+    .ref-mobile-hero .unlabeled-bottle-svg {
+      width: 100%;
+      max-width: 300px;
+      height: 310px;
+    }
+    .ref-mobile-hero .subtle-script-quote {
+      right: 12px;
+      bottom: 16px;
+      font-size: 15px;
+    }
+    .ref-mobile-hero .compact-prod-selector {
+      right: 0px;
+      gap: 6px;
+    }
+    .ref-mobile-hero .compact-sel-btn {
+      width: 52px;
+      padding: 6px 3px;
+    }
+    .ref-mobile-hero .compact-sel-label {
+      font-size: 8px;
+    }
+    .ref-mobile-hero .compact-sel-vol {
+      display: none;
+    }
+    .ref-mobile-selector-row {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 100%;
+      gap: 8px;
+      margin: 4px 0 10px;
+      flex-wrap: wrap;
     }
-    .desktop-bottle-svg {
-      height: 360px;
-      width: auto;
-      max-width: 100%;
-      filter: drop-shadow(0 22px 32px rgba(34, 26, 20, 0.22));
-    }
-    .stage-badge-volume {
-      position: absolute;
-      bottom: 22px;
-      background: var(--white-pure);
-      border: 1px solid var(--soft-sand);
-      padding: 7px 18px;
-      border-radius: 99px;
-      box-shadow: 0 4px 14px rgba(34, 26, 20, 0.06);
+    .ref-mobile-sel-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
       font-size: 12px;
       font-weight: 600;
       color: var(--dark-cocoa);
-      letter-spacing: 0.02em;
+      background: #FAF6F0;
+      border: 1.5px solid var(--soft-sand);
+      border-radius: 999px;
+      padding: 7px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .ref-mobile-sel-btn.active {
+      background: #FFFFFF;
+      border-color: var(--peanut-gold);
+      color: var(--forest-green);
+      box-shadow: 0 3px 10px rgba(200, 139, 58, 0.2);
+    }
+    .ref-mobile-sel-btn.btn-360 {
+      color: var(--peanut-bark);
+    }
+
+    /* Desktop Product Discovery Section */
+    .desktop-discovery-section {
+      max-width: 1260px;
+      margin: 0 auto 36px;
+      padding: 0 40px;
+    }
+    .desktop-product-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .desktop-knowledge-section {
+      max-width: 1260px;
+      margin: 0 auto 48px;
+      padding: 0 40px;
+    }
+    .desktop-knowledge-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+    .ref-mobile-hero .ref-ctas-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .ref-mobile-hero .ref-btn-order,
+    .ref-mobile-hero .ref-btn-explore {
+      width: 100%;
+      justify-content: center;
+      height: 48px;
+      box-sizing: border-box;
+    }
+
+    /* Desktop Breakpoints */
+    .desktop-showcase-frame.mode-1280 .ref-hero-wrap {
+      padding: 36px 36px 44px;
+      gap: 32px;
+    }
+    .desktop-showcase-frame.mode-1280 .ref-hero-headline {
+      font-size: 48px;
+    }
+    .desktop-showcase-frame.mode-1280 .unlabeled-bottle-svg {
+      width: 390px;
+      height: 450px;
+    }
+    .desktop-showcase-frame.mode-1024 .ref-hero-wrap {
+      grid-template-columns: 1fr 1.05fr;
+      gap: 24px;
+      padding: 30px 24px 38px;
+    }
+    .desktop-showcase-frame.mode-1024 .ref-hero-headline {
+      font-size: 38px;
+    }
+    .desktop-showcase-frame.mode-1024 .unlabeled-bottle-svg {
+      width: 340px;
+      height: 390px;
+    }
+    .desktop-showcase-frame.mode-1024 .compact-values-grid {
+      gap: 20px;
+    }
+    .desktop-showcase-frame.mode-1024 .compact-val-card {
+      gap: 12px;
+    }
+    .desktop-showcase-frame.mode-1024 .home-teaser-section {
+      padding: 0 24px;
+    }
+    .desktop-showcase-frame.mode-1024 .desktop-discovery-section,
+    .desktop-showcase-frame.mode-1024 .desktop-knowledge-section {
+      padding: 0 24px;
+    }
+    .desktop-showcase-frame.mode-1024 .desktop-product-grid,
+    .desktop-showcase-frame.mode-1024 .desktop-knowledge-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+    .desktop-showcase-frame.mode-1280 .desktop-discovery-section,
+    .desktop-showcase-frame.mode-1280 .desktop-knowledge-section {
+      padding: 0 32px;
+    }
+
+    /* Legacy compatibility aliases */
+    .desktop-hero-wrap {
+      display: none;
     }
 
     /* Dedicated 3 Supporting Feature Blocks Section Below Hero */
@@ -3087,11 +3513,20 @@
       <button type="button" class="ctrl-pill" id="btnTabOrder" onclick="openOrderFormDirect('peanut-oil')">Đặt Hàng Lẻ</button>
       <button type="button" class="ctrl-pill" id="btnTabQuote" onclick="openQuoteFormDirect('sachi-oil')">Báo Giá Nông Sản</button>
       <button type="button" class="ctrl-pill" id="btnTabKnowledge" onclick="navigateToRoute('knowledge')">📖 Góc Kiến Thức</button>
-      <button type="button" class="ctrl-pill" id="btnTabArticle" onclick="navigateToArticle('smoke-point-guide')">📄 Chi Tiết Bài</button>
+      <button type="button" class="ctrl-pill" id="btnTabArticle" onclick="navigateToArticle('unsaturated-fats-guide')">📄 Chi Tiết Bài</button>
       <button type="button" class="ctrl-pill" id="btnTabReceipt" onclick="navigateToRoute('order-success')">Biên Nhận Đơn</button>
       <button type="button" class="ctrl-pill" id="btnTabTrack" onclick="navigateToRoute('tracking')">Tra Cứu</button>
       <button type="button" class="ctrl-pill" id="btnTabStatus" onclick="navigateToRoute('order-status-detail')">Trạng Thái 5 Bước</button>
       <button type="button" class="ctrl-pill" id="btnTabNetwork" onclick="triggerNetworkUncertainDemo()">Lỗi Mạng Đơn</button>
+    </div>
+
+    <!-- Desktop Views Tester Group -->
+    <div class="control-group" id="desktopViewNavGroup" style="display:none;">
+      <span class="ctrl-label">Trang Desktop:</span>
+      <button type="button" class="ctrl-pill active" id="deskTabHome" onclick="switchDesktopView('home', this)">Trang Chủ</button>
+      <button type="button" class="ctrl-pill" id="deskTabAbout" onclick="switchDesktopView('about', this)">🌿 Về HM Naturals</button>
+      <button type="button" class="ctrl-pill" id="deskTabContact" onclick="switchDesktopView('contact', this)">💬 Liên Hệ</button>
+      <button type="button" class="ctrl-pill" id="deskTabDetail" onclick="openDesktopProductDetail('peanut-oil')">🏺 Chi Tiết Sản Phẩm</button>
     </div>
   </aside>
 
@@ -3139,21 +3574,85 @@
            SCREEN 1: MOBILE HOMEPAGE
            ======================================================== -->
       <section class="screen-view active-view" id="view-home">
-        <div class="hero-carousel-section">
-          <div class="carousel-peeking-info">
-            <span class="section-eyebrow">Tuyển phẩm vụ mùa</span>
+        <!-- Minimalist Natural Mobile Hero Section -->
+        <div class="ref-mobile-hero">
+          <div class="ref-eyebrow">TINH HOA TỪ NÔNG SẢN VIỆT</div>
+          <h1 class="ref-hero-headline" id="mobHeroHeadline">Dầu Lạc Nguyên Chất</h1>
+          <p class="ref-hero-sub" id="mobHeroDesc">Khám phá hương vị đặc trưng của dầu lạc và các sản phẩm dầu thực vật từ nông sản.</p>
+
+          <!-- Mobile Visual Stage (Separated Layers: Sunlight Glow, Unlabeled Bottle, Floor Shadow) -->
+          <div class="ref-stage-wrap" style="min-height:300px;margin:2px 0 6px;">
+            <div class="ref-stage-ambient-glow" style="width:260px;height:260px;"></div>
+            <div class="ref-stage-floor-shadow" style="width:200px;bottom:10px;"></div>
+            <div class="unlabeled-bottle-container" id="refMobileBottleWrapper">
+              <div id="refMobileBottleSvgContainer"></div>
+            </div>
+            <p class="subtle-script-quote" style="right:8px;bottom:8px;font-size:14px;">“Món ngon từ nguyên liệu tốt”</p>
           </div>
 
-          <div class="carousel-track" id="homeHeroCarousel" role="region" aria-label="Băng chuyền sản phẩm nổi bật">
-            <!-- Populated by JS -->
+          <!-- Mobile Compact Horizontal Selector -->
+          <div class="ref-mobile-selector-row" role="tablist" aria-label="Chọn nông phẩm">
+            <button type="button" class="ref-mobile-sel-btn active" id="mobSelPeanut" onclick="selectRefHeroProduct('peanut', this)">
+              <span>🥜</span> <span>Dầu Lạc</span>
+            </button>
+            <button type="button" class="ref-mobile-sel-btn" id="mobSelSesame" onclick="selectRefHeroProduct('sesame', this)">
+              <span>🌾</span> <span>Dầu Mè</span>
+            </button>
+            <button type="button" class="ref-mobile-sel-btn" id="mobSelSachi" onclick="selectRefHeroProduct('sachi', this)">
+              <span>⭐</span> <span>Dầu Sachi</span>
+            </button>
+            <button type="button" class="ref-mobile-sel-btn btn-360" onclick="spinRefHeroBottle()" aria-label="Xoay 360 độ chai dầu" title="Xoay 360°">
+              <span>↻</span> <span>360°</span>
+            </button>
           </div>
 
-          <div class="carousel-dots-row" id="homeCarouselDots" role="tablist" aria-label="Chỉ số vị trí băng chuyền">
-            <!-- Populated dynamically -->
+          <!-- Compact Value Indicators (Free of Unverified Health Claims) -->
+          <div class="ref-hero-indicators" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:4px 0 8px;">
+            <span class="ref-indicator-pill">🌱 100% Nông sản Việt</span>
+            <span class="ref-indicator-pill">⚙️ Quy trình ép nhiệt</span>
+            <span class="ref-indicator-pill">🏺 Thủy tinh tối màu</span>
+          </div>
+
+          <!-- Dual CTAs: Easy to reach on mobile -->
+          <div class="ref-ctas-row">
+            <button type="button" class="ref-btn-order" onclick="openOrderFormDirect('peanut-oil')">
+              <span>Đặt hàng ngay</span>
+              <span>→</span>
+            </button>
+            <button type="button" class="ref-btn-explore" onclick="navigateToRoute('listing')">
+              <span>Khám phá sản phẩm</span>
+            </button>
           </div>
         </div>
 
-        <!-- Category Navigation Rail -->
+        <!-- Section B: Compact Three-Value Section (Mobile) -->
+        <div class="compact-values-section" style="padding:22px var(--screen-pad);margin:12px 0 20px;">
+          <div class="compact-values-grid" style="grid-template-columns:1fr;gap:16px;">
+            <div class="compact-val-card">
+              <div class="compact-val-icon" aria-hidden="true">🌱</div>
+              <div class="compact-val-body">
+                <h3 class="compact-val-title">Nguyên Liệu Nông Sản</h3>
+                <p class="compact-val-desc">Thu mua chọn lọc từ nguồn đậu phộng sẻ và mè bản địa của nông hộ Việt Nam.</p>
+              </div>
+            </div>
+            <div class="compact-val-card">
+              <div class="compact-val-icon" aria-hidden="true">⚙️</div>
+              <div class="compact-val-body">
+                <h3 class="compact-val-title">Quy Trình Ép Nhiệt</h3>
+                <p class="compact-val-desc">Quy trình ép cơ học có kiểm soát nhiệt độ giúp dậy mùi thơm mộc và vắt kiệt dầu tự nhiên.</p>
+              </div>
+            </div>
+            <div class="compact-val-card">
+              <div class="compact-val-icon" aria-hidden="true">🏺</div>
+              <div class="compact-val-body">
+                <h3 class="compact-val-title">Chỉn Chu Trong Từng Sản Phẩm</h3>
+                <p class="compact-val-desc">Lắng lọc tự nhiên qua vải mộc, đóng chai thủy tinh tối màu giúp bảo quản chất lượng nguyên bản.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section C: Product Discovery (Mobile) -->
         <div class="home-section-head">
           <div>
             <span class="section-eyebrow">Hệ sản phẩm mộc</span>
@@ -3175,59 +3674,23 @@
           <!-- Populated by JS -->
         </div>
 
-        <!-- Production Process Section -->
-        <div class="process-strip-card">
-          <span class="section-eyebrow">Quy trình trung thực</span>
-          <h3 style="font-family:var(--font-display);font-size:18px;color:var(--forest-green);margin-top:2px;">Ba Nguyên Tắc Ép Dầu Tự Nhiên HM NATURALS</h3>
-          <div class="process-steps-list">
-            <div class="process-step-item">
-              <div class="step-badge">1</div>
-              <div class="step-text">
-                <h4>Ép cơ học chậm, không tinh luyện</h4>
-                <p>Bảo toàn dinh dưỡng chất béo tự nhiên, không gia nhiệt cao, không qua xử lý hóa chất.</p>
-              </div>
-            </div>
-            <div class="process-step-item">
-              <div class="step-badge">2</div>
-              <div class="step-text">
-                <h4>Lắng lọc tự nhiên qua vải mộc</h4>
-                <p>Không dùng phụ gia tẩy trong hay khử mùi, giữ nguyên độ sánh và hương thơm mộc của hạt.</p>
-              </div>
-            </div>
-            <div class="process-step-item">
-              <div class="step-badge">3</div>
-              <div class="step-text">
-                <h4>Bảo quản chai thủy tinh tối màu</h4>
-                <p>Hạn chế tác động của ánh sáng, giúp duy trì chất lượng và độ tươi của dầu sau khi ép.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Brand Story Section -->
-        <div class="story-banner">
-          <h3>Gìn Giữ Hạt Nông Sản Thuần Bản Địa</h3>
-          <p>Mỗi giọt dầu HM NATURALS được làm từ nguồn nông sản chọn lọc, thu mua trung thực từ nông hộ bản địa, giữ trọn vẹn sự tinh khiết và dinh dưỡng lành mạnh.</p>
-          <button type="button" class="btn-action-touch quote-flow" style="background:#FFF;" onclick="openDrawerWithSection('hotline')">Liên Hệ Xưởng Ép</button>
-        </div>
-
-        <!-- Homepage Featured Knowledge Section (Góc Kiến Thức — Task 1) -->
-        <div class="home-section-head" style="margin-top:20px;">
+        <!-- Knowledge Hub Section (Mobile - 2 Featured Articles) -->
+        <div class="home-section-head" style="margin-top:28px;">
           <div>
-            <span class="section-eyebrow">Cẩm nang &amp; Kinh nghiệm</span>
+            <span class="section-eyebrow">Cẩm nang &amp; Nghiên cứu</span>
             <h2 class="section-title">Góc Kiến Thức</h2>
           </div>
           <a href="#knowledge" class="section-more-link" onclick="navigateToRoute('knowledge'); return false;">Xem tất cả →</a>
         </div>
 
         <div class="knowledge-featured-list" id="homeKnowledgeList">
-          <!-- Populated dynamically from knowledgeArticles (3 featured articles) -->
+          <!-- Populated dynamically with 2 featured articles -->
         </div>
 
-        <!-- Footer -->
+        <!-- Section G: Footer -->
         <footer class="app-footer">
           <div class="footer-brand" id="footerBrandName">HM NATURALS</div>
-          <p id="footerFacility">Cơ sở sản xuất & ép dầu tự nhiên HM NATURALS</p>
+          <p id="footerFacility">Cơ sở sản xuất &amp; ép dầu tự nhiên HM NATURALS</p>
           <p id="footerContactNote">Hỗ trợ tư vấn đặt hàng và báo giá sỉ trực tiếp qua Zalo và Hotline xưởng</p>
         </footer>
       </section>
@@ -3369,7 +3832,7 @@
           <div class="form-order-summary">
             <img class="order-item-thumb" id="orderFormImg" src="" alt="Đơn hàng" />
             <div style="flex:1;">
-              <h4 style="font-family:var(--font-display);font-size:15px;color:var(--forest-green);" id="orderFormProdTitle">Dầu Phộng Ép Lạnh</h4>
+              <h4 style="font-family:var(--font-display);font-size:15px;color:var(--forest-green);" id="orderFormProdTitle">Dầu Lạc Ép Nhiệt</h4>
               <span style="font-size:12px;color:var(--text-muted);" id="orderFormProdMeta">Dung tích: 500ml • Số lượng: 1</span>
               <div style="font-weight:700;color:var(--dark-cocoa);font-size:15px;margin-top:2px;" id="orderFormTotalVal">165.000 ₫</div>
             </div>
@@ -3549,7 +4012,7 @@
             <div class="order-code-box">
               <div style="text-align:left;">
                 <span style="font-size:10px;font-weight:600;color:var(--peanut-bark);text-transform:uppercase;display:block;">Mã Yêu Cầu Chính Thức:</span>
-                <span class="order-code-text" id="receiptOfficialCode">HMN-2026-9812</span>
+                <span class="order-code-text" id="receiptOfficialCode">DH-20260930-108</span>
               </div>
               <button type="button" class="copy-pill-btn" id="btnCopyOrderCode" onclick="copyReceiptOrderCode()">
                 <span>Sao chép</span>
@@ -3566,7 +4029,7 @@
           <div class="form-order-summary" id="receiptSummaryCard">
             <img class="order-item-thumb" id="receiptThumbImg" src="" alt="Đơn hàng" />
             <div style="flex:1;">
-              <h4 style="font-family:var(--font-display);font-size:15px;color:var(--forest-green);" id="receiptProdTitle">Dầu Phộng Ép Lạnh</h4>
+              <h4 style="font-family:var(--font-display);font-size:15px;color:var(--forest-green);" id="receiptProdTitle">Dầu Lạc Ép Nhiệt</h4>
               <span style="font-size:12px;color:var(--text-muted);" id="receiptProdMeta">Dung tích: 500ml • Số lượng: 1</span>
               <div style="font-weight:700;color:var(--dark-cocoa);font-size:15px;margin-top:2px;" id="receiptTotalVal">165.000 ₫</div>
             </div>
@@ -3574,7 +4037,7 @@
 
           <!-- Actions -->
           <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">
-            <button type="button" class="btn-action-touch fixed-flow" style="width:100%;height:46px;" onclick="navigateToTrackingDetail('HMN-2026-9812')">
+            <button type="button" class="btn-action-touch fixed-flow" style="width:100%;height:46px;" onclick="navigateToTrackingDetail('DH-20260930-108')">
               Tra Cứu Đơn Hàng
             </button>
             <button type="button" class="btn-action-touch quote-flow" style="width:100%;height:46px;" onclick="navigateToRoute('home')">
@@ -3606,7 +4069,7 @@
           <form id="guestTrackingForm" onsubmit="handleGuestLookup(event)">
             <div class="form-row-group">
               <label class="form-field-label">Mã yêu cầu đơn hàng *</label>
-              <input type="text" class="form-field-input" id="inputTrackCode" placeholder="Ví dụ: HMN-2026-9812" style="font-family:ui-monospace, monospace;font-weight:600;" required />
+              <input type="text" class="form-field-input" id="inputTrackCode" placeholder="Ví dụ: DH-20260930-108" style="font-family:ui-monospace, monospace;font-weight:600;" required />
             </div>
 
             <div class="form-row-group">
@@ -3629,7 +4092,7 @@
           <div class="home-section-head" style="padding:0 0 12px;">
             <div>
               <span class="section-eyebrow">Tiến độ xử lý yêu cầu</span>
-              <h2 class="section-title" id="statusDetailOrderCodeTitle">HMN-2026-9812</h2>
+              <h2 class="section-title" id="statusDetailOrderCodeTitle">DH-20260930-108</h2>
             </div>
             <button type="button" class="ctrl-pill" style="color:var(--dark-cocoa);background:#FFF;border-color:var(--soft-sand);" onclick="navigateToRoute('tracking')">Tra cứu khác</button>
           </div>
@@ -3652,7 +4115,7 @@
             <span style="font-size:11px;font-weight:600;color:var(--deep-olive);text-transform:uppercase;display:block;margin-bottom:6px;">Thông tin bảo mật khách hàng:</span>
             <div class="privacy-info-row">
               <span class="privacy-lbl">Mã yêu cầu đơn:</span>
-              <span class="privacy-val" id="privacyCode">HMN-2026-9812</span>
+              <span class="privacy-val" id="privacyCode">DH-20260930-108</span>
             </div>
             <div class="privacy-info-row">
               <span class="privacy-lbl">Số điện thoại:</span>
@@ -3672,7 +4135,7 @@
           <div class="form-order-summary">
             <img class="order-item-thumb" id="statusProdThumb" src="" alt="Đơn hàng" />
             <div style="flex:1;">
-              <h4 style="font-family:var(--font-display);font-size:15px;color:var(--forest-green);" id="statusProdName">Dầu Phộng Ép Lạnh</h4>
+              <h4 style="font-family:var(--font-display);font-size:15px;color:var(--forest-green);" id="statusProdName">Dầu Lạc Ép Nhiệt</h4>
               <span style="font-size:12px;color:var(--text-muted);" id="statusProdVariant">Dung tích: 500ml • Số lượng: 1</span>
               <div style="font-weight:700;color:var(--dark-cocoa);font-size:15px;margin-top:2px;" id="statusProdPrice">165.000 ₫</div>
             </div>
@@ -3769,6 +4232,11 @@
             <!-- Rendered dynamically -->
           </div>
 
+          <!-- Scientific Sources & References Box -->
+          <div id="artDetailSources">
+            <!-- Rendered dynamically -->
+          </div>
+
           <!-- Related Products Section -->
           <div class="article-related-box" id="artRelatedProductsBox">
             <span class="section-eyebrow">Nông phẩm đề xuất trong bài</span>
@@ -3808,7 +4276,7 @@
             </span>
             <h1 class="about-hero-title">Gìn Giữ Hạt Nông Sản Thuần Bản Địa</h1>
             <p class="about-hero-lead">
-              Chúng tôi không tìm kiếm sự hào nhoáng công nghiệp, mà kiên định đồng hành cùng người nông dân giữ gìn giống hạt bản địa và phương pháp ép mộc cối đá cổ truyền.
+              Chúng tôi không tìm kiếm sự hào nhoáng công nghiệp, mà kiên định đồng hành cùng người nông dân giữ gìn giống hạt bản địa và phương pháp ép nhiệt cơ học truyền thống.
             </p>
           </div>
 
@@ -3821,12 +4289,12 @@
                 HM Naturals ra đời tại vùng bãi bồi sông Đáy nơi đất cát pha màu mỡ nuôi dưỡng những mẻ lạc sẻ đỏ vỏ mỏng, giàu dầu và nức tiếng thơm bùi.
               </p>
               <p class="about-story-p">
-                Nhận thấy người tiêu dùng ngày càng lo ngại trước dầu ăn công nghiệp tinh luyện nhiều hóa chất, xưởng chọn con đường ép cơ học chậm tự nhiên — giữ nguyên độ sánh, sắc vàng mật ong và hương vị mộc chân thật nhất.
+                Nhận thấy người tiêu dùng ngày càng lo ngại trước dầu ăn công nghiệp tinh luyện nhiều hóa chất, xưởng chọn con đường ép nhiệt cơ học nguyên chất — giữ nguyên độ sánh, sắc vàng tự nhiên và hương vị mộc chân thật nhất.
               </p>
               <div class="about-tags-row">
-                <span class="about-tag-pill">🌱 Ép cơ học chậm</span>
-                <span class="about-tag-pill">🪨 Lọc vải mộc 48h</span>
-                <span class="about-tag-pill">🏺 Chai thủy tinh hổ phách</span>
+                <span class="about-tag-pill">🌱 Ép nhiệt cơ học</span>
+                <span class="about-tag-pill">🪨 Lắng lọc vải mộc</span>
+                <span class="about-tag-pill">🏺 Chai thủy tinh tối màu</span>
               </div>
             </div>
 
@@ -3852,10 +4320,10 @@
                 <circle cx="300" cy="278" r="14" fill="#F0E5D4" stroke="#7A4B13" stroke-width="1"/>
                 <text x="300" y="283" font-family="sans-serif" font-size="12" text-anchor="middle">🥜</text>
                 <text x="300" y="310" font-family="'Playfair Display', serif" font-size="9" font-weight="bold" fill="#221A14" text-anchor="middle">DẦU ĐẬU PHỘNG</text>
-                <text x="300" y="324" font-family="'Be Vietnam Pro', sans-serif" font-size="7" font-weight="600" fill="#474E2B" text-anchor="middle" letter-spacing="1">ÉP CƠ HỌC MỘC</text>
+                <text x="300" y="324" font-family="'Be Vietnam Pro', sans-serif" font-size="7" font-weight="600" fill="#474E2B" text-anchor="middle" letter-spacing="1">ÉP NHIỆT MỘC</text>
                 <text x="300" y="340" font-family="'Be Vietnam Pro', sans-serif" font-size="7" fill="#7A4B13" text-anchor="middle">500ml • Chai Thủy Tinh</text>
               </svg>
-              <div class="about-bottle-caption">500ml • Chai Thủy Tinh Hổ Phách</div>
+              <div class="about-bottle-caption">500ml • Chai Thủy Tinh Mộc</div>
               <div class="about-quote-box">
                 “Mỗi giọt dầu là kết tinh của mùa vụ bản địa và bàn tay người ép mộc.”
               </div>
@@ -3895,12 +4363,12 @@
 
               <div class="about-value-card">
                 <div class="about-value-card-head">
-                  <div class="about-value-icon">🌿</div>
+                  <div class="about-value-icon">🏺</div>
                   <span class="about-value-num">03</span>
                 </div>
-                <h3 class="about-value-name">Bền Vững</h3>
+                <h3 class="about-value-name">Chỉn Chu Từng Sản Phẩm</h3>
                 <p class="about-value-text">
-                  Tôn trọng môi trường từ khâu đóng chai thủy tinh sẫm màu tái sử dụng được, đến việc tận dụng phụ phẩm bã đậu làm thức ăn gia súc và phân bón hữu cơ.
+                  Tỉ mỉ trong từng công đoạn từ khâu chọn hạt nông sản, kiểm soát nhiệt độ ép, đến lắng lọc tự nhiên qua vải mộc và đóng chai thủy tinh tối màu giúp bảo quản chất lượng nguyên bản.
                 </p>
               </div>
             </div>
@@ -4185,7 +4653,7 @@
         <div style="width:52px;height:52px;border-radius:50%;background:var(--forest-green);color:#FFF;display:grid;place-items:center;margin:0 auto 12px;font-size:24px;">✓</div>
         <h3 style="font-family:var(--font-display);font-size:19px;color:var(--forest-green);margin-bottom:6px;">Đã Gửi Yêu Cầu Thành Công</h3>
         <div style="background:var(--white-pure);padding:8px;border-radius:8px;font-size:12px;color:var(--peanut-bark);margin-bottom:10px;font-weight:600;" id="modalOrderRef">
-          Mã xác nhận yêu cầu: HMN-2026-9812
+          Mã xác nhận yêu cầu: DH-20260930-108
         </div>
         <p style="font-size:13px;color:var(--text-muted);line-height:1.5;margin-bottom:16px;" id="modalSuccessDesc">
           Xưởng đã ghi nhận thông tin. Nghệ nhân sẽ liên hệ qua Zalo hoặc số điện thoại trong vòng 15 phút để xác nhận ngày xuất xưởng.
@@ -4209,14 +4677,14 @@
 
         <div style="background:#EDE6DC;border-radius:12px;padding:16px;text-align:center;margin-bottom:14px;border:1px solid var(--soft-sand);">
           <div style="font-size:36px;margin-bottom:4px;">🍾</div>
-          <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--forest-green);">Khu Vực Nhận Diện Chai 3D Three.js</div>
-          <span style="font-size:11px;font-weight:600;color:var(--peanut-bark);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-top:2px;">Bảo lưu thương hiệu HM NATURALS</span>
+          <div style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--forest-green);">Mục Tiêu Thiết Kế Chai 3D Tương Lai</div>
+          <span style="font-size:11px;font-weight:600;color:var(--peanut-bark);text-transform:uppercase;letter-spacing:0.08em;display:block;margin-top:2px;">Visual Design Target • HM NATURALS</span>
         </div>
 
         <div style="font-size:12px;color:var(--text-muted);line-height:1.55;display:flex;flex-direction:column;gap:8px;">
-          <div><b>• Nhãn chai 3D:</b> Chữ dập nổi <i>HM NATURALS • BẢN ĐỊA ÉP LẠNH</i> trên chất liệu thủy tinh hổ phách quang học.</div>
-          <div><b>• Tương tác chuẩn bị:</b> Hỗ trợ rê chuột xoay đa chiều (`mouse-following rotation`) và kéo xoay 360° tự do trên Desktop 1440px.</div>
-          <div><b>• Cơ chế Fallback an toàn:</b> Tự động hiển thị ảnh tĩnh sắc nét khi thiết bị không hỗ trợ WebGL hoặc người dùng chọn giảm chuyển động (`prefers-reduced-motion`).</div>
+          <div><b>• Thiết kế mục tiêu:</b> Thân chai thủy tinh trong suốt dáng chữ nhật bo góc, nắp gỗ mộc, chứa dầu thực vật vàng óng mộc nguyên bản, không dán nhãn.</div>
+          <div><b>• Tương tác nguyên mẫu:</b> Bản mô phỏng tĩnh hỗ trợ rê chuột nghiêng góc nhìn và xoay tròn; mô hình 3D tương tác thực tế bằng Blender GLB sẽ được tích hợp ở giai đoạn sau.</div>
+          <div><b>• Quy chuẩn thương mại:</b> Bao bì thương mại thực tế, dung tích và các biến thể phân phối chính thức là thông tin chờ xác nhận từ chủ xưởng.</div>
         </div>
 
         <button type="button" class="btn-action-touch fixed-flow" style="width:100%;height:44px;margin-top:16px;" onclick="closeThreeJsReservationModal()">
@@ -4252,11 +4720,13 @@
     <!-- Desktop Sticky Header & Navbar -->
     <header class="desktop-header">
       <div class="desktop-header-main">
-        <a href="#desktop-home" class="desktop-brand-lockup" aria-label="HM NATURALS Trang Chủ">
-          <div class="brand-icon" style="width:36px;height:36px;font-size:16px;" aria-hidden="true">HM</div>
+        <a href="#desktop-home" class="desktop-brand-lockup" aria-label="HM NATURALS Trang Chủ" onclick="switchDesktopView('home', this); return false;">
+          <div class="brand-icon" style="width:38px;height:38px;background:var(--forest-green);border-radius:10px;display:grid;place-items:center;color:#E8DEC8;" aria-hidden="true">
+            <span style="font-family:var(--font-display);font-weight:700;font-size:17px;color:#C88B3A;">HM</span>
+          </div>
           <div class="brand-text-wrap">
-            <span class="brand-text-name" style="font-size:19px;">HM NATURALS</span>
-            <span class="brand-text-tagline" style="font-size:9px;">DẦU NÔNG SẢN NGUYÊN BẢN</span>
+            <span class="brand-text-name" style="font-size:20px;font-family:var(--font-display);font-weight:700;color:var(--dark-cocoa);">HM NATURALS</span>
+            <span class="brand-text-tagline" style="font-size:8.5px;letter-spacing:0.18em;color:var(--peanut-bark);font-weight:600;">DẦU NÔNG SẢN NGUYÊN BẢN</span>
           </div>
         </a>
 
@@ -4264,31 +4734,30 @@
         <nav class="desktop-nav-wrap" aria-label="Menu điều hướng Desktop">
           <ul class="desktop-nav-menu">
             <li><a href="#desktop-home" class="desktop-nav-link active" id="deskNavLinkHome" onclick="switchDesktopView('home', this); return false;">Trang Chủ</a></li>
-            <li><a href="#desktop-about" class="desktop-nav-link" id="deskNavLinkAbout" onclick="switchDesktopView('about', this); return false;">Về HM Naturals</a></li>
-            <li><a href="#listing" class="desktop-nav-link" onclick="navigateToRoute('listing'); switchDeviceMode('mobile', document.getElementById('btnModeMobile')); return false;">Sản Phẩm</a></li>
-            <li><a href="#knowledge" class="desktop-nav-link" onclick="navigateToRoute('knowledge'); switchDeviceMode('mobile', document.getElementById('btnModeMobile')); return false;">Góc Kiến Thức</a></li>
-            <li><a href="#quote" class="desktop-nav-link" onclick="openQuoteFormDirect('sachi-oil'); switchDeviceMode('mobile', document.getElementById('btnModeMobile')); return false;">Báo Giá Sỉ</a></li>
-            <li><a href="#tracking" class="desktop-nav-link" onclick="navigateToRoute('tracking'); switchDeviceMode('mobile', document.getElementById('btnModeMobile')); return false;">Tra Cứu Đơn</a></li>
+            <li><a href="#desktopProductDiscovery" class="desktop-nav-link" onclick="document.getElementById('desktopProductDiscovery') ? document.getElementById('desktopProductDiscovery').scrollIntoView({behavior:'smooth'}) : switchDesktopView('home'); return false;">Sản Phẩm</a></li>
+            <li><a href="#desktop-about" class="desktop-nav-link" id="deskNavLinkAbout" onclick="switchDesktopView('about', this); return false;">Câu Chuyện</a></li>
+            <li><a href="#desktopHomeValues" class="desktop-nav-link" onclick="switchDesktopView('home'); setTimeout(function(){ document.getElementById('desktopHomeValues') ? document.getElementById('desktopHomeValues').scrollIntoView({behavior:'smooth'}) : null; }, 100); return false;">Quy Trình</a></li>
+            <li><a href="#desktopKnowledgeHub" class="desktop-nav-link" onclick="document.getElementById('desktopKnowledgeHub') ? document.getElementById('desktopKnowledgeHub').scrollIntoView({behavior:'smooth'}) : switchDesktopView('home'); return false;">Góc Kiến Thức</a></li>
             <li><a href="#desktop-contact" class="desktop-nav-link" id="deskNavLinkContact" onclick="switchDesktopView('contact', this); return false;">Liên Hệ</a></li>
           </ul>
         </nav>
 
         <!-- Desktop Right Actions Cluster -->
         <div class="desktop-actions-cluster">
-          <div class="desktop-search-box">
+          <button type="button" class="desktop-search-box" style="cursor:pointer;" onclick="navigateToRoute('listing'); switchDeviceMode('mobile', document.getElementById('btnModeMobile'));" aria-label="Tìm kiếm">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" placeholder="Tìm kiếm nông phẩm..." style="border:none;background:transparent;outline:none;font-size:13px;width:100%;color:var(--dark-cocoa);" />
-            <kbd style="font-size:10px;background:var(--warm-cream);padding:2px 5px;border-radius:4px;border:1px solid var(--soft-sand);color:var(--text-muted);">⌘K</kbd>
-          </div>
+            <span style="font-size:12.5px;color:var(--text-muted);">Tìm kiếm...</span>
+            <kbd style="font-size:10px;background:var(--warm-cream);padding:2px 5px;border-radius:4px;border:1px solid var(--soft-sand);color:var(--text-muted);margin-left:auto;">⌘K</kbd>
+          </button>
 
           <button type="button" class="desktop-cart-btn" onclick="toggleCartDrawer(true)" aria-label="Mở giỏ hàng">
             <span>🛒</span>
             <span>Giỏ Hàng</span>
-            <span style="background:var(--forest-green);color:#FFF;padding:2px 7px;border-radius:99px;font-size:11px;">2</span>
+            <span style="background:var(--forest-green);color:#FFF;padding:2px 7px;border-radius:99px;font-size:11px;" id="deskCartBadgeCount">2</span>
           </button>
 
           <button type="button" class="desktop-cta-btn" onclick="openOrderFormDirect('peanut-oil')">
-            Gửi Yêu Cầu Mua
+            Đặt hàng ngay
           </button>
 
           <button type="button" class="desktop-menu-btn" onclick="toggleNavDrawer(true)" aria-label="Mở thực đơn">
@@ -4301,99 +4770,180 @@
 
     <!-- Desktop Homepage Content Container -->
     <div id="desktopViewHome">
-      <!-- Desktop Homepage Hero Section (Asymmetrical Editorial Grid) -->
-      <section class="desktop-hero-wrap" id="desktopHeroSection">
-      <!-- Left Column: Editorial Brand Story & Primary Actions -->
-      <div class="desktop-hero-content">
-        <div class="desktop-eyebrow">
-          <span style="color:var(--peanut-gold);font-size:16px;">🌿</span>
-          <span>DẦU THỰC VẬT ÉP CƠ HỌC BẢN ĐỊA</span>
-        </div>
+      <!-- Section A: Desktop Minimalist Natural Golden-Sunlight Hero Section -->
+      <section class="ref-hero-wrap" id="desktopHeroSection">
+        <!-- Left Column: Editorial Brand Story & Primary Actions -->
+        <div class="ref-hero-left">
+          <div class="ref-eyebrow">
+            <span>TINH HOA TỪ NÔNG SẢN VIỆT</span>
+          </div>
 
-        <h1 class="desktop-hero-title">
-          Vẹn Nguyên Giọt Dầu Thuần Khiết Từ Đất Mẹ
-        </h1>
+          <h1 class="ref-hero-title" id="refHeroHeadline">
+            <span id="refHeroTitleL1">Dầu Lạc</span>
+            <span id="refHeroTitleL2">Nguyên Chất</span>
+          </h1>
 
-        <p class="desktop-hero-desc">
-          Dầu ăn ép cơ học nguyên bản từ nguồn đậu phộng sẻ và mè đen bản địa. Không tinh luyện hóa chất, giữ trọn sắc sánh và hương vị mộc mạc cho gian bếp gia đình.
-        </p>
+          <p class="ref-hero-desc" id="refHeroDesc">
+            Khám phá hương vị đặc trưng của dầu lạc và các sản phẩm dầu thực vật từ nông sản.
+          </p>
 
-        <div class="desktop-hero-ctas">
-          <button type="button" class="btn-hero-primary" onclick="navigateToRoute('listing'); switchDeviceMode('mobile', document.getElementById('btnModeMobile'));">
-            <span>Khám Phá Tuyển Phẩm</span>
-            <span>→</span>
-          </button>
-          <button type="button" class="btn-hero-secondary" onclick="openQuoteFormDirect('sachi-oil'); switchDeviceMode('mobile', document.getElementById('btnModeMobile'));">
-            <span>Yêu Cầu Báo Giá Sỉ</span>
-          </button>
-        </div>
-      </div>
+          <!-- Compact Value Indicators (Neutral, Free of Health/Nutritional Claims) -->
+          <div class="ref-hero-indicators">
+            <span class="ref-indicator-pill">🌱 100% Nông sản Việt</span>
+            <span class="ref-indicator-pill">⚙️ Quy trình ép nhiệt</span>
+            <span class="ref-indicator-pill">🏺 Thủy tinh tối màu</span>
+          </div>
 
-      <!-- Right Column: Dedicated Interactive 3D Bottle Stage (Reserved for Three.js) -->
-      <div class="desktop-3d-stage" id="desktopBottleStage" onmousemove="handleBottleStageMouseMove(event)" onmouseleave="handleBottleStageMouseLeave()">
-        <!-- Interactive 3D Bottle Simulator (Occupies ~65-70% Stage Height) -->
-        <div class="desktop-bottle-wrapper" id="desktopBottleWrapper">
-          <svg class="desktop-bottle-svg" viewBox="180 50 240 370" xmlns="http://www.w3.org/2000/svg">
-            <radialGradient id="deskG" cx="50%" cy="45%" r="60%">
-              <stop offset="0%" stop-color="#FFE8C2" stop-opacity="0.8"/>
-              <stop offset="60%" stop-color="#E8CEB0" stop-opacity="0.3"/>
-              <stop offset="100%" stop-color="#F2EADF" stop-opacity="0"/>
-            </radialGradient>
-            <ellipse cx="300" cy="400" rx="90" ry="16" fill="#3D3024" opacity="0.25"/>
-            <!-- Amber Glass Bottle Body -->
-            <path d="M245 105 h110 v35 l30 55 v180 c0 16 -12 28 -28 28 h-114 c-16 0 -28 -12 -28 -28 v-180 l30 -55 z" fill="#8C4E15"/>
-            <path d="M252 195 h96 v170 c0 12 -10 22 -22 22 h-52 c-12 0 -22 -10 -22 -22 z" fill="#D98A2B" opacity="0.95"/>
-            <!-- Glass Optical Reflections -->
-            <path d="M256 198 v165" stroke="#FFFFFF" stroke-width="6" opacity="0.45" stroke-linecap="round"/>
-            <path d="M344 205 v158" stroke="#FFE7BA" stroke-width="3.5" opacity="0.4" stroke-linecap="round"/>
-            <!-- Wooden Stopper -->
-            <rect x="268" y="65" width="64" height="42" rx="5" fill="#422915"/>
-            <rect x="272" y="70" width="56" height="8" rx="2" fill="#C88B3A" opacity="0.85"/>
-            <!-- Artisanal Typographic Label -->
-            <rect x="256" y="220" width="88" height="135" rx="4" fill="#FAF6EE" stroke="#D9CDBF"/>
-            <text x="300" y="246" font-family="'Playfair Display', serif" font-size="10.5" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">HM NATURALS</text>
-            <line x1="268" y1="254" x2="332" y2="254" stroke="#C88B3A" stroke-width="1.2"/>
-            <circle cx="300" cy="278" r="14" fill="#F0E5D4" stroke="#7A4B13" stroke-width="1"/>
-            <text x="300" y="283" font-family="sans-serif" font-size="12" text-anchor="middle">🥜</text>
-            <text x="300" y="310" font-family="'Playfair Display', serif" font-size="9" font-weight="bold" fill="#221A14" text-anchor="middle">DẦU ĐẬU PHỘNG</text>
-            <text x="300" y="324" font-family="'Be Vietnam Pro', sans-serif" font-size="7" font-weight="600" fill="#474E2B" text-anchor="middle" letter-spacing="1">ÉP CƠ HỌC MỘC</text>
-            <text x="300" y="340" font-family="'Be Vietnam Pro', sans-serif" font-size="7" fill="#7A4B13" text-anchor="middle">500ml • Chai Thủy Tinh</text>
-          </svg>
-        </div>
+          <!-- Dual Action Buttons -->
+          <div class="ref-ctas-row">
+            <button type="button" class="ref-btn-order" onclick="openOrderFormDirect('peanut-oil')">
+              <span>Đặt hàng ngay</span>
+              <span>→</span>
+            </button>
+            <button type="button" class="ref-btn-explore" onclick="document.getElementById('desktopProductDiscovery') ? document.getElementById('desktopProductDiscovery').scrollIntoView({behavior:'smooth'}) : null;">
+              <span>Khám phá sản phẩm</span>
+            </button>
+          </div>
 
-        <!-- Subtle Floating Pill: Product Volume & Packaging -->
-        <div class="stage-badge-volume">
-          500ml • Chai Thủy Tinh Hổ Phách
-        </div>
-      </div>
-    </section>
-
-    <!-- Dedicated 3 Supporting Feature Blocks Section Below Hero -->
-    <section class="desktop-trust-section" id="desktopHeroPillars" aria-label="Cam kết chất lượng nông sản">
-      <div class="desktop-trust-grid">
-        <div class="pillar-card">
-          <div class="pillar-icon">🌱</div>
-          <div class="pillar-content">
-            <strong>Nông Sản Thuần Bản Địa</strong>
-            <span>Đậu phộng sẻ và mè đen thuần nông tuyển chọn từ nông hộ Việt Nam, hạt chắc mẩy giàu dinh dưỡng.</span>
+          <!-- Bottom Left Scroll Prompt -->
+          <div class="ref-scroll-prompt">
+            <span class="ref-scroll-arrow">↓</span>
+            <span>SCROLL ĐỂ KHÁM PHÁ</span>
           </div>
         </div>
-        <div class="pillar-card">
-          <div class="pillar-icon">⚙️</div>
-          <div class="pillar-content">
-            <strong>Ép Cơ Học Mộc</strong>
-            <span>Quy trình ép chậm vật lý không qua tinh luyện hóa chất, giữ vẹn nguyên sắc sánh và mùi thơm tự nhiên.</span>
+
+        <!-- Center & Right Stage: Bottle + Golden Sunlight Ambient + Meniscus + Thumbnails + 360 -->
+        <div class="ref-stage-wrap" id="refDesktopStage" onmousemove="handleRefStageMouseMove(event)" onmouseleave="handleRefStageMouseLeave()">
+          <!-- Layer 1: Sunlight Ambient Glow (Warm glow from upper-right) -->
+          <div class="ref-stage-ambient-glow"></div>
+          <!-- Layer 2: Soft Floor Shadow underneath bottle -->
+          <div class="ref-stage-floor-shadow"></div>
+
+          <!-- Layer 3: Standalone Unlabeled Bottle Layer (Separate layer for future Blender GLB swap) -->
+          <div class="unlabeled-bottle-container" id="refBottleWrapper">
+            <div id="refBottleSvgContainer">
+              <!-- Rendered dynamically via getUnlabeledBottleSvg -->
+            </div>
+          </div>
+
+          <!-- Layer 4: Subtle Cursive Script Quote (Reduced Prominence) -->
+          <p class="subtle-script-quote" aria-hidden="true">“Món ngon bắt đầu từ nguyên liệu tốt”</p>
+
+          <!-- Layer 5: Compact Right-Side Product Selector Dock -->
+          <div class="ref-thumbs-dock" role="tablist" aria-label="Chọn sản phẩm trưng bày">
+            <div class="ref-thumb-card active" id="refThumbPeanut" onclick="selectRefHeroProduct('peanut', this)" role="tab" aria-selected="true" tabindex="0" title="Dầu Lạc Nguyên Chất">
+              <div id="refThumbMiniPeanut"></div>
+              <span class="ref-thumb-label">Dầu Lạc</span>
+            </div>
+            <div class="ref-thumb-card" id="refThumbSesame" onclick="selectRefHeroProduct('sesame', this)" role="tab" aria-selected="false" tabindex="0" title="Dầu Mè Đen Rang Mộc">
+              <div id="refThumbMiniSesame"></div>
+              <span class="ref-thumb-label">Dầu Mè</span>
+            </div>
+            <div class="ref-thumb-card" id="refThumbSachi" onclick="selectRefHeroProduct('sachi', this)" role="tab" aria-selected="false" tabindex="0" title="Dầu Hạt Sachi Ép Cơ Học">
+              <div id="refThumbMiniSachi"></div>
+              <span class="ref-thumb-label">Dầu Sachi</span>
+            </div>
+
+            <!-- 360 Degree Rotation Trigger Badge -->
+            <div class="ref-360-badge" onclick="spinRefHeroBottle()" role="button" aria-label="Xoay 360 độ chai dầu" title="Bấm để xoay 360°">
+              <div class="ref-360-circle">
+                <span class="ref-360-num">360°</span>
+                <span class="ref-360-icon">↻</span>
+              </div>
+              <span class="ref-360-text">Kéo để xoay</span>
+            </div>
+          </div>
+
+          <!-- Bottom Center Interaction Indicator Pill -->
+          <div class="ref-drag-indicator">
+            <span>🖱️</span>
+            <span>Kéo hoặc chạm để tương tác 3D</span>
           </div>
         </div>
-        <div class="pillar-card">
-          <div class="pillar-icon">🏺</div>
-          <div class="pillar-content">
-            <strong>Thủy Tinh Tối Màu</strong>
-            <span>Lắng lọc tự nhiên qua vải dâu mộc, đóng chai thủy tinh hổ phách chắn sáng giúp bảo quản bền lâu.</span>
+      </section>
+
+      <!-- Section B: Compact Three-Value Section (Desktop) -->
+      <section class="compact-values-section" id="desktopHomeValues" aria-label="Ba giá trị cốt lõi">
+        <div class="compact-values-grid">
+          <div class="compact-val-card">
+            <div class="compact-val-icon" aria-hidden="true">🌱</div>
+            <div class="compact-val-body">
+              <h3 class="compact-val-title">Nguyên Liệu Nông Sản</h3>
+              <p class="compact-val-desc">Thu mua chọn lọc từ nguồn đậu phộng sẻ và mè bản địa của nông hộ Việt Nam.</p>
+            </div>
+          </div>
+          <div class="compact-val-card">
+            <div class="compact-val-icon" aria-hidden="true">⚙️</div>
+            <div class="compact-val-body">
+              <h3 class="compact-val-title">Quy Trình Ép Nhiệt</h3>
+              <p class="compact-val-desc">Quy trình ép cơ học có kiểm soát nhiệt độ giúp dậy mùi thơm mộc và vắt kiệt dầu tự nhiên.</p>
+            </div>
+          </div>
+          <div class="compact-val-card">
+            <div class="compact-val-icon" aria-hidden="true">🏺</div>
+            <div class="compact-val-body">
+              <h3 class="compact-val-title">Chỉn Chu Trong Từng Sản Phẩm</h3>
+              <p class="compact-val-desc">Lắng lọc tự nhiên qua vải mộc, đóng chai thủy tinh tối màu giúp bảo quản chất lượng nguyên bản.</p>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <!-- Section C: Product Discovery (Desktop) -->
+      <section class="desktop-discovery-section" id="desktopProductDiscovery" aria-label="Khám phá sản phẩm">
+        <div class="home-section-head">
+          <div>
+            <span class="section-eyebrow">Hệ sản phẩm mộc</span>
+            <h2 class="section-title">Danh Mục Nông Sản</h2>
+          </div>
+          <span style="font-size:13px;color:var(--text-muted);">Tuyển phẩm dầu ăn &amp; nông sản tự nhiên</span>
+        </div>
+
+        <div class="category-chip-rail" style="margin-bottom:24px;">
+          <button type="button" class="cat-chip-btn active" onclick="filterDesktopCategory('all', this)">Tất Cả (4)</button>
+          <button type="button" class="cat-chip-btn" onclick="filterDesktopCategory('peanut', this)">Dầu Đậu Phộng</button>
+          <button type="button" class="cat-chip-btn" onclick="filterDesktopCategory('sesame', this)">Dầu Mè</button>
+          <button type="button" class="cat-chip-btn" onclick="filterDesktopCategory('sachi', this)">Dầu Hạt Sachi</button>
+          <button type="button" class="cat-chip-btn" onclick="filterDesktopCategory('byproduct', this)">Phụ Phẩm Sạch</button>
+        </div>
+
+        <div class="desktop-product-grid" id="desktopProductGridContainer">
+          <!-- Populated dynamically from catalogProducts -->
+        </div>
+      </section>
+
+      <!-- Knowledge Hub Section (Desktop) -->
+      <section class="desktop-knowledge-section" id="desktopKnowledgeHub" aria-label="Góc kiến thức dinh dưỡng">
+        <div class="home-section-head">
+          <div>
+            <span class="section-eyebrow">Cẩm nang &amp; Nghiên cứu</span>
+            <h2 class="section-title">Góc Kiến Thức Dinh Dưỡng</h2>
+          </div>
+          <span style="font-size:13px;color:var(--text-muted);">Tài liệu tham khảo y khoa &amp; dinh dưỡng</span>
+        </div>
+
+        <div class="knowledge-scientific-disclaimer">
+          <strong>Lưu ý khoa học:</strong> Các bài viết trong Góc Kiến Thức được biên soạn dựa trên các hướng dẫn dinh dưỡng chính thức từ Tổ chức Y tế Thế giới (WHO), Trường Y tế Công cộng Harvard và Hiệp hội Tim mạch Hoa Kỳ (AHA). Tài liệu nhằm cung cấp thông tin giáo dục tổng quát về chất béo trong chế độ ăn, không chứng minh hay bảo đảm hàm lượng dưỡng chất hoặc công dụng điều trị y tế của bất kỳ sản phẩm cụ thể nào của HM NATURALS.
+        </div>
+
+        <div class="desktop-knowledge-grid" id="desktopKnowledgeGrid">
+          <!-- Populated dynamically with 4 evidence-based articles -->
+        </div>
+      </section>
+
+      <!-- Section G: Desktop Footer -->
+      <footer class="app-footer" style="margin-top:40px;background:var(--forest-green);color:#E8DEC8;border-top:none;padding:36px 40px;">
+        <div style="max-width:1260px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
+          <div>
+            <div style="font-family:var(--font-display);font-size:22px;font-weight:700;color:#FFF;">HM NATURALS</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.7);margin-top:4px;">Dầu thực vật ép cơ học nguyên bản từ nông sản bản địa Việt Nam</div>
+          </div>
+          <div style="font-size:13px;color:rgba(255,255,255,0.7);text-align:right;">
+            <div>Cơ sở sản xuất &amp; ép dầu Nam Đàn, Nghệ An</div>
+            <div style="margin-top:4px;">Tư vấn đặt hàng &amp; báo giá sỉ qua Zalo &amp; Hotline xưởng</div>
+          </div>
+        </div>
+      </footer>
     </div> <!-- /#desktopViewHome -->
 
     <!-- Desktop About Page View -->
@@ -4405,106 +4955,106 @@
             <span>🌿</span>
             <span>Câu Chuyện Thương Hiệu</span>
           </span>
-          <h1 class="about-hero-title">Gìn Giữ Hạt Nông Sản Thuần Bản Địa</h1>
-          <p class="about-hero-lead">
-            Chúng tôi không tìm kiếm sự hào nhoáng công nghiệp, mà kiên định đồng hành cùng người nông dân giữ gìn giống hạt bản địa và phương pháp ép mộc cối đá cổ truyền.
-          </p>
-        </div>
-
-        <!-- 2-Column Asymmetric Story Section -->
-        <div class="desktop-about-story">
-          <!-- Left Column: Story narrative -->
-          <div class="about-story-text">
-            <span class="about-story-eyebrow">TÂM HUYẾT XƯỞNG ÉP</span>
-            <h2 class="about-story-title">Từ Vạt Đất Phù Sa Đến Gian Bếp Ấm Lành</h2>
-            <p class="about-story-p">
-              HM Naturals ra đời tại vùng bãi bồi sông Đáy nơi đất cát pha màu mỡ nuôi dưỡng những mẻ lạc sẻ đỏ vỏ mỏng, giàu dầu và nức tiếng thơm bùi.
+            <h1 class="about-hero-title">Gìn Giữ Hạt Nông Sản Thuần Bản Địa</h1>
+            <p class="about-hero-lead">
+              Chúng tôi không tìm kiếm sự hào nhoáng công nghiệp, mà kiên định đồng hành cùng người nông dân giữ gìn giống hạt bản địa và phương pháp ép nhiệt cơ học truyền thống.
             </p>
-            <p class="about-story-p">
-              Nhận thấy người tiêu dùng ngày càng lo ngại trước dầu ăn công nghiệp tinh luyện nhiều hóa chất, xưởng chọn con đường ép cơ học chậm tự nhiên — giữ nguyên độ sánh, sắc vàng mật ong và hương vị mộc chân thật nhất.
-            </p>
-            <div class="about-tags-row">
-              <span class="about-tag-pill">🌱 Ép cơ học chậm</span>
-              <span class="about-tag-pill">🪨 Lọc vải mộc 48h</span>
-              <span class="about-tag-pill">🏺 Chai thủy tinh hổ phách</span>
-            </div>
           </div>
 
-          <!-- Right Column: Premium Showcase Bottle Card -->
-          <div class="about-bottle-card">
-            <div class="about-bottle-glow"></div>
-            <svg class="about-bottle-svg" viewBox="180 50 240 370" xmlns="http://www.w3.org/2000/svg">
-              <radialGradient id="aboutDeskG" cx="50%" cy="45%" r="60%">
-                <stop offset="0%" stop-color="#FFE8C2" stop-opacity="0.8"/>
-                <stop offset="60%" stop-color="#E8CEB0" stop-opacity="0.3"/>
-                <stop offset="100%" stop-color="#F2EADF" stop-opacity="0"/>
-              </radialGradient>
-              <ellipse cx="300" cy="400" rx="90" ry="16" fill="#3D3024" opacity="0.22"/>
-              <path d="M245 105 h110 v35 l30 55 v180 c0 16 -12 28 -28 28 h-114 c-16 0 -28 -12 -28 -28 v-180 l30 -55 z" fill="#8C4E15"/>
-              <path d="M252 195 h96 v170 c0 12 -10 22 -22 22 h-52 c-12 0 -22 -10 -22 -22 z" fill="#D98A2B" opacity="0.95"/>
-              <path d="M256 198 v165" stroke="#FFFFFF" stroke-width="6" opacity="0.45" stroke-linecap="round"/>
-              <path d="M344 205 v158" stroke="#FFE7BA" stroke-width="3.5" opacity="0.4" stroke-linecap="round"/>
-              <rect x="268" y="65" width="64" height="42" rx="5" fill="#422915"/>
-              <rect x="272" y="70" width="56" height="8" rx="2" fill="#C88B3A" opacity="0.85"/>
-              <rect x="256" y="220" width="88" height="135" rx="4" fill="#FAF6EE" stroke="#D9CDBF"/>
-              <text x="300" y="246" font-family="'Playfair Display', serif" font-size="10.5" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">HM NATURALS</text>
-              <line x1="268" y1="254" x2="332" y2="254" stroke="#C88B3A" stroke-width="1.2"/>
-              <circle cx="300" cy="278" r="14" fill="#F0E5D4" stroke="#7A4B13" stroke-width="1"/>
-              <text x="300" y="283" font-family="sans-serif" font-size="12" text-anchor="middle">🥜</text>
-              <text x="300" y="310" font-family="'Playfair Display', serif" font-size="9" font-weight="bold" fill="#221A14" text-anchor="middle">DẦU ĐẬU PHỘNG</text>
-              <text x="300" y="324" font-family="'Be Vietnam Pro', sans-serif" font-size="7" font-weight="600" fill="#474E2B" text-anchor="middle" letter-spacing="1">ÉP CƠ HỌC MỘC</text>
-              <text x="300" y="340" font-family="'Be Vietnam Pro', sans-serif" font-size="7" fill="#7A4B13" text-anchor="middle">500ml • Chai Thủy Tinh</text>
-            </svg>
-            <div class="about-bottle-caption">500ml • Chai Thủy Tinh Hổ Phách</div>
-            <div class="about-quote-box">
-              “Mỗi giọt dầu là kết tinh của mùa vụ bản địa và bàn tay người ép mộc.”
-            </div>
-          </div>
-        </div>
-
-        <!-- 3 Core Values Section -->
-        <div class="desktop-about-values">
-          <div class="about-values-head">
-            <span class="about-values-eyebrow">CAM KẾT PHẨM CHẤT</span>
-            <h2 class="about-values-title">Ba Giá Trị Cốt Lõi</h2>
-            <p class="about-values-desc">Nền tảng định hình mọi quyết định của xưởng, từ khâu chọn hạt đến lúc đóng chai.</p>
-          </div>
-
-          <div class="about-values-grid">
-            <div class="about-value-card">
-              <div class="about-value-card-head">
-                <div class="about-value-icon">🛡️</div>
-                <span class="about-value-num">01</span>
-              </div>
-              <h3 class="about-value-name">Trung Thực</h3>
-              <p class="about-value-text">
-                100% nguyên chất từ hạt mộc. Tuyệt đối không pha trộn dầu cọ rẻ tiền, không chất bảo quản, không phụ gia khử mùi hay chất tạo màu hóa học.
+          <!-- 2-Column Asymmetric Story Section -->
+          <div class="desktop-about-story">
+            <!-- Left Column: Story narrative -->
+            <div class="about-story-text">
+              <span class="about-story-eyebrow">TÂM HUYẾT XƯỞNG ÉP</span>
+              <h2 class="about-story-title">Từ Vạt Đất Phù Sa Đến Gian Bếp Ấm Lành</h2>
+              <p class="about-story-p">
+                HM Naturals ra đời tại vùng bãi bồi sông Đáy nơi đất cát pha màu mỡ nuôi dưỡng những mẻ lạc sẻ đỏ vỏ mỏng, giàu dầu và nức tiếng thơm bùi.
               </p>
+              <p class="about-story-p">
+                Nhận thấy người tiêu dùng ngày càng lo ngại trước dầu ăn công nghiệp tinh luyện nhiều hóa chất, xưởng chọn con đường ép nhiệt cơ học nguyên chất — giữ nguyên độ sánh, sắc vàng tự nhiên và hương vị mộc chân thật nhất.
+              </p>
+              <div class="about-tags-row">
+                <span class="about-tag-pill">🌱 Ép nhiệt cơ học</span>
+                <span class="about-tag-pill">🪨 Lắng lọc vải mộc</span>
+                <span class="about-tag-pill">🏺 Chai thủy tinh tối màu</span>
+              </div>
             </div>
 
-            <div class="about-value-card">
-              <div class="about-value-card-head">
-                <div class="about-value-icon">🌾</div>
-                <span class="about-value-num">02</span>
+            <!-- Right Column: Premium Showcase Bottle Card -->
+            <div class="about-bottle-card">
+              <div class="about-bottle-glow"></div>
+              <svg class="about-bottle-svg" viewBox="180 50 240 370" xmlns="http://www.w3.org/2000/svg">
+                <radialGradient id="aboutDeskG" cx="50%" cy="45%" r="60%">
+                  <stop offset="0%" stop-color="#FFE8C2" stop-opacity="0.8"/>
+                  <stop offset="60%" stop-color="#E8CEB0" stop-opacity="0.3"/>
+                  <stop offset="100%" stop-color="#F2EADF" stop-opacity="0"/>
+                </radialGradient>
+                <ellipse cx="300" cy="400" rx="90" ry="16" fill="#3D3024" opacity="0.22"/>
+                <path d="M245 105 h110 v35 l30 55 v180 c0 16 -12 28 -28 28 h-114 c-16 0 -28 -12 -28 -28 v-180 l30 -55 z" fill="#8C4E15"/>
+                <path d="M252 195 h96 v170 c0 12 -10 22 -22 22 h-52 c-12 0 -22 -10 -22 -22 z" fill="#D98A2B" opacity="0.95"/>
+                <path d="M256 198 v165" stroke="#FFFFFF" stroke-width="6" opacity="0.45" stroke-linecap="round"/>
+                <path d="M344 205 v158" stroke="#FFE7BA" stroke-width="3.5" opacity="0.4" stroke-linecap="round"/>
+                <rect x="268" y="65" width="64" height="42" rx="5" fill="#422915"/>
+                <rect x="272" y="70" width="56" height="8" rx="2" fill="#C88B3A" opacity="0.85"/>
+                <rect x="256" y="220" width="88" height="135" rx="4" fill="#FAF6EE" stroke="#D9CDBF"/>
+                <text x="300" y="246" font-family="'Playfair Display', serif" font-size="10.5" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">HM NATURALS</text>
+                <line x1="268" y1="254" x2="332" y2="254" stroke="#C88B3A" stroke-width="1.2"/>
+                <circle cx="300" cy="278" r="14" fill="#F0E5D4" stroke="#7A4B13" stroke-width="1"/>
+                <text x="300" y="283" font-family="sans-serif" font-size="12" text-anchor="middle">🥜</text>
+                <text x="300" y="310" font-family="'Playfair Display', serif" font-size="9" font-weight="bold" fill="#221A14" text-anchor="middle">DẦU ĐẬU PHỘNG</text>
+                <text x="300" y="324" font-family="'Be Vietnam Pro', sans-serif" font-size="7" font-weight="600" fill="#474E2B" text-anchor="middle" letter-spacing="1">ÉP NHIỆT MỘC</text>
+                <text x="300" y="340" font-family="'Be Vietnam Pro', sans-serif" font-size="7" fill="#7A4B13" text-anchor="middle">500ml • Chai Thủy Tinh</text>
+              </svg>
+              <div class="about-bottle-caption">500ml • Chai Thủy Tinh Mộc</div>
+              <div class="about-quote-box">
+                “Mỗi giọt dầu là kết tinh của mùa vụ bản địa và bàn tay người ép mộc.”
               </div>
-              <h3 class="about-value-name">Bản Địa</h3>
-              <p class="about-value-text">
-                Thu mua nông sản trực tiếp từ bà con nông dân với giá bao tiêu công bằng, góp phần bảo tồn các giống hạt bản địa như lạc sẻ đỏ, mè đen nương đồi.
-              </p>
-            </div>
-
-            <div class="about-value-card">
-              <div class="about-value-card-head">
-                <div class="about-value-icon">🌿</div>
-                <span class="about-value-num">03</span>
-              </div>
-              <h3 class="about-value-name">Bền Vững</h3>
-              <p class="about-value-text">
-                Tôn trọng môi trường từ khâu đóng chai thủy tinh sẫm màu tái sử dụng được, đến việc tận dụng phụ phẩm bã đậu làm thức ăn gia súc và phân bón hữu cơ.
-              </p>
             </div>
           </div>
-        </div>
+
+          <!-- 3 Core Values Section -->
+          <div class="desktop-about-values">
+            <div class="about-values-head">
+              <span class="about-values-eyebrow">CAM KẾT PHẨM CHẤT</span>
+              <h2 class="about-values-title">Ba Giá Trị Cốt Lõi</h2>
+              <p class="about-values-desc">Nền tảng định hình mọi quyết định của xưởng, từ khâu chọn hạt đến lúc đóng chai.</p>
+            </div>
+
+            <div class="about-values-grid">
+              <div class="about-value-card">
+                <div class="about-value-card-head">
+                  <div class="about-value-icon">🛡️</div>
+                  <span class="about-value-num">01</span>
+                </div>
+                <h3 class="about-value-name">Trung Thực</h3>
+                <p class="about-value-text">
+                  100% nguyên chất từ hạt mộc. Tuyệt đối không pha trộn dầu cọ rẻ tiền, không chất bảo quản, không phụ gia khử mùi hay chất tạo màu hóa học.
+                </p>
+              </div>
+
+              <div class="about-value-card">
+                <div class="about-value-card-head">
+                  <div class="about-value-icon">🌾</div>
+                  <span class="about-value-num">02</span>
+                </div>
+                <h3 class="about-value-name">Bản Địa</h3>
+                <p class="about-value-text">
+                  Thu mua nông sản trực tiếp từ bà con nông dân với giá bao tiêu công bằng, góp phần bảo tồn các giống hạt bản địa như lạc sẻ đỏ, mè đen nương đồi.
+                </p>
+              </div>
+
+              <div class="about-value-card">
+                <div class="about-value-card-head">
+                  <div class="about-value-icon">🏺</div>
+                  <span class="about-value-num">03</span>
+                </div>
+                <h3 class="about-value-name">Chỉn Chu Từng Sản Phẩm</h3>
+                <p class="about-value-text">
+                  Tỉ mỉ trong từng công đoạn từ khâu chọn hạt nông sản, kiểm soát nhiệt độ ép, đến lắng lọc tự nhiên qua vải mộc và đóng chai thủy tinh tối màu giúp bảo quản chất lượng nguyên bản.
+                </p>
+              </div>
+            </div>
+          </div>
       </div>
     </div> <!-- /#desktopViewAbout -->
 
@@ -4629,6 +5179,93 @@
         </div>
       </div>
     </div>
+
+    <!-- Desktop Product Detail Page View -->
+    <div id="desktopViewDetail" style="display:none;">
+      <div class="desktop-detail-container" style="max-width:1260px;margin:0 auto;padding:32px 40px 64px;">
+        <!-- Breadcrumbs Navigation -->
+        <nav class="desktop-breadcrumbs" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-muted);margin-bottom:28px;">
+          <a href="#desktop-home" onclick="switchDesktopView('home', this); return false;" style="color:var(--text-muted);text-decoration:none;">Trang Chủ</a>
+          <span>/</span>
+          <a href="#desktopProductDiscovery" onclick="switchDesktopView('home'); setTimeout(function(){ document.getElementById('desktopProductDiscovery').scrollIntoView({behavior:'smooth'}); }, 100); return false;" style="color:var(--text-muted);text-decoration:none;">Sản Phẩm</a>
+          <span>/</span>
+          <span style="color:var(--dark-cocoa);font-weight:600;" id="deskDetailBreadcrumbName">Dầu Lạc Nguyên Chất Ép Nhiệt</span>
+          <button type="button" onclick="switchDesktopView('home');" style="margin-left:auto;background:none;border:none;color:var(--forest-green);font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;">
+            ← Quay lại trang chủ
+          </button>
+        </nav>
+
+        <!-- 2-Column Product Detail Layout -->
+        <div class="desktop-detail-grid" style="display:grid;grid-template-columns:1fr 1.12fr;gap:48px;align-items:start;">
+          <!-- Left Column: Gallery & Badges -->
+          <div class="desktop-detail-media">
+            <div class="desktop-detail-main-img-box" style="position:relative;background:#FAF6EE;border:1px solid var(--soft-sand);border-radius:20px;overflow:hidden;padding:28px;display:flex;align-items:center;justify-content:center;min-height:450px;">
+              <img id="deskDetailMainImg" src="" alt="Sản phẩm" style="max-height:390px;object-fit:contain;transition:transform 0.25s;" />
+              <span class="photo-illustrate-tag" style="position:absolute;top:16px;right:16px;background:rgba(34,26,20,0.65);color:#FFF;padding:4px 10px;border-radius:6px;font-size:11px;">Ảnh mẫu minh họa</span>
+            </div>
+            <!-- Trust badges row under gallery -->
+            <div style="display:flex;gap:12px;margin-top:16px;justify-content:center;flex-wrap:wrap;">
+              <span style="font-size:12px;color:var(--forest-green);background:#FAF6EE;border:1px solid var(--soft-sand);padding:6px 14px;border-radius:99px;font-weight:600;">🌱 100% Nông sản Việt</span>
+              <span style="font-size:12px;color:var(--forest-green);background:#FAF6EE;border:1px solid var(--soft-sand);padding:6px 14px;border-radius:99px;font-weight:600;">⚙️ Ép nhiệt cơ học</span>
+              <span style="font-size:12px;color:var(--forest-green);background:#FAF6EE;border:1px solid var(--soft-sand);padding:6px 14px;border-radius:99px;font-weight:600;">🏺 Thủy tinh tối màu</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Purchasing Panel & Specifications -->
+          <div class="desktop-detail-info">
+            <span class="p-cat" id="deskDetailCategory" style="font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--deep-olive);">Dầu Đậu Phộng Tự Nhiên</span>
+            <h1 id="deskDetailTitle" style="font-family:var(--font-display);font-size:32px;font-weight:700;color:var(--dark-cocoa);margin:8px 0 12px;line-height:1.2;">Dầu Lạc Nguyên Chất Ép Nhiệt</h1>
+            <p id="deskDetailDesc" style="font-size:15px;line-height:1.65;color:var(--text-muted);margin-bottom:20px;">Hạt đậu phộng sẻ bản địa thu hoạch theo mùa, ép nhiệt cơ học có kiểm soát, giữ trọn sắc sánh và mùi thơm béo mộc.</p>
+
+            <!-- Price Display Area -->
+            <div style="background:#FAF6F0;border:1px solid var(--soft-sand);border-radius:14px;padding:18px 24px;margin-bottom:24px;">
+              <div style="display:flex;align-items:baseline;gap:8px;">
+                <span id="deskDetailPrice" style="font-size:28px;font-weight:700;color:var(--dark-cocoa);font-family:var(--font-display);">165.000 ₫</span>
+                <span id="deskDetailUnitNote" style="font-size:13px;color:var(--text-muted);">/ Chai 500ml</span>
+              </div>
+              <div style="font-size:12px;color:var(--peanut-bark);margin-top:6px;">✓ Giao hàng toàn quốc • Thanh toán khi nhận hàng sau khi xưởng gọi xác nhận đơn</div>
+            </div>
+
+            <!-- Volume / Variant Selector Box -->
+            <div id="deskVariantSelectorWrap" style="margin-bottom:20px;">
+              <label style="font-size:13px;font-weight:700;color:var(--dark-cocoa);display:block;margin-bottom:8px;">Chọn Quy Cách / Dung Tích:</label>
+              <div id="deskVariantButtonsRow" style="display:flex;gap:10px;flex-wrap:wrap;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Quantity Counter & CTAs Row -->
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px;flex-wrap:wrap;">
+              <div id="deskQuantitySelectorWrap" style="display:inline-flex;align-items:center;background:#FAF6EE;border:1px solid var(--soft-sand);border-radius:99px;padding:4px;">
+                <button type="button" onclick="adjustDeskQuantity(-1)" style="width:36px;height:36px;border-radius:50%;border:none;background:#FFF;cursor:pointer;font-size:18px;display:grid;place-items:center;color:var(--dark-cocoa);">-</button>
+                <span id="deskQuantityDisplay" style="width:40px;text-align:center;font-weight:700;font-size:15px;color:var(--dark-cocoa);">1</span>
+                <button type="button" onclick="adjustDeskQuantity(1)" style="width:36px;height:36px;border-radius:50%;border:none;background:#FFF;cursor:pointer;font-size:18px;display:grid;place-items:center;color:var(--dark-cocoa);">+</button>
+              </div>
+
+              <button type="button" id="btnDeskDetailActionPrimary" class="ref-btn-order" style="flex:1;min-height:48px;justify-content:center;font-size:15px;" onclick="handleDeskPurchaseAction()">
+                <span>Đặt hàng ngay</span> <span>→</span>
+              </button>
+              <button type="button" id="btnDeskDetailActionCart" class="ref-btn-explore" style="min-height:48px;padding:0 22px;font-size:14px;" onclick="addDeskCurrentItemToCart()">
+                🛒 Thêm Vào Giỏ
+              </button>
+            </div>
+
+            <!-- Specifications Table -->
+            <div style="border-top:1px solid var(--soft-sand);padding-top:20px;margin-bottom:20px;">
+              <h3 style="font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--forest-green);margin-bottom:12px;">Thông Số Nông Phẩm</h3>
+              <div id="deskDetailSpecsContainer" style="display:grid;gap:8px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Notice Box -->
+            <div style="background:#FAF6EE;border-left:3px solid var(--forest-green);padding:12px 16px;border-radius:0 10px 10px 0;font-size:12.5px;color:var(--text-muted);line-height:1.55;">
+              <b>Cam kết xưởng HM NATURALS:</b> Dầu thực vật ép nhiệt nguyên chất, lắng lọc vải mộc thủ công, tuyệt đối không sử dụng hóa chất tinh luyện hay chất bảo quản nhân tạo.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- JAVASCRIPT LOGIC (100% Dynamic Data Architecture) -->
@@ -4642,13 +5279,15 @@
       hotline: "0912 345 678",
       hotlineDisplay: "[Hotline xưởng: 0912 345 678]",
       facilityDisplay: "Cơ sở sản xuất & ép dầu tự nhiên HM NATURALS",
-      orderCodePrefix: "HMN-2026-",
-      sampleOrderCode: "HMN-2026-9812",
-      threeJsBottleReservation: {
-        reserved: true,
-        labelTitle: "HM NATURALS",
-        labelSubtitle: "COLD PRESSED ARTISANAL VEGETABLE OIL",
-        canvasTarget: "Desktop 1440px Hero 3D Stage"
+      orderCodePrefix: "DH-",
+      quoteCodePrefix: "BG-",
+      sampleOrderCode: "DH-20260930-108",
+      sampleQuoteCode: "BG-20260930-205",
+      heroBottleTarget: {
+        body: "Thủy tinh trong suốt dáng chữ nhật bo góc",
+        cap: "Nắp gỗ mộc tiện tinh xảo",
+        oil: "Dầu thực vật vàng óng nguyên bản",
+        note: "Hình thái thiết kế mục tiêu (Visual Design Target); quy cách thương mại thực tế chờ xác nhận."
       }
     };
 
@@ -4671,7 +5310,7 @@
           '<circle cx="300" cy="273" r="12" fill="#F0E5D4" stroke="#7A4B13" stroke-width="0.8"/>' +
           '<text x="300" y="277" font-family="sans-serif" font-size="10" text-anchor="middle">🥜</text>' +
           '<text x="300" y="302" font-family="serif" font-size="8" font-weight="bold" fill="#221A14" text-anchor="middle">ĐẬU PHỘNG</text>' +
-          '<text x="300" y="316" font-family="sans-serif" font-size="7" fill="#6E7448" text-anchor="middle">ÉP LẠNH THÔ</text>' +
+          '<text x="300" y="316" font-family="sans-serif" font-size="7" fill="#6E7448" text-anchor="middle">ÉP NHIỆT MỘC</text>' +
           '</svg>'
         );
       } else if (type === 'sesame') {
@@ -4724,14 +5363,201 @@
       }
     }
 
+    // =========================================================
+    // MINIMALIST WARM-SUNLIGHT HERO INTERACTIVE LOGIC
+    // =========================================================
+    function getUnlabeledBottleSvg(type) {
+      var isPeanut = type === 'peanut';
+      var isSesame = type === 'sesame';
+      var isSachi = type === 'sachi';
+
+      var oilGradStops = isPeanut
+        ? '<stop offset="0%" stop-color="#FFDD80" stop-opacity="0.95"/>' +
+          '<stop offset="35%" stop-color="#F59E0B" stop-opacity="0.92"/>' +
+          '<stop offset="75%" stop-color="#D97706" stop-opacity="0.95"/>' +
+          '<stop offset="100%" stop-color="#B45309" stop-opacity="0.98"/>'
+        : isSesame
+        ? '<stop offset="0%" stop-color="#F59E0B" stop-opacity="0.95"/>' +
+          '<stop offset="40%" stop-color="#B45309" stop-opacity="0.95"/>' +
+          '<stop offset="80%" stop-color="#78350F" stop-opacity="0.98"/>' +
+          '<stop offset="100%" stop-color="#451A03" stop-opacity="0.98"/>'
+        : '<stop offset="0%" stop-color="#FDE047" stop-opacity="0.95"/>' +
+          '<stop offset="40%" stop-color="#EAB308" stop-opacity="0.92"/>' +
+          '<stop offset="80%" stop-color="#CA8A04" stop-opacity="0.95"/>' +
+          '<stop offset="100%" stop-color="#854D0E" stop-opacity="0.98"/>';
+
+      var oilSurfaceColor = isPeanut ? '#FFE899' : isSesame ? '#FCD34D' : '#FEF08A';
+
+      return '<svg class="unlabeled-bottle-svg" viewBox="0 0 380 480" xmlns="http://www.w3.org/2000/svg" aria-label="Chai dầu thủy tinh không nhãn HM NATURALS">' +
+        '<defs>' +
+          '<linearGradient id="oilGrad_' + type + '" x1="0%" y1="0%" x2="100%" y2="100%">' + oilGradStops + '</linearGradient>' +
+          '<linearGradient id="woodCapGrad" x1="0%" y1="0%" x2="100%" y2="0%">' +
+            '<stop offset="0%" stop-color="#4A2810"/>' +
+            '<stop offset="25%" stop-color="#78441B"/>' +
+            '<stop offset="60%" stop-color="#8F5324"/>' +
+            '<stop offset="85%" stop-color="#6E3B15"/>' +
+            '<stop offset="100%" stop-color="#3D1E08"/>' +
+          '</linearGradient>' +
+          '<linearGradient id="glassWallGrad" x1="0%" y1="0%" x2="100%" y2="0%">' +
+            '<stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.5"/>' +
+            '<stop offset="8%" stop-color="#FFFFFF" stop-opacity="0.15"/>' +
+            '<stop offset="90%" stop-color="#FFFFFF" stop-opacity="0.05"/>' +
+            '<stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.4"/>' +
+          '</linearGradient>' +
+          '<filter id="bottleShadow" x="-30%" y="-20%" width="160%" height="160%">' +
+            '<feDropShadow dx="-10" dy="24" stdDeviation="18" flood-color="#362212" flood-opacity="0.18"/>' +
+            '<feDropShadow dx="-4" dy="8" stdDeviation="8" flood-color="#362212" flood-opacity="0.12"/>' +
+          '</filter>' +
+        '</defs>' +
+        '<g transform="translate(190, 240) rotate(-24) translate(-90, -185)" filter="url(#bottleShadow)">' +
+          '<!-- Outer Glass Body (Rounded Rectangular Shape) -->' +
+          '<path d="M 30 75 C 30 62, 40 52, 54 48 L 74 44 L 74 18 C 74 12, 78 8, 84 8 L 96 8 C 102 8, 106 12, 106 18 L 106 44 L 126 48 C 140 52, 150 62, 150 75 L 150 310 C 150 326, 138 338, 122 338 L 58 338 C 42 338, 30 326, 30 310 Z" ' +
+                'fill="url(#glassWallGrad)" stroke="rgba(255,255,255,0.45)" stroke-width="1.5"/>' +
+          '<!-- Thick Glass Bottom Base -->' +
+          '<path d="M 32 305 L 148 305 L 148 312 C 148 324, 136 335, 122 335 L 58 335 C 44 335, 32 324, 32 312 Z" ' +
+                'fill="rgba(255,248,235,0.22)"/>' +
+          '<path d="M 44 326 Q 90 332 136 326" stroke="rgba(255,255,255,0.5)" stroke-width="2" fill="none"/>' +
+          '<!-- Translucent Edible Oil Interior (Nearly Full ~90%) -->' +
+          '<path d="M 36 82 L 144 82 L 144 304 C 144 316, 134 324, 120 324 L 60 324 C 46 324, 36 316, 36 304 Z" ' +
+                'fill="url(#oilGrad_' + type + ')"/>' +
+          '<!-- Exactly One Realistic Oil Surface (Meniscus Curve) -->' +
+          '<ellipse cx="90" cy="82" rx="54" ry="8" fill="' + oilSurfaceColor + '" opacity="0.85"/>' +
+          '<ellipse cx="90" cy="82" rx="50" ry="6" fill="url(#oilGrad_' + type + ')" opacity="0.6"/>' +
+          '<path d="M 42 82 Q 90 87 138 82" stroke="rgba(255,255,255,0.6)" stroke-width="1.8" fill="none"/>' +
+          '<!-- Primary Specular Light Reflection -->' +
+          '<path d="M 42 90 L 42 295" stroke="rgba(255,255,255,0.65)" stroke-width="4.5" stroke-linecap="round" opacity="0.85"/>' +
+          '<path d="M 48 98 L 48 285" stroke="rgba(255,255,255,0.28)" stroke-width="2" stroke-linecap="round"/>' +
+          '<!-- Secondary Right Wall Specular -->' +
+          '<path d="M 138 95 L 138 290" stroke="rgba(255,255,255,0.35)" stroke-width="3" stroke-linecap="round"/>' +
+          '<!-- Shoulder Light Refraction Curve -->' +
+          '<path d="M 46 56 Q 58 50 74 47" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" stroke-linecap="round" fill="none"/>' +
+          '<!-- Neck Specular -->' +
+          '<line x1="78" y1="16" x2="78" y2="40" stroke="rgba(255,255,255,0.5)" stroke-width="2"/>' +
+          '<!-- Wooden Cap with Chamfered Edges and Wood Grain Tone -->' +
+          '<rect x="70" y="0" width="40" height="28" rx="4" fill="url(#woodCapGrad)" stroke="#2D1505" stroke-width="1"/>' +
+          '<line x1="72" y1="8" x2="108" y2="8" stroke="#9A5C2A" stroke-width="1.2" opacity="0.8"/>' +
+          '<line x1="72" y1="16" x2="108" y2="16" stroke="#3D1E08" stroke-width="1" opacity="0.6"/>' +
+          '<line x1="72" y1="22" x2="108" y2="22" stroke="#3D1E08" stroke-width="1" opacity="0.6"/>' +
+          '<path d="M 72 3 Q 90 5 108 3" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" fill="none"/>' +
+        '</g>' +
+      '</svg>';
+    }
+
+    function getRefMiniThumbSvg(type) {
+      var isPeanut = type === 'peanut';
+      var isSesame = type === 'sesame';
+      var oilColor = isPeanut ? '#F59E0B' : isSesame ? '#B45309' : '#EAB308';
+      return '<svg width="24" height="42" viewBox="0 0 28 48" xmlns="http://www.w3.org/2000/svg">' +
+        '<rect x="9" y="1" width="10" height="8" rx="2" fill="#5C3818"/>' +
+        '<rect x="4" y="9" width="20" height="36" rx="4" fill="rgba(255,255,255,0.4)" stroke="rgba(217,205,191,0.6)" stroke-width="1"/>' +
+        '<rect x="6" y="14" width="16" height="29" rx="3" fill="' + oilColor + '"/>' +
+        '<ellipse cx="14" cy="14" rx="8" ry="2" fill="#FFE899" opacity="0.8"/>' +
+        '<line x1="8" y1="16" x2="8" y2="40" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round"/>' +
+      '</svg>';
+    }
+
+    var currentRefHeroProduct = 'peanut';
+    function selectRefHeroProduct(type, clickedEl) {
+      currentRefHeroProduct = type;
+      var deskContainer = document.getElementById('refBottleSvgContainer');
+      var mobContainer = document.getElementById('refMobileBottleSvgContainer');
+      var svgCode = getUnlabeledBottleSvg(type);
+      if (deskContainer) deskContainer.innerHTML = svgCode;
+      if (mobContainer) mobContainer.innerHTML = svgCode;
+
+      // Sync Desktop selector cards
+      document.querySelectorAll('.ref-thumb-card').forEach(function(c) {
+        c.classList.remove('active');
+        c.setAttribute('aria-selected', 'false');
+      });
+      var deskCard = document.getElementById(type === 'peanut' ? 'refThumbPeanut' : type === 'sesame' ? 'refThumbSesame' : 'refThumbSachi');
+      if (deskCard) { deskCard.classList.add('active'); deskCard.setAttribute('aria-selected', 'true'); }
+
+      // Sync Mobile selector buttons
+      document.querySelectorAll('.ref-mobile-sel-btn').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      var mobBtn = document.getElementById(type === 'peanut' ? 'mobSelPeanut' : type === 'sesame' ? 'mobSelSesame' : 'mobSelSachi');
+      if (mobBtn) mobBtn.classList.add('active');
+
+      // Sync headlines & descriptions
+      var titleL1 = document.getElementById('refHeroTitleL1');
+      var titleL2 = document.getElementById('refHeroTitleL2');
+      var desc = document.getElementById('refHeroDesc');
+      var mobHeadline = document.getElementById('mobHeroHeadline');
+      var mobDesc = document.getElementById('mobHeroDesc');
+
+      if (type === 'peanut') {
+        if (titleL1) titleL1.textContent = 'Dầu Lạc';
+        if (titleL2) titleL2.textContent = 'Nguyên Chất';
+        if (desc) desc.textContent = 'Khám phá hương vị đặc trưng của dầu lạc và các sản phẩm dầu thực vật từ nông sản.';
+        if (mobHeadline) mobHeadline.textContent = 'Dầu Lạc Nguyên Chất';
+        if (mobDesc) mobDesc.textContent = 'Khám phá hương vị đặc trưng của dầu lạc và các sản phẩm dầu thực vật từ nông sản.';
+      } else if (type === 'sesame') {
+        if (titleL1) titleL1.textContent = 'Dầu Mè Đen';
+        if (titleL2) titleL2.textContent = 'Rang Mộc';
+        if (desc) desc.textContent = 'Hương thơm nồng nàn từ hạt mè đen nương đồi tuyển chọn, ép nhiệt cơ học nguyên chất.';
+        if (mobHeadline) mobHeadline.textContent = 'Dầu Mè Đen Rang Mộc';
+        if (mobDesc) mobDesc.textContent = 'Hương thơm nồng nàn từ hạt mè đen nương đồi tuyển chọn, ép nhiệt cơ học nguyên chất.';
+      } else if (type === 'sachi') {
+        if (titleL1) titleL1.textContent = 'Dầu Hạt Sachi';
+        if (titleL2) titleL2.textContent = 'Ép Cơ Học';
+        if (desc) desc.textContent = 'Dầu hạt Sachi tự nhiên từ vùng nguyên liệu Tây Nguyên, quy trình mộc chỉn chu.';
+        if (mobHeadline) mobHeadline.textContent = 'Dầu Hạt Sachi Ép Cơ Học';
+        if (mobDesc) mobDesc.textContent = 'Dầu hạt Sachi tự nhiên từ vùng nguyên liệu Tây Nguyên, quy trình mộc chỉn chu.';
+      }
+    }
+
+    function spinRefHeroBottle() {
+      var deskWrapper = document.getElementById('refBottleWrapper');
+      var mobWrapper = document.getElementById('refMobileBottleWrapper');
+      [deskWrapper, mobWrapper].forEach(function(w) {
+        if (w) {
+          w.classList.remove('spinning-360');
+          void w.offsetWidth;
+          w.classList.add('spinning-360');
+          setTimeout(function() { w.classList.remove('spinning-360'); }, 1250);
+        }
+      });
+    }
+
+    function handleRefStageMouseMove(e) {
+      var stage = document.getElementById('refDesktopStage');
+      var wrapper = document.getElementById('refBottleWrapper');
+      if (!stage || !wrapper || wrapper.classList.contains('spinning-360')) return;
+      var rect = stage.getBoundingClientRect();
+      var x = e.clientX - rect.left - (rect.width / 2);
+      var y = e.clientY - rect.top - (rect.height / 2);
+      var rotY = (x / (rect.width / 2)) * 12;
+      var rotX = -(y / (rect.height / 2)) * 8;
+      wrapper.style.transform = 'perspective(1100px) rotateY(' + rotY.toFixed(2) + 'deg) rotateX(' + rotX.toFixed(2) + 'deg) scale(1.02)';
+    }
+
+    function handleRefStageMouseLeave() {
+      var wrapper = document.getElementById('refBottleWrapper');
+      if (wrapper && !wrapper.classList.contains('spinning-360')) {
+        wrapper.style.transform = 'perspective(1100px) rotateY(0deg) rotateX(0deg) scale(1)';
+      }
+    }
+
+    function initRefHero() {
+      var pMini = document.getElementById('refThumbMiniPeanut');
+      var sMini = document.getElementById('refThumbMiniSesame');
+      var scMini = document.getElementById('refThumbMiniSachi');
+      if (pMini) pMini.innerHTML = getRefMiniThumbSvg('peanut');
+      if (sMini) sMini.innerHTML = getRefMiniThumbSvg('sesame');
+      if (scMini) scMini.innerHTML = getRefMiniThumbSvg('sachi');
+      selectRefHeroProduct('peanut');
+    }
+
     // 100% Dynamic Product Catalog
     var catalogProducts = [
       {
         id: "peanut-oil",
         categoryKey: "peanut",
         category: "Dầu Đậu Phộng Tự Nhiên",
-        name: "Dầu Phộng Ép Lạnh Cối Đá",
-        desc: "Hạt đậu phộng sẻ bản địa thu hoạch theo mùa, ép chậm cơ học không gia nhiệt, giữ vẹn nguyên mùi thơm béo mộc.",
+        name: "Dầu Lạc Nguyên Chất Ép Nhiệt",
+        desc: "Hạt đậu phộng sẻ bản địa thu hoạch theo mùa, ép nhiệt cơ học có kiểm soát, giữ trọn sắc sánh và mùi thơm béo mộc.",
         isQuote: false,
         isWholesale: false,
         img: createBottleSvg('peanut'),
@@ -4742,7 +5568,7 @@
         ],
         specs: [
           { label: "Nguồn giống", value: "Hạt lạc sẻ bản địa vỏ mỏng" },
-          { label: "Phương pháp ép", value: "Ép cơ học chậm, lọc vải mộc 48h" },
+          { label: "Phương pháp ép", value: "Ép nhiệt cơ học, lắng lọc tự nhiên qua vải mộc" },
           { label: "Quy cách đóng gói", value: "Chai thủy tinh tối màu chống sáng" }
         ]
       },
@@ -4750,8 +5576,8 @@
         id: "sesame-oil",
         categoryKey: "sesame",
         category: "Dầu Mè Đen Thủ Công",
-        name: "Dầu Mè Đen Rang Mộc",
-        desc: "Hạt mè đen nương đồi rang chín thơm, ép cơ học lắng lọc tự nhiên, cho chất dầu sẫm màu và thơm đượm đặc trưng.",
+        name: "Dầu Mè Đen Rang Mộc Ép Nhiệt",
+        desc: "Hạt mè đen nương đồi rang chín thơm, ép nhiệt cơ học lắng lọc tự nhiên, cho chất dầu sẫm màu và thơm đượm đặc trưng.",
         isQuote: false,
         isWholesale: false,
         img: createBottleSvg('sesame'),
@@ -4762,7 +5588,7 @@
         ],
         specs: [
           { label: "Nguồn giống", value: "Mè đen đồi thuần chủng" },
-          { label: "Phương pháp chế biến", value: "Rang than củi nhãn, ép cơ học nguyên chất" },
+          { label: "Phương pháp chế biến", value: "Rang mộc, ép nhiệt cơ học nguyên chất" },
           { label: "Bảo quản", value: "Nơi thoáng mát, đậy kín sau khi dùng" }
         ]
       },
@@ -4770,8 +5596,8 @@
         id: "sachi-oil",
         categoryKey: "sachi",
         category: "Dầu Hạt Tự Nhiên Dưỡng Sinh",
-        name: "Dầu Hạt Sachi Ép Sống",
-        desc: "Hạt Sachi chọn lọc ép chậm nguyên chất, giàu axit béo thiết yếu, phù hợp ăn sống dưỡng sinh và trộn món ăn dặm.",
+        name: "Dầu Hạt Sachi Ép Cơ Học",
+        desc: "Hạt Sachi chọn lọc ép cơ học nguyên chất, phù hợp cho các món trộn thanh lành trong bữa ăn gia đình.",
         isQuote: true,
         isWholesale: false,
         priceText: "Liên hệ báo giá",
@@ -4785,8 +5611,8 @@
           "Hợp đồng cung cấp định kỳ"
         ],
         specs: [
-          { label: "Nguồn nguyên liệu", value: "Hạt Sachi hữu cơ bản địa" },
-          { label: "Công nghệ ép", value: "Ép sống cơ học, lắng cặn tự nhiên" },
+          { label: "Nguồn nguyên liệu", value: "Hạt Sachi chọn lọc bản địa" },
+          { label: "Công nghệ ép", value: "Ép cơ học, lắng cặn tự nhiên" },
           { label: "Tiêu chuẩn đóng gói", value: "Chai thủy tinh tối màu / Can tiêu chuẩn" }
         ]
       },
@@ -4795,7 +5621,7 @@
         categoryKey: "byproduct",
         category: "Phụ Phẩm Nông Nghiệp Sạch",
         name: "Bã Đậu Phộng Ép Khô",
-        desc: "Phần bã đậu phộng sạch sấy khô sau ép, giàu đạm thực vật, dùng làm thức ăn chăn nuôi hoặc phân bón hữu cơ cao cấp.",
+        desc: "Phần bã đậu phộng sạch sấy khô sau ép, giàu đạm thực vật, dùng làm thức ăn gia súc hoặc ủ hữu cơ (Chờ xác nhận dịch vụ chính thức).",
         isQuote: true,
         isWholesale: true,
         priceText: "Báo giá sỉ theo bao",
@@ -4817,180 +5643,187 @@
 
     // Authentic SVG Visual Generators for Knowledge Hub Articles
     function createArticleSvg(type) {
-      if (type === 'smoke-point') {
+      if (type === 'unsaturated-fats' || type === 'smoke-point') {
         return 'data:image/svg+xml;utf8,' + encodeURIComponent(
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">' +
           '<rect width="400" height="240" fill="#EAE2D5"/>' +
-          '<radialGradient id="spG" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#FFE8C2" stop-opacity="0.9"/><stop offset="100%" stop-color="#EAE2D5" stop-opacity="0.1"/></radialGradient>' +
-          '<rect width="400" height="240" fill="url(#spG)"/>' +
-          '<ellipse cx="200" cy="190" rx="140" ry="24" fill="#3D3024" opacity="0.15"/>' +
-          '<path d="M100 130 Q200 200 300 130" stroke="#3D3024" stroke-width="12" fill="#585149" stroke-linecap="round"/>' +
-          '<path d="M85 125 h20 M295 125 h20" stroke="#26402F" stroke-width="6" stroke-linecap="round"/>' +
-          '<path d="M130 148 Q200 185 270 148" fill="#D98A2B" opacity="0.85"/>' +
-          '<circle cx="170" cy="140" r="10" fill="#474E2B" opacity="0.8"/>' +
-          '<circle cx="230" cy="142" r="8" fill="#C88B3A" opacity="0.9"/>' +
-          '<circle cx="200" cy="135" r="7" fill="#8C2418" opacity="0.75"/>' +
-          '<path d="M180 110 Q185 90 180 75" stroke="#C88B3A" stroke-width="2.5" fill="none" opacity="0.7"/>' +
-          '<path d="M200 105 Q205 85 200 70" stroke="#C88B3A" stroke-width="2.5" fill="none" opacity="0.85"/>' +
-          '<path d="M220 112 Q225 92 220 78" stroke="#C88B3A" stroke-width="2.5" fill="none" opacity="0.7"/>' +
-          '<text x="200" y="45" font-family="sans-serif" font-size="13" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">ĐIỂM KHÓI &amp; NHIỆT ĐỘ XÀO NẤU</text>' +
+          '<radialGradient id="ufG" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#FFE8C2" stop-opacity="0.95"/><stop offset="100%" stop-color="#EAE2D5" stop-opacity="0.1"/></radialGradient>' +
+          '<rect width="400" height="240" fill="url(#ufG)"/>' +
+          '<ellipse cx="200" cy="195" rx="130" ry="22" fill="#3D3024" opacity="0.14"/>' +
+          '<circle cx="150" cy="120" r="32" fill="#26402F" opacity="0.9"/>' +
+          '<circle cx="250" cy="120" r="32" fill="#C88B3A" opacity="0.9"/>' +
+          '<path d="M150 120 L250 120" stroke="#FAF6EE" stroke-width="4" stroke-dasharray="6 4"/>' +
+          '<text x="150" y="125" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FFF" text-anchor="middle">MUFA</text>' +
+          '<text x="250" y="125" font-family="sans-serif" font-size="11" font-weight="bold" fill="#FFF" text-anchor="middle">PUFA</text>' +
+          '<text x="200" y="46" font-family="sans-serif" font-size="12.5" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">CHẤT BÉO KHÔNG BÃO HÒA</text>' +
+          '<text x="200" y="180" font-family="sans-serif" font-size="11" fill="#585149" text-anchor="middle">Tài liệu tham khảo WHO &amp; Harvard</text>' +
           '</svg>'
         );
-      } else if (type === 'amber-glass') {
+      } else if (type === 'peanut-oil-balance') {
         return 'data:image/svg+xml;utf8,' + encodeURIComponent(
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">' +
           '<rect width="400" height="240" fill="#ECE4D8"/>' +
-          '<radialGradient id="agG" cx="40%" cy="40%" r="50%"><stop offset="0%" stop-color="#FFF" stop-opacity="0.8"/><stop offset="100%" stop-color="#ECE4D8" stop-opacity="0.1"/></radialGradient>' +
-          '<rect width="400" height="240" fill="url(#agG)"/>' +
-          '<ellipse cx="200" cy="205" rx="80" ry="16" fill="#3D3024" opacity="0.18"/>' +
-          '<path d="M175 60 h50 v20 l16 30 v85 c0 10 -8 18 -18 18 h-46 c-10 0 -18 -8 -18 -18 v-85 l16 -30 z" fill="#8C4E15"/>' +
-          '<path d="M180 115 h40 v75 c0 8 -6 14 -14 14 h-12 c-8 0 -14 -6 -14 -14 z" fill="#D98A2B" opacity="0.95"/>' +
-          '<path d="M182 118 v70" stroke="#FFF" stroke-width="3" opacity="0.45" stroke-linecap="round"/>' +
-          '<rect x="187" y="42" width="26" height="20" rx="3" fill="#422915"/>' +
-          '<circle cx="270" cy="115" r="32" fill="#26402F" opacity="0.95"/>' +
-          '<path d="M260 115 l7 7 l14 -14" stroke="#FFE8C2" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' +
-          '<text x="270" y="160" font-family="sans-serif" font-size="10" font-weight="bold" fill="#26402F" text-anchor="middle">CHẮN TIA UV</text>' +
-          '<circle cx="100" cy="70" r="16" fill="#C88B3A" opacity="0.8"/>' +
-          '<line x1="120" y1="80" x2="145" y2="95" stroke="#C88B3A" stroke-width="2" stroke-dasharray="3,3"/>' +
-          '<line x1="100" y1="92" x2="110" y2="120" stroke="#C88B3A" stroke-width="2" stroke-dasharray="3,3"/>' +
-          '<text x="200" y="32" font-family="sans-serif" font-size="13" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">BẢO QUẢN THỦY TINH TỐI MÀU</text>' +
+          '<radialGradient id="pbG" cx="45%" cy="40%" r="55%"><stop offset="0%" stop-color="#FFF5E5" stop-opacity="0.9"/><stop offset="100%" stop-color="#ECE4D8" stop-opacity="0.1"/></radialGradient>' +
+          '<rect width="400" height="240" fill="url(#pbG)"/>' +
+          '<ellipse cx="200" cy="195" rx="100" ry="18" fill="#3D3024" opacity="0.14"/>' +
+          '<circle cx="200" cy="115" r="44" fill="#FAF6EE" stroke="#C88B3A" stroke-width="2"/>' +
+          '<path d="M190 95 C185 85, 215 85, 210 95 C210 115, 200 135, 200 135 C200 135, 190 115, 190 95 Z" fill="#D98A2B"/>' +
+          '<circle cx="200" cy="115" r="3.5" fill="#FFF"/>' +
+          '<text x="200" y="45" font-family="sans-serif" font-size="12.5" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">DẦU LẠC &amp; CHẾ ĐỘ ĂN CÂN BẰNG</text>' +
+          '<text x="200" y="175" font-family="sans-serif" font-size="11" fill="#7A4B13" text-anchor="middle">Thành phần axit béo tự nhiên</text>' +
           '</svg>'
         );
-      } else if (type === 'marinating') {
+      } else if (type === 'fat-types-guide' || type === 'marinating') {
         return 'data:image/svg+xml;utf8,' + encodeURIComponent(
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">' +
           '<rect width="400" height="240" fill="#E8E1D5"/>' +
-          '<radialGradient id="mrG" cx="50%" cy="50%" r="55%"><stop offset="0%" stop-color="#FFE0B2" stop-opacity="0.8"/><stop offset="100%" stop-color="#E8E1D5" stop-opacity="0.2"/></radialGradient>' +
-          '<rect width="400" height="240" fill="url(#mrG)"/>' +
-          '<ellipse cx="200" cy="195" rx="120" ry="20" fill="#3D3024" opacity="0.16"/>' +
-          '<ellipse cx="200" cy="140" rx="90" ry="40" fill="#7A4B13"/>' +
-          '<ellipse cx="200" cy="135" rx="82" ry="34" fill="#422915"/>' +
-          '<ellipse cx="200" cy="135" rx="72" ry="28" fill="#B87326" opacity="0.85"/>' +
-          '<circle cx="170" cy="130" r="2.5" fill="#FFF"/><circle cx="185" cy="125" r="2.5" fill="#FFF"/>' +
-          '<circle cx="215" cy="135" r="2.5" fill="#FFF"/><circle cx="230" cy="128" r="2.5" fill="#FFF"/>' +
-          '<circle cx="195" cy="140" r="2.5" fill="#FFF"/><circle cx="205" cy="122" r="2.5" fill="#FFF"/>' +
-          '<path d="M260 70 L220 120" stroke="#7A4B13" stroke-width="8" stroke-linecap="round"/>' +
-          '<path d="M220 120 L210 135" stroke="#D98A2B" stroke-width="12" stroke-linecap="round"/>' +
-          '<text x="200" y="45" font-family="sans-serif" font-size="13" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">MẸO ƯỚP DẦU MÈ ĐEN</text>' +
+          '<radialGradient id="ftG" cx="50%" cy="50%" r="55%"><stop offset="0%" stop-color="#FFE8C2" stop-opacity="0.85"/><stop offset="100%" stop-color="#E8E1D5" stop-opacity="0.15"/></radialGradient>' +
+          '<rect width="400" height="240" fill="url(#ftG)"/>' +
+          '<ellipse cx="200" cy="195" rx="120" ry="20" fill="#3D3024" opacity="0.14"/>' +
+          '<rect x="100" y="90" width="80" height="60" rx="8" fill="#F4EDE3" stroke="#8C4E15" stroke-width="1.5"/>' +
+          '<text x="140" y="118" font-family="sans-serif" font-size="10" font-weight="bold" fill="#8C4E15" text-anchor="middle">BÃO HÒA</text>' +
+          '<text x="140" y="134" font-family="sans-serif" font-size="9" fill="#585149" text-anchor="middle">(Hạn chế)</text>' +
+          '<rect x="220" y="90" width="80" height="60" rx="8" fill="#FAF6EE" stroke="#26402F" stroke-width="1.8"/>' +
+          '<text x="260" y="118" font-family="sans-serif" font-size="10" font-weight="bold" fill="#26402F" text-anchor="middle">CHƯA NO</text>' +
+          '<text x="260" y="134" font-family="sans-serif" font-size="9" fill="#26402F" text-anchor="middle">(Ưu tiên)</text>' +
+          '<path d="M185 120 L215 120" stroke="#C88B3A" stroke-width="2.5" marker-end="url(#arrow)" stroke-dasharray="3 2"/>' +
+          '<text x="200" y="45" font-family="sans-serif" font-size="12.5" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">PHÂN BIỆT CÁC NHÓM CHẤT BÉO</text>' +
+          '<text x="200" y="180" font-family="sans-serif" font-size="11" fill="#585149" text-anchor="middle">Khuyến nghị AHA 2026</text>' +
           '</svg>'
         );
       } else {
         return 'data:image/svg+xml;utf8,' + encodeURIComponent(
           '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" width="400" height="240">' +
           '<rect width="400" height="240" fill="#E2EAE4"/>' +
-          '<radialGradient id="scG" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="#E8F5E9" stop-opacity="0.9"/><stop offset="100%" stop-color="#E2EAE4" stop-opacity="0.2"/></radialGradient>' +
-          '<rect width="400" height="240" fill="url(#scG)"/>' +
+          '<radialGradient id="cuG" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="#E8F5E9" stop-opacity="0.95"/><stop offset="100%" stop-color="#E2EAE4" stop-opacity="0.15"/></radialGradient>' +
+          '<rect width="400" height="240" fill="url(#cuG)"/>' +
           '<ellipse cx="200" cy="195" rx="120" ry="20" fill="#3D3024" opacity="0.14"/>' +
-          '<path d="M120 130 Q200 200 280 130 Z" fill="#F8F9FA" stroke="#D9CDBF" stroke-width="2"/>' +
-          '<circle cx="160" cy="135" r="22" fill="#474E2B" opacity="0.9"/>' +
-          '<circle cx="200" cy="128" r="25" fill="#26402F" opacity="0.9"/>' +
-          '<circle cx="240" cy="138" r="20" fill="#6E7448" opacity="0.9"/>' +
-          '<circle cx="180" cy="122" r="8" fill="#8C2418"/>' +
-          '<circle cx="225" cy="125" r="7" fill="#D98A2B"/>' +
-          '<polygon points="200,90 204,102 216,104 207,112 210,124 200,117 190,124 193,112 184,104 196,102" fill="#7A4B13"/>' +
-          '<text x="200" y="45" font-family="sans-serif" font-size="13" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">SALAD &amp; DẦU SACHI ÉP SỐNG</text>' +
+          '<path d="M120 135 Q200 185 280 135" stroke="#3D3024" stroke-width="8" fill="none" stroke-linecap="round"/>' +
+          '<path d="M140 145 Q200 175 260 145" fill="#D98A2B" opacity="0.85"/>' +
+          '<circle cx="200" cy="110" r="14" fill="#FAF6EE" stroke="#26402F" stroke-width="1.5"/>' +
+          '<text x="200" y="115" font-family="sans-serif" font-size="12" text-anchor="middle">✓</text>' +
+          '<text x="200" y="45" font-family="sans-serif" font-size="12.5" font-weight="bold" fill="#26402F" text-anchor="middle" letter-spacing="1">SỬ DỤNG DẦU ĂN PHÙ HỢP</text>' +
+          '<text x="200" y="180" font-family="sans-serif" font-size="11" fill="#474E2B" text-anchor="middle">Nhiệt độ xào nấu &amp; chế biến an toàn</text>' +
           '</svg>'
         );
       }
     }
 
-    // 100% Dynamic Knowledge Articles Database (Góc Kiến Thức — Task 1)
+    // 100% Dynamic Knowledge Articles Database (Evidence-Based Scientific Nutrition)
     var knowledgeArticles = [
       {
-        id: "smoke-point-guide",
-        title: "Điểm Khói Của Dầu Đậu Phộng & Cách Dùng Xào Nấu Chuẩn Vị",
+        id: "unsaturated-fats-guide",
+        title: "Chất béo không bão hòa là gì? Phân biệt chất béo không bão hòa đơn và đa",
         categoryKey: "oil-knowledge",
-        categoryName: "Kiến Thức Dầu Thực Vật",
-        date: "Vụ Mùa 2026",
+        categoryName: "Kiến thức dinh dưỡng chất béo",
+        date: "Cập nhật 2026",
         readTime: "4 phút đọc",
-        coverSvg: createArticleSvg('smoke-point'),
-        excerpt: "Hiểu rõ nhiệt độ bốc khói của dầu ép cơ học thô để chiên xào giòn thơm mà không lo biến đổi dưỡng chất hay sinh mùi khét.",
-        takeaway: "Dầu phộng ép cơ học thô giữ điểm khói tự nhiên ở mức 160°C - 190°C. Thích hợp cho các món xào lửa vừa, phi hành tỏi thơm nồng và ướp ngấm thớ thịt trước khi chế biến.",
+        coverSvg: createArticleSvg('unsaturated-fats'),
+        excerpt: "Tìm hiểu vai trò của chất béo không bão hòa đơn (MUFA) và đa (PUFA), cùng nguyên tắc thay thế một phần chất béo bão hòa trong chế độ ăn cân bằng theo khuyến nghị y khoa.",
+        takeaway: "Tổ chức Y tế Thế giới (WHO) và Hiệp hội Tim mạch Hoa Kỳ (AHA) khuyến nghị thay thế chất béo bão hòa bằng chất béo không bão hòa (MUFA và PUFA) trong chế độ ăn uống tổng thể lành mạnh.",
+        sources: [
+          { name: "WHO Guidelines on Fats and Carbohydrates (2023)", url: "https://www.who.int/news/item/17-07-2023-who-updates-guidelines-on-fats-and-carbohydrates" },
+          { name: "Harvard T.H. Chan School of Public Health - Types of Fat", url: "https://nutritionsource.hsph.harvard.edu/what-should-you-eat/fats-and-cholesterol/types-of-fat/" }
+        ],
+        disclaimer: "Lưu ý khoa học: Tài liệu này cung cấp kiến thức dinh dưỡng tổng quát, không chứng minh hay bảo đảm hàm lượng dưỡng chất hoặc công dụng y tế của bất kỳ sản phẩm cụ thể nào của HM NATURALS.",
         bodyHtml:
-          "<p>Trong gian bếp Việt, dầu đậu phộng (dầu lạc) từ lâu đã là linh hồn của những đĩa rau muống xào tỏi xanh mướt hay mẻ cá kho đậm đà. Tuy nhiên, không ít người nội trợ vẫn băn khoăn: liệu dầu lạc nguyên chất ép cơ học có chịu được nhiệt độ cao hay không?</p>" +
-          "<h3>1. Điểm khói của dầu ép cơ học thô là gì?</h3>" +
-          "<p>Điểm khói (Smoke Point) là ngưỡng nhiệt độ mà tại đó dầu ăn bắt đầu bốc khói xanh và phân hủy chất béo thành các hợp chất có hại. Dầu đậu phộng tinh luyện công nghiệp có điểm khói trên 220°C nhờ qua xử lý hóa chất khử mùi và tẩy màu. Ngược lại, <b>dầu đậu phộng ép cơ học thô HM NATURALS</b> giữ trọn dưỡng chất tự nhiên và polyphenol, nên có điểm khói tự nhiên dao động từ <b>160°C đến 190°C</b>.</p>" +
-          "<h3>2. Cách dùng dầu phộng chuẩn vị trong nấu nướng</h3>" +
+          "<p>Chất béo là một trong ba nhóm đa lượng thiết yếu cấu thành năng lượng cho cơ thể cùng với carbohydrate và protein. Tuy nhiên, không phải mọi loại chất béo đều có cấu trúc sinh hóa và tác động chuyển hóa giống nhau.</p>" +
+          "<h3>1. Chất béo không bão hòa đơn (MUFA) và đa (PUFA)</h3>" +
+          "<p>Theo phân tích từ <b>Harvard Nutrition Source</b>, chất béo không bão hòa có các liên kết đôi trong chuỗi carbon, thường ở dạng lỏng ở nhiệt độ phòng. Chúng được chia làm hai nhóm chính:</p>" +
           "<ul>" +
-            "<li><b>Phi hành tỏi khử dầu:</b> Cho dầu vào chảo ấm, thả vài tép tỏi đập dập khi dầu vừa lăn tăn bọt nhỏ. Khi tỏi chuyển vàng nhạt và dậy hương thơm nồng, hạ nhiệt độ vừa phải để xào thức ăn.</li>" +
-            "<li><b>Xào rau củ:</b> Xào nhanh tay trên lửa vừa, rau giữ được màu xanh bóng và vị ngọt thanh mà không bị khét dầu.</li>" +
-            "<li><b>Ướp thực phẩm:</b> Dùng 1 muỗng dầu lạc trộn đều cùng thịt hoặc cá trước khi nướng 15 phút giúp món ăn giữ ẩm mọng nước.</li>" +
+            "<li><b>Chất béo không bão hòa đơn (Monounsaturated Fatty Acids - MUFA):</b> Chỉ có một liên kết đôi. Axit oleic trong dầu lạc, dầu ô liu và quả bơ là ví dụ tiêu biểu.</li>" +
+            "<li><b>Chất béo không bão hòa đa (Polyunsaturated Fatty Acids - PUFA):</b> Có từ hai liên kết đôi trở lên, bao gồm các axit béo thiết yếu cơ thể không tự tổng hợp được như axit linoleic (Omega-6) và axit alpha-linolenic (Omega-3).</li>" +
           "</ul>" +
-          "<h3>3. Những điều cần tránh</h3>" +
-          "<p>Không nên đun dầu đến mức bốc khói dày đặc trên chảo và tuyệt đối không tái sử dụng dầu chiên đi chiên lại nhiều lần. Nâng niu nhiệt độ chính là cách tôn vinh giọt dầu mộc bản địa.</p>",
+          "<h3>2. Nguyên tắc thay thế trong chế độ ăn cân bằng</h3>" +
+          "<p>Khuyến nghị năm 2023 của <b>Tổ chức Y tế Thế giới (WHO)</b> nhấn mạnh: ưu tiên thay thế một phần chất béo bão hòa (thường có nhiều trong mỡ động vật, bơ, dầu cọ) bằng chất béo không bão hòa có nguồn gốc từ thực vật trong khẩu phần ăn hàng ngày.</p>" +
+          "<div class=\"knowledge-scientific-disclaimer\"><b>Khuyến cáo minh bạch:</b> Hướng dẫn khoa học dinh dưỡng mang tính chất giáo dục tổng quát. Việc tiêu thụ dầu ăn cần nằm trong tổng thể chế độ dinh dưỡng đa dạng và lối sống vận động, không xem dầu ăn là liệu pháp y tế hay thần dược chữa bệnh.</div>",
         relatedProductId: "peanut-oil",
-        relatedArticleIds: ["amber-glass-storage", "kitchen-marinating-tips"]
+        relatedArticleIds: ["peanut-oil-diet-balance", "saturated-vs-unsaturated-guide"]
       },
       {
-        id: "amber-glass-storage",
-        title: "Vì Sao Dầu Ép Cơ Học Cần Bảo Quản Trong Chai Thủy Tinh Tối Màu?",
-        categoryKey: "storage",
-        categoryName: "Bảo Quản",
-        date: "Vụ Mùa 2026",
-        readTime: "3 phút đọc",
-        coverSvg: createArticleSvg('amber-glass'),
-        excerpt: "Ánh sáng và tia UV là tác nhân hàng đầu phá hủy vitamin E tự nhiên trong dầu thực vật. Tìm hiểu cách xưởng ép giữ dầu tươi mới bền lâu.",
-        takeaway: "Chai thủy tinh màu hổ phách ngăn chặn đến 90% quang phổ ánh sáng có hại, bảo vệ các liên kết axit béo chưa bão hòa khỏi bị oxy hóa sinh mùi hôi dầu.",
-        bodyHtml:
-          "<p>Nhiều người tiêu dùng thường thắc mắc vì sao các dòng dầu thực vật công nghiệp ngoài siêu thị thường đóng trong chai nhựa trong suốt, trong khi dầu ép cơ học tự nhiên của HM NATURALS lại luôn được bảo quản trong chai thủy tinh sẫm màu.</p>" +
-          "<h3>1. Ánh sáng — Kẻ thù số một của giọt dầu mộc</h3>" +
-          "<p>Dầu lạc và dầu mè đen nguyên bản chứa hàm lượng Vitamin E, phytosterol và axit béo không no rất cao. Khi tiếp xúc với ánh sáng mặt trời hoặc ánh đèn huỳnh quang công suất lớn, quá trình quang oxy hóa (photo-oxidation) diễn ra nhanh gấp hàng chục lần so với trong bóng tối.</p>" +
-          "<h3>2. Ưu thế vượt trội của thủy tinh hổ phách</h3>" +
-          "<p>Thủy tinh màu hổ phách (amber glass) đóng vai trò như một tấm màng lọc quang học tự nhiên, hấp thụ gần như hoàn toàn tia cực tím (UV-A, UV-B) và ánh sáng xanh có bước sóng dưới 450nm. Nhờ đó, chất dầu giữ được độ tươi, màu vàng óng tự nhiên và hương thơm nguyên bản suốt vụ mùa mà không cần bất kỳ chất bảo quản nào.</p>" +
-          "<h3>3. Mẹo bảo quản tại gian bếp gia đình</h3>" +
-          "<ul>" +
-            "<li>Đặt chai dầu ở nơi râm mát, tránh ánh nắng chiếu trực tiếp từ cửa sổ.</li>" +
-            "<li>Không để chai dầu cạnh bếp gas hoặc lò vi sóng nơi có nguồn nhiệt cao.</li>" +
-            "<li>Vặn chặt nắp sau mỗi lần sử dụng để hạn chế không khí tràn vào chai.</li>" +
-          "</ul>",
-        relatedProductId: "sesame-oil",
-        relatedArticleIds: ["smoke-point-guide", "kitchen-marinating-tips"]
-      },
-      {
-        id: "kitchen-marinating-tips",
-        title: "Mẹo Ướp Thịt Nướng Dậy Mùi Thơm Sâu Với Dầu Mè Đen Rang Củi",
-        categoryKey: "kitchen-tips",
-        categoryName: "Mẹo Nhà Bếp",
-        date: "Vụ Mùa 2026",
+        id: "peanut-oil-diet-balance",
+        title: "Dầu lạc trong chế độ ăn cân bằng: hiểu đúng về thành phần chất béo",
+        categoryKey: "oil-knowledge",
+        categoryName: "Khoa học thực phẩm",
+        date: "Cập nhật 2026",
         readTime: "5 phút đọc",
-        coverSvg: createArticleSvg('marinating'),
-        excerpt: "Chỉ với một muỗng cà phê dầu mè đen rang củi mộc, thớ thịt nướng giữ được độ ẩm mềm tự nhiên và hương thơm ngậy sâu lắng.",
-        takeaway: "Trộn dầu mè đen vào khâu ướp cuối cùng giúp tạo lớp màng mỏng khóa ẩm trong thớ thịt, khi nướng trên than hồng bề mặt giòn bóng mà bên trong vẫn mềm ngọt.",
+        coverSvg: createArticleSvg('peanut-oil-balance'),
+        excerpt: "Phân tích cấu trúc axit béo tự nhiên trong dầu hạt họ đậu và cách kết hợp dầu thực vật vào thực đơn gia đình một cách điều độ, khoa học.",
+        takeaway: "Dầu lạc tự nhiên chứa phần lớn là axit béo không bão hòa đơn (axit oleic) cùng một phần chất béo không bão hòa đa. Việc sử dụng dầu cần kết hợp trong tổng thể khẩu phần ăn đa dạng, hợp lý.",
+        sources: [
+          { name: "Harvard T.H. Chan School of Public Health - Fats and Cholesterol", url: "https://nutritionsource.hsph.harvard.edu/what-should-you-eat/fats-and-cholesterol/types-of-fat/" },
+          { name: "American Heart Association - Healthy Cooking Oils", url: "https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/fats/healthy-cooking-oils" }
+        ],
+        disclaimer: "Lưu ý khoa học: Quy trình ép nhiệt là phương pháp cơ học truyền thống giúp tạo hương vị đặc trưng, không có nghĩa là làm dầu tự động giàu dinh dưỡng hơn hay có tác dụng chữa bệnh.",
         bodyHtml:
-          "<p>Hạt mè đen nương đồi rang chín tới trên than củi nhãn mang đến một loại dầu có sắc nâu cánh gián ấm áp và hương thơm nồng nàn không thể trộn lẫn. Trong nghệ thuật ướp nướng, dầu mè đen chính là chất xúc tác kỳ diệu giúp nâng tầm vị giác.</p>" +
-          "<h3>1. Nguyên lý khóa ẩm của dầu thực vật tự nhiên</h3>" +
-          "<p>Khi ướp gia vị mặn như muối, nước mắm hay xì dầu, thịt thường có xu hướng bị rút nước ra ngoài khiến thớ thịt dễ bị khô ráp khi nướng. Nếu cho một lượng nhỏ dầu mè đen vào sau cùng, dầu sẽ tạo lớp màng lipid bao bọc các mao dẫn của thớ thịt, giữ trọn vẹn nước ngọt tự nhiên bên trong.</p>" +
-          "<h3>2. Tỉ lệ ướp chuẩn vị xưởng gợi ý</h3>" +
-          "<ul>" +
-            "<li><b>Đối với 500g thịt bò / thịt heo:</b> Dùng 1 muỗng canh hành tỏi băm, 1 muỗng xì dầu, chút tiêu xay và <b>1 muỗng cà phê dầu mè đen HM NATURALS</b>.</li>" +
-            "<li>Ướp trong 20–30 phút trước khi đặt lên vỉ nướng than hoa.</li>" +
-            "<li>Khi thịt gần chín vàng đều hai mặt, quét phết nhẹ thêm một lớp dầu mè đen pha chút mật ong để màu nướng lên óng ả bắt mắt.</li>" +
-          "</ul>",
-        relatedProductId: "sesame-oil",
-        relatedArticleIds: ["smoke-point-guide", "sachi-cold-salad"]
+          "<p>Dầu lạc (dầu đậu phộng) là loại dầu thực vật quen thuộc trong văn hóa ẩm thực truyền thống của người Việt, đặc biệt ở các vùng duyên hải miền Trung nơi đất cát phù sa trù phú.</p>" +
+          "<h3>1. Thành phần axit béo tự nhiên trong dầu lạc</h3>" +
+          "<p>Theo dữ liệu dinh dưỡng từ <b>American Heart Association (AHA)</b>, dầu đậu phộng chứa khoảng 46–50% axit béo không bão hòa đơn (MUFA), khoảng 30–33% axit béo không bão hòa đa (PUFA), và khoảng 17–20% axit béo bão hòa. Tỉ lệ này giúp dầu lạc có tính bền nhiệt tương đối tốt hơn so với các loại dầu giàu PUFA không bền khác.</p>" +
+          "<h3>2. Hiểu đúng về quy trình ép nhiệt</h3>" +
+          "<p>HM NATURALS sử dụng phương pháp ép nhiệt cơ học truyền thống. Quá trình này giúp giải phóng hương thơm đặc trưng của hạt đậu phộng sẻ. Cần lưu ý rõ ràng: <i>ép nhiệt không làm dầu tự động trở nên bổ dưỡng hơn hay tạo ra đặc tính chữa bệnh</i>. Giá trị thực sự của dầu lạc nằm ở hương vị mộc mạc và sự nguyên chất không pha tạp.</p>" +
+          "<h3>3. Sử dụng điều độ trong bữa ăn</h3>" +
+          "<p>Dù là dầu thực vật, mỗi gam chất béo vẫn cung cấp khoảng 9 kcal năng lượng. Do đó, nguyên tắc quan trọng nhất vẫn là sử dụng với lượng vừa phải, kết hợp đa dạng các nguồn thực phẩm tươi sống trong mỗi bữa ăn.</p>",
+        relatedProductId: "peanut-oil",
+        relatedArticleIds: ["unsaturated-fats-guide", "cooking-oil-usage-guide"]
       },
       {
-        id: "sachi-cold-salad",
-        title: "Cách Dùng Dầu Hạt Sachi Ép Sống Trong Món Salad & Sốt Trộn",
-        categoryKey: "recipes",
-        categoryName: "Công Thức Món Ăn",
-        date: "Vụ Mùa 2026",
+        id: "saturated-vs-unsaturated-guide",
+        title: "Phân biệt chất béo bão hòa và không bão hòa khi lựa chọn dầu ăn",
+        categoryKey: "kitchen-tips",
+        categoryName: "Mẹo tiêu dùng",
+        date: "Cập nhật 2026",
         readTime: "4 phút đọc",
-        coverSvg: createArticleSvg('sachi-salad'),
-        excerpt: "Hàm lượng Omega tự nhiên dồi dào trong hạt Sachi cần thưởng thức ở dạng ép sống tươi nguyên để cơ thể hấp thu trọn vẹn dưỡng chất quý.",
-        takeaway: "Dầu Sachi có tính chất tương tự dầu ô liu nguyên chất (Extra Virgin), dùng ngon nhất khi rưới trực tiếp lên rau sống, súp ấm hoặc làm sốt giấm táo thanh mát.",
+        coverSvg: createArticleSvg('fat-types-guide'),
+        excerpt: "Cách nhận biết các nhóm chất béo trong thực phẩm hàng ngày và nguyên lý thay thế chất béo bão hòa bằng dầu thực vật chưa bão hòa theo khuyến nghị AHA 2026.",
+        takeaway: "Theo khuyến nghị chế độ ăn uống 2026 của AHA, giảm tiêu thụ chất béo bão hòa từ mỡ động vật và thay thế bằng các nguồn chất béo không bão hòa từ thực vật là một phần quan trọng của lối sống lành mạnh.",
+        sources: [
+          { name: "AHA 2026 Dietary Guidance to Improve Cardiovascular Health", url: "https://professional.heart.org/en/science-news/2026-dietary-guidance-to-improve-cardiovascular-health/top-things-to-know" },
+          { name: "WHO Guidelines on Dietary Fats (2023)", url: "https://www.who.int/news/item/17-07-2023-who-updates-guidelines-on-fats-and-carbohydrates" }
+        ],
+        disclaimer: "Lưu ý khoa học: Thông tin mang tính giáo dục tiêu dùng, không thay thế cho tư vấn y khoa cá nhân hóa từ chuyên gia dinh dưỡng hoặc bác sĩ.",
         bodyHtml:
-          "<p>Được mệnh danh là 'vua của các loại hạt dưỡng sinh', hạt Sachi hình sao chứa hàm lượng Omega 3-6-9 dồi dào bậc nhất trong thế giới thực vật. Tuy nhiên, các liên kết axit béo thiết yếu này rất nhạy cảm với nhiệt độ cao, do đó phương pháp sử dụng tối ưu nhất là ăn sống trực tiếp.</p>" +
-          "<h3>1. Công thức Sốt Giấm Táo Dầu Sachi thanh lành</h3>" +
-          "<p>Một công thức sốt trộn đơn giản nhưng tròn vị dành cho bữa ăn thanh lọc cơ thể hàng ngày:</p>" +
+          "<p>Khi đứng trước các lựa chọn chất béo trong gian bếp, người tiêu dùng thường bối rối giữa chất béo bão hòa (saturated fat) và chất béo không bão hòa (unsaturated fat).</p>" +
+          "<h3>1. Đặc điểm phân biệt đơn giản</h3>" +
           "<ul>" +
-            "<li><b>Nguyên liệu:</b> 2 muỗng canh dầu hạt Sachi ép sống HM NATURALS, 1 muỗng canh giấm táo hữu cơ, 1 muỗng cà phê mật ong hoa rừng, 1/4 muỗng cà phê muối hồng, chút tiêu đen đập dập.</li>" +
-            "<li><b>Cách làm:</b> Đánh đều hỗn hợp trong bát nhỏ cho đến khi sốt nhũ hóa sánh nhẹ, rưới đều lên đĩa xà lách, cà chua bi, dưa chuột và quả bơ thái lát.</li>" +
+            "<li><b>Chất béo bão hòa:</b> Không có liên kết đôi trong chuỗi axit béo, thường đông đặc ở nhiệt độ phòng. Phổ biến trong mỡ heo, mỡ bò, bơ động vật, dầu dừa và dầu cọ.</li>" +
+            "<li><b>Chất béo không bão hòa:</b> Có ít nhất một liên kết đôi, thường ở thể lỏng ở nhiệt độ phòng. Phổ biến trong dầu lạc, dầu mè, dầu hạt sachi, các loại hạt và cá béo.</li>" +
           "</ul>" +
-          "<h3>2. Dùng cùng súp ấm và cháo ăn dặm</h3>" +
-          "<p>Sau khi nấu chín nồi cháo hoặc bát súp rau củ và múc ra tô cho bớt nóng, bạn chỉ cần nhỏ từ 5–10 giọt dầu Sachi lên bề mặt và khuấy nhẹ. Món ăn sẽ tăng thêm độ béo thanh nhẹ dịu mà không hề ngấy.</p>",
+          "<h3>2. Khuyến nghị dinh dưỡng cập nhật năm 2026 của AHA</h3>" +
+          "<p>Tài liệu hướng dẫn dinh dưỡng 2026 của <b>American Heart Association</b> nhấn mạnh rằng việc giảm chất béo bão hòa sẽ mang lại lợi ích rõ rệt nhất khi được thay thế bằng chất béo không bão hòa, chứ không phải thay thế bằng carbohydrate tinh chế hoặc đường bột.</p>",
+        relatedProductId: "sesame-oil",
+        relatedArticleIds: ["unsaturated-fats-guide", "cooking-oil-usage-guide"]
+      },
+      {
+        id: "cooking-oil-usage-guide",
+        title: "Cách lựa chọn và sử dụng dầu thực vật phù hợp trong nấu nướng",
+        categoryKey: "recipes",
+        categoryName: "Thực hành nhà bếp",
+        date: "Cập nhật 2026",
+        readTime: "5 phút đọc",
+        coverSvg: createArticleSvg('cooking-oil-usage'),
+        excerpt: "Hướng dẫn thực tế về nhiệt độ nấu ăn, cách bảo quản và nguyên tắc phối hợp các loại dầu hạt thực vật cho từng phương thức chế biến gia đình.",
+        takeaway: "Mỗi loại dầu thực vật có đặc tính mùi vị và ngưỡng nhiệt sử dụng khác nhau. Không đun dầu quá điểm bốc khói và không tái sử dụng dầu nhiều lần là nguyên tắc cốt lõi bảo vệ chất lượng món ăn.",
+        sources: [
+          { name: "American Heart Association - Healthy Cooking Oils", url: "https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/fats/healthy-cooking-oils" },
+          { name: "Harvard Nutrition Source - Cooking with Healthy Oils", url: "https://nutritionsource.hsph.harvard.edu/what-should-you-eat/fats-and-cholesterol/types-of-fat/" }
+        ],
+        disclaimer: "Lưu ý khoa học: Tài liệu giáo dục thực hành nấu ăn lành mạnh, bảo tồn hương vị món ăn mà không làm biến đổi dầu ăn.",
+        bodyHtml:
+          "<p>Trong căn bếp gia đình, việc sử dụng đúng loại dầu cho từng kiểu chế biến vừa giúp tôn lên hương vị món ăn, vừa hạn chế tối đa quá trình oxy hóa chất béo do nhiệt độ.</p>" +
+          "<h3>1. Dầu lạc: Thích hợp xào nấu lửa vừa</h3>" +
+          "<p>Nhờ cấu trúc giàu axit béo không bão hòa đơn (MUFA), dầu lạc có độ bền nhiệt khá tốt, thích hợp cho các món chiên xào gia đình trên lửa vừa, phi hành tỏi và ướp thịt nướng dậy mùi bùi béo tự nhiên.</p>" +
+          "<h3>2. Dầu mè đen: Thơm đượm cho món ướp và nêm sau nấu</h3>" +
+          "<p>Dầu mè đen rang mộc có hương thơm rất đậm đà. Cách dùng tối ưu là thêm vào cuối quá trình nấu nướng (như nhỏ vài giọt vào bát canh, tô phở, đĩa mì xào) hoặc ướp thớ thịt trước khi nướng.</p>" +
+          "<h3>3. Dầu Sachi: Ưu tiên dùng trực tiếp</h3>" +
+          "<p>Dầu hạt Sachi chứa nhiều axit béo không bão hòa đa (PUFA), rất nhạy cảm với nhiệt độ cao. Vì vậy, loại dầu này phù hợp nhất để rưới trực tiếp lên salad, trộn vào súp ấm hoặc cháo ăn dặm của trẻ nhỏ.</p>" +
+          "<h3>4. Quy tắc an toàn bắt buộc</h3>" +
+          "<ul>" +
+            "<li>Không đun dầu đến mức bốc khói xanh dày đặc.</li>" +
+            "<li>Không tái sử dụng dầu đã qua chiên rán nhiều lần.</li>" +
+            "<li>Bảo quản chai dầu ở nơi thoáng mát, tránh ánh sáng mặt trời trực tiếp.</li>" +
+          "</ul>",
         relatedProductId: "sachi-oil",
-        relatedArticleIds: ["kitchen-marinating-tips", "amber-glass-storage"]
+        relatedArticleIds: ["peanut-oil-diet-balance", "saturated-vs-unsaturated-guide"]
       }
     ];
 
@@ -5007,10 +5840,10 @@
     var lastSafeTxnKey = "tx_idemp_init";
     var lastOrderPayload = null;
 
-    // Cart State (Proposed V1 Feature for Fixed-Price Items)
+    // Cart State (Approved V1 Feature for Fixed-Price Items)
     var cartItems = [
-      { id: "peanut-oil", name: "Dầu Phộng Ép Lạnh", variant: "500ml", price: 165000, qty: 1 },
-      { id: "sesame-oil", name: "Dầu Mè Đen Rang", variant: "250ml", price: 145000, qty: 1 }
+      { id: "peanut-oil", name: "Dầu Lạc Ép Nhiệt", variant: "500ml", price: 165000, qty: 1 },
+      { id: "sesame-oil", name: "Dầu Mè Đen Rang Mộc", variant: "250ml", price: 145000, qty: 1 }
     ];
 
     var currentDeviceMode = 'mobile';
@@ -5028,6 +5861,7 @@
       var mobileWidthGroup = document.getElementById('mobileWidthGroup');
       var mobileScreenGroup = document.getElementById('mobileScreenGroup');
       var mobileDividerDot = document.getElementById('mobileDividerDot');
+      var deskNavGrp = document.getElementById('desktopViewNavGroup');
 
       if (mode === 'mobile') {
         mobileFrame.style.display = 'flex';
@@ -5035,6 +5869,7 @@
         mobileWidthGroup.style.display = 'flex';
         mobileScreenGroup.style.display = 'flex';
         mobileDividerDot.style.display = 'block';
+        if (deskNavGrp) deskNavGrp.style.display = 'none';
       } else if (mode === 'desktop-1440') {
         mobileFrame.style.display = 'none';
         desktopFrame.style.display = 'flex';
@@ -5042,6 +5877,7 @@
         mobileWidthGroup.style.display = 'none';
         mobileScreenGroup.style.display = 'none';
         mobileDividerDot.style.display = 'none';
+        if (deskNavGrp) deskNavGrp.style.display = 'flex';
       } else if (mode === 'desktop-1280') {
         mobileFrame.style.display = 'none';
         desktopFrame.style.display = 'flex';
@@ -5049,6 +5885,7 @@
         mobileWidthGroup.style.display = 'none';
         mobileScreenGroup.style.display = 'none';
         mobileDividerDot.style.display = 'none';
+        if (deskNavGrp) deskNavGrp.style.display = 'flex';
       } else if (mode === 'desktop-1024') {
         mobileFrame.style.display = 'none';
         desktopFrame.style.display = 'flex';
@@ -5056,23 +5893,28 @@
         mobileWidthGroup.style.display = 'none';
         mobileScreenGroup.style.display = 'none';
         mobileDividerDot.style.display = 'none';
+        if (deskNavGrp) deskNavGrp.style.display = 'flex';
       }
     }
 
-    // Desktop View Switcher (Home vs About vs Contact)
+    // Desktop View Switcher (Home vs About vs Contact vs Detail)
     function switchDesktopView(viewName, linkEl) {
       var homeWrap = document.getElementById('desktopViewHome');
       var aboutWrap = document.getElementById('desktopViewAbout');
       var contactWrap = document.getElementById('desktopViewContact');
+      var detailWrap = document.getElementById('desktopViewDetail');
       if (!homeWrap || !aboutWrap || !contactWrap) return;
       homeWrap.style.display = 'none';
       aboutWrap.style.display = 'none';
       contactWrap.style.display = 'none';
+      if (detailWrap) detailWrap.style.display = 'none';
 
       if (viewName === 'about') {
         aboutWrap.style.display = 'block';
       } else if (viewName === 'contact') {
         contactWrap.style.display = 'block';
+      } else if (viewName === 'detail') {
+        if (detailWrap) detailWrap.style.display = 'block';
       } else {
         homeWrap.style.display = 'block';
       }
@@ -5086,6 +5928,172 @@
         var link = document.getElementById(targetId);
         if (link) link.classList.add('active');
       }
+
+      // Sync tester control buttons
+      document.querySelectorAll('#deskTabHome, #deskTabAbout, #deskTabContact, #deskTabDetail').forEach(function(b){
+        b.classList.remove('active');
+      });
+      var activeTesterBtn = document.getElementById(viewName === 'about' ? 'deskTabAbout' : viewName === 'contact' ? 'deskTabContact' : viewName === 'detail' ? 'deskTabDetail' : 'deskTabHome');
+      if (activeTesterBtn) activeTesterBtn.classList.add('active');
+    }
+
+    function openDesktopProductDetail(prodId) {
+      var p = catalogProducts.find(function(item){ return item.id === prodId; }) || catalogProducts[0];
+      currentProduct = p;
+
+      var bcName = document.getElementById('deskDetailBreadcrumbName');
+      if (bcName) bcName.textContent = p.name;
+      var catEl = document.getElementById('deskDetailCategory');
+      if (catEl) catEl.textContent = p.category;
+      var titleEl = document.getElementById('deskDetailTitle');
+      if (titleEl) titleEl.textContent = p.name;
+      var descEl = document.getElementById('deskDetailDesc');
+      if (descEl) descEl.textContent = p.desc;
+      var imgEl = document.getElementById('deskDetailMainImg');
+      if (imgEl) { imgEl.src = p.img; imgEl.alt = p.name; }
+
+      var priceEl = document.getElementById('deskDetailPrice');
+      var unitNote = document.getElementById('deskDetailUnitNote');
+      var variantWrap = document.getElementById('deskVariantSelectorWrap');
+      var variantRow = document.getElementById('deskVariantButtonsRow');
+      var qtyWrap = document.getElementById('deskQuantitySelectorWrap');
+      var btnPrimary = document.getElementById('btnDeskDetailActionPrimary');
+      var btnCart = document.getElementById('btnDeskDetailActionCart');
+
+      if (p.isQuote) {
+        if (priceEl) priceEl.textContent = p.priceText || "Liên hệ báo giá";
+        if (unitNote) unitNote.textContent = p.isWholesale ? "(Quy cách sỉ/đại lý)" : "(Nông phẩm dự án)";
+        if (qtyWrap) qtyWrap.style.display = 'none';
+        if (btnCart) btnCart.style.display = 'none';
+        if (btnPrimary) {
+          btnPrimary.innerHTML = '<span>' + (p.ctaText || 'Yêu cầu báo giá') + '</span> <span>→</span>';
+          btnPrimary.onclick = function() {
+            openQuoteFormDirect(p.id);
+            switchDeviceMode('mobile', document.getElementById('btnModeMobile'));
+          };
+        }
+
+        if (p.quoteTiers && p.quoteTiers.length) {
+          if (variantWrap) variantWrap.style.display = 'block';
+          if (variantRow) {
+            variantRow.innerHTML = '';
+            p.quoteTiers.forEach(function(tier, idx) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'cat-chip-btn' + (idx === 0 ? ' active' : '');
+              btn.textContent = tier;
+              btn.onclick = function() {
+                variantRow.querySelectorAll('.cat-chip-btn').forEach(function(b){ b.classList.remove('active'); });
+                btn.classList.add('active');
+              };
+              variantRow.appendChild(btn);
+            });
+          }
+        } else {
+          if (variantWrap) variantWrap.style.display = 'none';
+        }
+      } else {
+        if (qtyWrap) qtyWrap.style.display = 'inline-flex';
+        if (btnCart) btnCart.style.display = 'inline-flex';
+        selectedVariantObj = p.variants[1] || p.variants[0];
+        currentVariant = selectedVariantObj.label;
+        currentVariantPrice = selectedVariantObj.price;
+        currentQuantity = 1;
+        var qDisplay = document.getElementById('deskQuantityDisplay');
+        if (qDisplay) qDisplay.textContent = "1";
+
+        if (priceEl) priceEl.textContent = selectedVariantObj.price.toLocaleString('vi-VN') + ' ₫';
+        if (unitNote) unitNote.textContent = '/ Chai ' + selectedVariantObj.label;
+
+        if (btnPrimary) {
+          btnPrimary.innerHTML = '<span>Đặt hàng ngay</span> <span>→</span>';
+          btnPrimary.onclick = function() {
+            openOrderFormDirect(p.id);
+            switchDeviceMode('mobile', document.getElementById('btnModeMobile'));
+          };
+        }
+
+        if (variantWrap) variantWrap.style.display = 'block';
+        if (variantRow) {
+          variantRow.innerHTML = '';
+          p.variants.forEach(function(v) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'cat-chip-btn' + (v.id === selectedVariantObj.id ? ' active' : '');
+            btn.textContent = v.label + ' (' + (v.price / 1000).toFixed(0) + 'k)';
+            btn.onclick = function() {
+              variantRow.querySelectorAll('.cat-chip-btn').forEach(function(b){ b.classList.remove('active'); });
+              btn.classList.add('active');
+              selectedVariantObj = v;
+              currentVariant = v.label;
+              currentVariantPrice = v.price;
+              updateDeskDetailPrice();
+            };
+            variantRow.appendChild(btn);
+          });
+        }
+      }
+
+      // Specifications Table
+      var specsContainer = document.getElementById('deskDetailSpecsContainer');
+      if (specsContainer && p.specs) {
+        specsContainer.innerHTML = '';
+        p.specs.forEach(function(s) {
+          var row = document.createElement('div');
+          row.style.cssText = "display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--soft-sand);font-size:13.5px;";
+          row.innerHTML = '<span style="color:var(--text-muted);">' + s.label + ':</span><strong style="color:var(--dark-cocoa);">' + s.value + '</strong>';
+          specsContainer.appendChild(row);
+        });
+      }
+
+      switchDesktopView('detail');
+    }
+
+    function updateDeskDetailPrice() {
+      var priceEl = document.getElementById('deskDetailPrice');
+      var total = (currentVariantPrice || 0) * (currentQuantity || 1);
+      if (priceEl && currentVariantPrice) {
+        priceEl.textContent = total.toLocaleString('vi-VN') + ' ₫';
+      }
+    }
+
+    function adjustDeskQuantity(delta) {
+      var min = (selectedVariantObj && selectedVariantObj.minQuantity) || 1;
+      var step = (selectedVariantObj && selectedVariantObj.quantityStep) || 1;
+      currentQuantity = Math.max(min, (currentQuantity || 1) + (delta * step));
+      var qDisplay = document.getElementById('deskQuantityDisplay');
+      if (qDisplay) qDisplay.textContent = currentQuantity;
+      updateDeskDetailPrice();
+    }
+
+    function addDeskCurrentItemToCart() {
+      if (!currentProduct || currentProduct.isQuote) return;
+      var existing = cartItems.find(function(item){
+        return item.id === currentProduct.id && item.variant === selectedVariantObj.id;
+      });
+      if (existing) {
+        existing.qty += currentQuantity;
+      } else {
+        cartItems.push({
+          id: currentProduct.id,
+          name: currentProduct.name,
+          variant: selectedVariantObj.id,
+          price: selectedVariantObj.price,
+          qty: currentQuantity
+        });
+      }
+      updateCartBadge();
+      renderCartItems();
+      toggleCartDrawer(true);
+    }
+
+    function handleDeskPurchaseAction() {
+      if (currentProduct.isQuote) {
+        openQuoteFormDirect(currentProduct.id);
+      } else {
+        openOrderFormDirect(currentProduct.id);
+      }
+      switchDeviceMode('mobile', document.getElementById('btnModeMobile'));
     }
 
     // Contact Form Submission Handler
@@ -5365,7 +6373,7 @@
       var container = document.getElementById('homeKnowledgeList');
       if (!container) return;
       container.innerHTML = '';
-      var featured = knowledgeArticles.slice(0, 3);
+      var featured = knowledgeArticles.slice(0, 2);
       featured.forEach(function(art) {
         var card = document.createElement('article');
         card.className = 'knowledge-card';
@@ -5384,6 +6392,98 @@
             '</div>' +
           '</div>';
         container.appendChild(card);
+      });
+    }
+
+    // Desktop Product Discovery Rendering
+    function renderDesktopProductDiscovery(catFilter) {
+      var container = document.getElementById('desktopProductGridContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      var list = catalogProducts.filter(function(p) {
+        return !catFilter || catFilter === 'all' || p.categoryKey === catFilter;
+      });
+      list.forEach(function(prod) {
+        var card = document.createElement('div');
+        card.className = 'product-card-touch';
+        card.style.background = '#FFFFFF';
+        card.style.cursor = 'pointer';
+        card.onclick = function() {
+          openDesktopProductDetail(prod.id);
+        };
+
+        var priceHtml = prod.isQuote
+          ? '<span class="p-quote-tag" style="font-size:13px;">' + (prod.priceText || 'Yêu cầu báo giá') + '</span>'
+          : '<span class="p-price" style="font-size:16px;">' + prod.variants[1].price.toLocaleString('vi-VN') + ' ₫</span>' +
+            '<span style="font-size:11px;color:var(--text-muted);margin-left:4px;">/' + prod.variants[1].label + '</span>';
+
+        var ctaBtn = prod.isQuote
+          ? '<button type="button" class="btn-action-touch quote-flow" style="min-height:36px;padding:6px 14px;font-size:12px;" onclick="event.stopPropagation(); openDesktopProductDetail(\'' + prod.id + '\');">Xem Báo Giá</button>'
+          : '<button type="button" class="btn-action-touch fixed-flow" style="min-height:36px;padding:6px 14px;font-size:12px;" onclick="event.stopPropagation(); openDesktopProductDetail(\'' + prod.id + '\');">Đặt Hàng</button>';
+
+        card.innerHTML =
+          '<div class="p-img-wrap" style="height:200px;">' +
+            '<img src="' + prod.img + '" alt="' + prod.name + '" />' +
+            '<span class="photo-illustrate-tag">Ảnh minh họa</span>' +
+          '</div>' +
+          '<div class="p-body" style="padding:16px;">' +
+            '<span class="p-cat">' + prod.category + '</span>' +
+            '<h4 class="p-title" style="font-size:15px;min-height:40px;margin:4px 0 6px;">' + prod.name + '</h4>' +
+            '<p style="font-size:12px;color:var(--text-muted);line-height:1.45;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">' + prod.desc + '</p>' +
+            '<div class="p-action-row" style="margin-top:auto;">' +
+              '<div>' + priceHtml + '</div>' +
+              ctaBtn +
+            '</div>' +
+          '</div>';
+        container.appendChild(card);
+      });
+    }
+
+    function filterDesktopCategory(catKey, btn) {
+      document.querySelectorAll('#desktopProductDiscovery .cat-chip-btn').forEach(function(c) {
+        c.classList.remove('active');
+      });
+      if (btn) btn.classList.add('active');
+      renderDesktopProductDiscovery(catKey);
+    }
+
+    // Desktop Knowledge Hub Rendering (4 Evidence-Based Articles with WHO, Harvard, AHA Citations)
+    function renderDesktopKnowledgeHub() {
+      var grid = document.getElementById('desktopKnowledgeGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      knowledgeArticles.forEach(function(art) {
+        var card = document.createElement('article');
+        card.className = 'knowledge-card';
+        card.style.background = '#FFFFFF';
+        card.style.cursor = 'pointer';
+        card.onclick = function() {
+          navigateToArticle(art.id);
+          switchDeviceMode('mobile', document.getElementById('btnModeMobile'));
+        };
+
+        var sourcesHtml = '';
+        if (art.sources && art.sources.length) {
+          sourcesHtml = '<div style="margin-top:10px;padding-top:8px;border-top:1px dashed var(--soft-sand);font-size:11px;color:var(--text-muted);">' +
+            '<b>Nguồn y khoa:</b> ' + art.sources.map(function(s){ return '<a href="' + s.url + '" target="_blank" rel="noopener noreferrer" style="color:var(--forest-green);text-decoration:underline;" onclick="event.stopPropagation();">' + s.name.split(' - ')[0].split(' (')[0] + ' ↗</a>'; }).join(', ') +
+          '</div>';
+        }
+
+        card.innerHTML =
+          '<div class="knowledge-card-media">' +
+            '<img src="' + art.coverSvg + '" alt="' + art.title + '" />' +
+            '<span class="knowledge-cat-badge">' + art.categoryName + '</span>' +
+          '</div>' +
+          '<div class="knowledge-card-body" style="padding:16px;">' +
+            '<h4 class="knowledge-card-title" style="font-size:14.5px;line-height:1.35;min-height:40px;">' + art.title + '</h4>' +
+            '<p class="knowledge-card-excerpt" style="font-size:12px;line-height:1.5;">' + art.excerpt + '</p>' +
+            '<div class="knowledge-card-meta" style="margin-top:10px;">' +
+              '<span>⏱ ' + art.readTime + '</span>' +
+              '<span style="color:var(--forest-green);font-weight:600;">Chi tiết →</span>' +
+            '</div>' +
+            sourcesHtml +
+          '</div>';
+        grid.appendChild(card);
       });
     }
 
@@ -5467,6 +6567,25 @@
       var coverBox = document.getElementById('artDetailCover');
       if (coverBox) {
         coverBox.innerHTML = '<img src="' + art.coverSvg + '" alt="' + art.title + '" />';
+      }
+
+      // Scientific Sources List & Disclaimers
+      var sourcesBox = document.getElementById('artDetailSources');
+      if (sourcesBox) {
+        if (art.sources && art.sources.length) {
+          var sHtml = '<div style="margin-top:20px;padding:16px;background:#FAF6EE;border-radius:12px;border:1px solid var(--soft-sand);">' +
+            '<div style="font-size:13px;font-weight:700;color:var(--dark-cocoa);margin-bottom:8px;">Tài liệu khoa học tham khảo:</div>';
+          art.sources.forEach(function(s) {
+            sHtml += '<div style="margin-bottom:6px;"><a href="' + s.url + '" target="_blank" rel="noopener noreferrer" style="color:var(--forest-green);font-size:12.5px;font-weight:600;text-decoration:underline;">' + s.name + ' ↗</a></div>';
+          });
+          if (art.disclaimer) {
+            sHtml += '<div style="font-size:11.5px;color:var(--text-muted);font-style:italic;margin-top:10px;line-height:1.5;">' + art.disclaimer + '</div>';
+          }
+          sHtml += '</div>';
+          sourcesBox.innerHTML = sHtml;
+        } else {
+          sourcesBox.innerHTML = '';
+        }
       }
 
       // Related Product Card
@@ -5813,7 +6932,7 @@
         btn.disabled = false;
 
         // Populate Order Receipt Screen
-        var officialOrderCode = brandConfig.sampleOfficialCode || "HMN-2026-9812";
+        var officialOrderCode = brandConfig.sampleOrderCode || "DH-20260930-108";
         document.getElementById('receiptOfficialCode').textContent = officialOrderCode;
         document.getElementById('receiptThumbImg').src = currentProduct.img;
         document.getElementById('receiptProdTitle').textContent = currentProduct.name;
@@ -5848,7 +6967,7 @@
     }
 
     function navigateToTrackingDetail(orderCode) {
-      document.getElementById('statusDetailOrderCodeTitle').textContent = orderCode || brandConfig.sampleOfficialCode || "HMN-2026-9812";
+      document.getElementById('statusDetailOrderCodeTitle').textContent = orderCode || brandConfig.sampleOrderCode || "DH-20260930-108";
       setOrderStatusDemo('tiep_nhan');
       navigateToRoute('order-status-detail');
     }
@@ -5896,7 +7015,7 @@
         alertBox.style.display = "flex";
       } else if (state === 'success') {
         alertBox.style.display = "none";
-        navigateToTrackingDetail(brandConfig.sampleOfficialCode || "HMN-2026-9812");
+        navigateToTrackingDetail(brandConfig.sampleOrderCode || "DH-20260930-108");
       }
     }
 
@@ -5997,7 +7116,7 @@
         btn.textContent = currentProduct.isWholesale ? "Gửi Yêu Cầu Báo Giá Sỉ" : "Gửi Yêu Cầu Báo Giá";
         btn.disabled = false;
         // Official reference displayed ONLY after confirmation
-        document.getElementById('modalOrderRef').textContent = "Mã xác nhận báo giá: #BG-3810";
+        document.getElementById('modalOrderRef').textContent = "Mã xác nhận báo giá: BG-20260930-205";
         document.getElementById('modalSuccessDesc').textContent = "Yêu cầu báo giá đã được chuyển đến quản lý xưởng. Bảng báo giá chi tiết sẽ được gửi qua kênh liên hệ bạn đã chọn.";
         document.getElementById('orderSuccessModal').style.display = 'grid';
       }, 700);
@@ -6057,7 +7176,7 @@
         btn.textContent = "Thử Gửi Lại Với Cùng Idempotency-Key";
         btn.disabled = false;
         // Backend confirmation now obtained!
-        document.getElementById('receiptOfficialCode').textContent = brandConfig.sampleOfficialCode || "HMN-2026-9812";
+        document.getElementById('receiptOfficialCode').textContent = brandConfig.sampleOrderCode || "DH-20260930-108";
         setOrderStatusDemo('tiep_nhan');
         navigateToRoute('order-success');
       }, 800);
@@ -6073,31 +7192,9 @@
     renderHomeGrid(catalogProducts);
     renderListingGrid(catalogProducts);
     renderHomeFeaturedKnowledge();
-
-    // Check URL parameters for direct view routing
-    (function() {
-      try {
-        var params = new URLSearchParams(window.location.search);
-        var view = params.get('view');
-        var mode = params.get('mode');
-        if (mode === 'mobile') {
-          var btnMob = document.getElementById('btnModeMobile');
-          if (btnMob) switchDeviceMode('mobile', btnMob);
-        } else if (mode === 'desktop') {
-          var btnDesk = document.getElementById('btnModeDesktop1440');
-          if (btnDesk) switchDeviceMode('desktop-1440', btnDesk);
-        }
-        if (view === 'about') {
-          switchDesktopView('about');
-          navigateToRoute('about');
-        } else if (view === 'contact') {
-          switchDesktopView('contact');
-          navigateToRoute('contact');
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    })();
+    renderDesktopProductDiscovery('all');
+    renderDesktopKnowledgeHub();
+    initRefHero();
   </script>
 </body>
 </html>

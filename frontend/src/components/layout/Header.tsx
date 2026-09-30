@@ -42,7 +42,7 @@ export function Header() {
       {/* ── 1. Desktop Top Announcement Bar ── */}
       <div className="desktop-top-bar" role="region" aria-label="Thông báo xưởng">
         <div className="desktop-top-bar-inner">
-          <span>🌿 <b>HM NATURALS:</b> Dầu thực vật ép cơ học nguyên bản từ nông sản bản địa Việt Nam</span>
+          <span><b>HM NATURALS:</b> Dầu thực vật ép cơ học nguyên bản từ nông sản bản địa Việt Nam</span>
           <span>Cơ sở sản xuất &amp; ép dầu tự nhiên Sơn Nam, Hưng Yên</span>
         </div>
       </div>
@@ -151,7 +151,11 @@ export function Header() {
               onClick={openCart}
               aria-label={`Mở giỏ hàng (${totalItems} sản phẩm)`}
             >
-              <span>🛒</span>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </svg>
               <span>Giỏ Hàng</span>
               <span style={{
                 background: 'var(--forest-green)',

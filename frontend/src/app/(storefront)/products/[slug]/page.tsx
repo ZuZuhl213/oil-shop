@@ -162,7 +162,12 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               onClick={() => setShow360Modal(true)}
               aria-label="Xem 360 độ chai dầu HM NATURALS"
             >
-              <span aria-hidden="true">🔄</span>
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21.5 2v6h-6" />
+                <path d="M2.5 12A10 10 0 0 1 19 4.5l2.5 3.5" />
+                <path d="M2.5 22v-6h6" />
+                <path d="M21.5 12A10 10 0 0 1 5 19.5l-2.5-3.5" />
+              </svg>
               <span>Xem 360° Chai Dầu HM NATURALS</span>
             </button>
           </div>
@@ -231,7 +236,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           {isQuote && product.quoteTiers && (
             <div className="specs-card-box" style={{ background: 'var(--peanut-gold-surface)', borderColor: 'rgba(200,139,58,0.3)' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--peanut-bark)', textTransform: 'uppercase', marginBottom: 6 }}>
-                📋 Quy cách báo giá sỉ &amp; đại lý:
+                Quy cách báo giá sỉ &amp; đại lý:
               </div>
               <ul style={{ paddingLeft: 18, fontSize: 13, color: 'var(--dark-cocoa)', lineHeight: 1.6 }}>
                 {product.quoteTiers.map((tier, idx) => (

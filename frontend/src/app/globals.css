@@ -911,6 +911,26 @@ body {
   }
 }
 
+/* ── Hero entrance — single orchestrated moment, not per-section fades ── */
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes heroFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ref-hero-left {
+    animation: heroFadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .ref-stage-wrap {
+    animation: heroFadeIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+  }
+  .ref-thumbs-dock {
+    animation: heroFadeIn 0.5s ease 0.35s both;
+  }
+}
 
 /* ===================================================================
    3. MOBILE HERO CAROUSEL & PEAKING CARDS
@@ -2377,8 +2397,7 @@ body {
 .about-story-eyebrow {
   font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--peanut-bark);
 }
 .about-story-title {
@@ -2475,8 +2494,7 @@ body {
 .about-values-eyebrow {
   font-size: 10.5px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--deep-olive);
   display: block;
   margin-bottom: 6px;
@@ -2955,4 +2973,24 @@ body {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* ── Desktop typography scale refinements ── */
+@media (min-width: 1024px) {
+  /* Product/knowledge section heading grows on desktop for better hierarchy */
+  .desktop-discovery-section .section-title,
+  .knowledge-listing-head .section-title {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .desktop-discovery-section .section-eyebrow,
+  .knowledge-listing-head .section-eyebrow {
+    font-size: 12px;
+  }
+  /* Tighten compact-values padding on desktop */
+  .compact-values-section {
+    padding: 36px 48px;
+    margin: 0 0 32px;
+  }
+}
+
 
