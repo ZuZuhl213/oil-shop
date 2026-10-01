@@ -7,6 +7,7 @@ import { useCart, type CartItem } from '@/context/CartContext';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { getProductBySlug } from '@/lib/api/products';
 import type { ProductDto } from '@/lib/api/contracts/types';
+import { isQuantityValid } from '@/features/cart/cart-store';
 
 function formatQuantity(quantity: number): string {
   return quantity.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
@@ -43,32 +44,60 @@ function QuantityInput({ item }: { item: CartItem }) {
   );
 }
 
-function VariantSelect({ item }: { item: CartItem }) {
+function VariantSelect({ item, onNotice }: { item: CartItem; onNotice: (message: string | null) => void }) {
   const { changeVariant } = useCart();
-  const [variants, setVariants] = useState<ProductDto['variants']>([]);
+  const [catalog, setCatalog] = useState<
+    { status: 'loading' } | { status: 'error' } | { status: 'ready'; product: ProductDto }
+  >({ status: 'loading' });
+  const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!item.productSlug) return;
     let active = true;
-    getProductBySlug(item.productSlug).then((product) => { if (active) setVariants(product.variants); }).catch(() => {});
+    getProductBySlug(item.productSlug).then((product) => {
+      if (active) setCatalog({ status: 'ready', product });
+    }).catch(() => {
+      if (active) setCatalog({ status: 'error' });
+    });
     return () => { active = false; };
-  }, [item.productSlug]);
-  if (variants.filter((variant) => variant.isActive).length < 2) return null;
-  return <label className="flex items-center gap-2 text-sm text-text-muted">
+  }, [item.productSlug, attempt]);
+
+  if (!item.productSlug) return null;
+  if (catalog.status === 'loading') return <p className="text-sm text-text-muted" role="status">Đang tải quy cách…</p>;
+  if (catalog.status === 'error') return <div className="text-sm">
+    <p role="alert" className="text-error-crimson">Không tải được quy cách. Giỏ hàng vẫn giữ quy cách hiện tại.</p>
+    <button type="button" className="mt-1 min-h-11 rounded-lg border border-soft-sand px-3 text-forest-green" aria-label={`Thử lại tải quy cách ${item.productName}`} onClick={() => {
+      setCatalog({ status: 'loading' });
+      setAttempt((current) => current + 1);
+    }}>Thử lại</button>
+  </div>;
+
+  const variants = catalog.product.variants.filter((variant) => variant.isActive);
+  const currentIsActive = variants.some((variant) => variant.id === item.variantId);
+  if (variants.length === 0 || (variants.length === 1 && currentIsActive)) return null;
+  return <label className="flex flex-wrap items-center gap-2 text-sm text-text-muted">
     Đổi quy cách
-    <select aria-label={`Quy cách ${item.productName}`} value={item.variantId} onChange={(event) => {
+    <select aria-label={`Quy cách ${item.productName}`} value={currentIsActive ? item.variantId : ''} onChange={(event) => {
       const variant = variants.find((entry) => entry.id === event.currentTarget.value);
-      if (!variant) return;
-      changeVariant(item.variantId, {
+      if (!variant || variant.id === item.variantId) return;
+      onNotice(null);
+      const keepsQuantity = isQuantityValid(item.quantity, variant.minQuantity, variant.quantityStep);
+      const result = changeVariant(item.variantId, {
         ...item, variantId: variant.id, variantName: variant.name, price: variant.price,
+        saleType: catalog.product.saleType,
         minQuantity: variant.minQuantity, quantityStep: variant.quantityStep, quantity: variant.minQuantity,
       });
-    }} className="rounded-lg border border-soft-sand bg-white-pure px-2 py-1 text-dark-cocoa">
-      {variants.filter((variant) => variant.isActive).map((variant) => <option key={variant.id} value={variant.id}>{variant.name}</option>)}
+      if (result.ok) onNotice(keepsQuantity
+        ? `Đã đổi quy cách sang ${variant.name}, giữ số lượng ${formatQuantity(item.quantity)}.`
+        : `Đã đổi quy cách sang ${variant.name}. Số lượng ${formatQuantity(item.quantity)} không phù hợp với mức tối thiểu ${formatQuantity(variant.minQuantity)} và bước ${formatQuantity(variant.quantityStep)}; đã đặt về mức tối thiểu ${formatQuantity(variant.minQuantity)}.`);
+    }} className="max-w-full rounded-lg border border-soft-sand bg-white-pure px-2 py-1 text-dark-cocoa">
+      {!currentIsActive && <option value="" disabled>Chọn quy cách thay thế</option>}
+      {variants.map((variant) => <option key={variant.id} value={variant.id}>{variant.name}</option>)}
     </select>
   </label>;
 }
 
 export default function CartPage() {
+  const [variantNotice, setVariantNotice] = useState<string | null>(null);
   const {
     items,
     saleType,
@@ -116,6 +145,7 @@ export default function CartPage() {
 
         {storageMessage && <p className="mb-4 rounded-xl border border-soft-sand bg-white-pure p-3 text-sm text-text-muted" role="status">{storageMessage}</p>}
         {actionError && <div className="mb-4 rounded-xl border border-error-crimson bg-white-pure p-3 text-sm text-error-crimson" role="alert">{actionError.message}</div>}
+        {variantNotice && <p className="mb-4 rounded-xl border border-soft-sand bg-white-pure p-3 text-sm text-text-muted" role="status">{variantNotice}</p>}
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="space-y-3">
@@ -129,7 +159,7 @@ export default function CartPage() {
                   <div className="min-w-0 flex-1">
                     <h2 className="font-semibold text-forest-green">{item.productName}</h2>
                     <p className="mt-1 text-sm text-text-muted">Quy cách: {item.variantName}</p>
-                    <div className="mt-2"><VariantSelect item={item} /></div>
+                    <div className="mt-2"><VariantSelect item={item} onNotice={setVariantNotice} /></div>
                     <p className="mt-1 text-sm font-semibold text-dark-cocoa">
                       {item.price == null ? 'Shop sẽ báo giá sau khi liên hệ' : `${formatCurrencyVnd(item.price)} / quy cách`}
                     </p>

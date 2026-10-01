@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
+import { useModalDrawer } from '@/lib/use-modal-drawer';
 
 export function CartDrawer() {
   const {
@@ -20,6 +21,7 @@ export function CartDrawer() {
     actionError,
   } = useCart();
   const isQuote = saleType === 'QUOTE';
+  const { panelRef, closeRef } = useModalDrawer(isCartOpen, closeCart);
 
   if (!isCartOpen) return null;
 
@@ -34,6 +36,8 @@ export function CartDrawer() {
 
       {/* Cart Drawer Panel */}
       <aside
+        ref={panelRef}
+        tabIndex={-1}
         className={`cart-drawer ${isCartOpen ? 'open' : ''}`}
         role="dialog"
         aria-modal="true"
@@ -48,6 +52,7 @@ export function CartDrawer() {
             </span>
           </div>
           <button
+            ref={closeRef}
             type="button"
             style={{ border: 'none', background: 'transparent', fontSize: 18, cursor: 'pointer', padding: 8 }}
             onClick={closeCart}

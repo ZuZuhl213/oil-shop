@@ -37,8 +37,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [storageMessage, setStorageMessage] = useState<string | null>(null);
   const [actionError, setActionError] = useState<CartActionError | null>(null);
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [openDrawer, setOpenDrawer] = useState<'cart' | 'nav' | null>(null);
+  const openCart = useCallback(() => setOpenDrawer('cart'), []);
+  const closeCart = useCallback(() => setOpenDrawer((current) => current === 'cart' ? null : current), []);
+  const openNav = useCallback(() => setOpenDrawer('nav'), []);
+  const closeNav = useCallback(() => setOpenDrawer((current) => current === 'nav' ? null : current), []);
   const cartRef = useRef<CartState>(EMPTY_CART);
   const hydratedRef = useRef(false);
   const dirtyRef = useRef(false);
@@ -97,7 +100,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const result = resultForTransition(transition);
     if (!result.ok) {
       setActionError(result.error);
-      if (openOnError) setIsCartOpen(true);
+      if (openOnError) setOpenDrawer('cart');
       return result;
     }
 
@@ -112,7 +115,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = useCallback((item: CartItemInput) => {
     const result = apply({ type: 'add', item }, true);
-    if (result.ok) setIsCartOpen(true);
+    if (result.ok) setOpenDrawer('cart');
     return result;
   }, [apply]);
 
@@ -144,12 +147,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       actionError,
       clearActionError: () => setActionError(null),
       isHydrated,
-      isCartOpen,
-      openCart: () => setIsCartOpen(true),
-      closeCart: () => setIsCartOpen(false),
-      isNavOpen,
-      openNav: () => setIsNavOpen(true),
-      closeNav: () => setIsNavOpen(false),
+      isCartOpen: openDrawer === 'cart',
+      openCart,
+      closeCart,
+      isNavOpen: openDrawer === 'nav',
+      openNav,
+      closeNav,
     }}>
       {children}
     </CartContext.Provider>

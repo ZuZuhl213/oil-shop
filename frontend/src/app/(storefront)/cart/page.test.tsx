@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { CartProvider } from '@/context/CartContext';
@@ -16,6 +16,11 @@ const fixedCart = {
   }],
 };
 
+const cartCatalog = {
+  ...product, id: '1', slug: 'dau-lac',
+  variants: product.variants.map((variant, index) => ({ ...variant, productId: '1', id: index === 0 ? '15' : variant.id })),
+};
+
 function mount() {
   return render(<CartProvider><CartPage /></CartProvider>);
 }
@@ -23,8 +28,9 @@ function mount() {
 beforeEach(() => {
   localStorage.clear();
   localStorage.setItem('hm_naturals_cart_v1', JSON.stringify(fixedCart));
+  vi.stubGlobal('fetch', vi.fn(async () => Response.json(cartCatalog)));
 });
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 it('edits quantity, updates the estimate, and removes a cart line', async () => {
   mount();
@@ -73,8 +79,110 @@ it('keeps edits in memory and explains when local storage is unavailable', async
 
   fireEvent.click(screen.getByRole('button', { name: 'Tăng số lượng Dầu lạc' }));
 
-  expect(await screen.findByRole('status')).toHaveTextContent(/bộ nhớ tạm/i);
+  expect(await screen.findByText(/bộ nhớ tạm/i)).toBeVisible();
   expect(screen.getByText('Tạm tính dòng hàng: 180.000 ₫')).toBeVisible();
+});
+
+it('shows Catalog loading and an error without changing cart data, then retries successfully', async () => {
+  let reject!: (reason: Error) => void;
+  const fetch = vi.fn()
+    .mockImplementationOnce(() => new Promise((_resolve, rejectPromise) => { reject = rejectPromise; }))
+    .mockResolvedValue(Response.json(cartCatalog));
+  vi.stubGlobal('fetch', fetch);
+  mount();
+  expect(await screen.findByText('Đang tải quy cách…')).toBeVisible();
+  const saved = localStorage.getItem('hm_naturals_cart_v1');
+  await act(async () => { reject(new Error('offline')); });
+  expect(await screen.findByRole('alert')).toHaveTextContent('Không tải được quy cách');
+  expect(screen.getByText('Quy cách: 1L')).toBeVisible();
+  expect(localStorage.getItem('hm_naturals_cart_v1')).toBe(saved);
+  expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole('button', { name: 'Thử lại tải quy cách Dầu lạc' }));
+  const select = await screen.findByRole('combobox');
+  expect(fetch).toHaveBeenCalledTimes(2);
+  expect(within(select).getByRole('option', { name: 'Can 5L' })).toBeVisible();
+  expect(localStorage.getItem('hm_naturals_cart_v1')).toBe(saved);
+});
+
+it('only offers active variants and preserves a current inactive variant until an explicit change', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ...product, variants: [
+    { ...product.variants[0], id: '15', name: '1L', isActive: false },
+    product.variants[1],
+  ] })));
+  mount();
+  const select = await screen.findByRole('combobox');
+  expect(select).toHaveValue('');
+  expect(within(select).queryByRole('option', { name: '1L' })).not.toBeInTheDocument();
+  expect(within(select).getByRole('option', { name: 'Can 5L' })).toBeEnabled();
+  expect(screen.getByText('Quy cách: 1L')).toBeVisible();
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items[0].variantId).toBe('15');
+});
+
+it('keeps a valid quantity and renders the new price, total and quantity rules', async () => {
+  localStorage.setItem('hm_naturals_cart_v1', JSON.stringify({ ...fixedCart, items: [{ ...fixedCart.items[0], quantity: 4 }] }));
+  mount();
+  fireEvent.change(await screen.findByRole('combobox'), { target: { value: '42' } });
+  expect(await screen.findByText('Quy cách: Can 5L')).toBeVisible();
+  expect(screen.getByText('400.000 ₫ / quy cách')).toBeVisible();
+  expect(screen.getByText('Tạm tính dòng hàng: 1.600.000 ₫')).toBeVisible();
+  expect(screen.getByText('1.600.000 ₫', { selector: 'strong' })).toBeVisible();
+  expect(screen.getByRole('spinbutton')).toHaveValue(4);
+  expect(screen.getByRole('spinbutton')).toHaveAttribute('min', '2');
+  expect(screen.getByRole('spinbutton')).toHaveAttribute('step', '2');
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items[0]).toMatchObject({
+    variantId: '42', quantity: 4, minQuantity: 2, quantityStep: 2, price: 400000,
+  });
+  expect(screen.getByRole('status')).toHaveTextContent('Đã đổi quy cách');
+});
+
+it('resets an incompatible quantity to the new minimum and explains why after the line remounts', async () => {
+  localStorage.setItem('hm_naturals_cart_v1', JSON.stringify({ ...fixedCart, items: [{ ...fixedCart.items[0], quantity: 3 }] }));
+  mount();
+  fireEvent.change(await screen.findByRole('combobox'), { target: { value: '42' } });
+  expect(await screen.findByText(/Số lượng 3 không phù hợp.*2/)).toBeVisible();
+  expect(screen.getByRole('spinbutton')).toHaveValue(2);
+  expect(screen.getByText('Tạm tính dòng hàng: 800.000 ₫')).toBeVisible();
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items[0].quantity).toBe(2);
+});
+
+it('retains a valid fractional quantity for a new variant', async () => {
+  localStorage.setItem('hm_naturals_cart_v1', JSON.stringify({
+    ...fixedCart, items: [{ ...fixedCart.items[0], quantity: 1.5, minQuantity: 0.5, quantityStep: 0.5 }],
+  }));
+  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ...product, variants: [
+    product.variants[0], { ...product.variants[1], minQuantity: 0.5, quantityStep: 0.5 },
+  ] })));
+  mount();
+  fireEvent.change(await screen.findByRole('combobox'), { target: { value: '42' } });
+  expect(await screen.findByText('Quy cách: Can 5L')).toBeVisible();
+  expect(screen.getByRole('spinbutton')).toHaveValue(1.5);
+  expect(screen.getByText('Tạm tính dòng hàng: 600.000 ₫')).toBeVisible();
+});
+
+it('rejects a duplicate target and retains both lines, quantities and totals', async () => {
+  const items = [fixedCart.items[0], { ...fixedCart.items[0], variantId: '42', variantName: 'Can 5L', price: 400000, quantity: 2, minQuantity: 2, quantityStep: 2 }];
+  localStorage.setItem('hm_naturals_cart_v1', JSON.stringify({ ...fixedCart, items }));
+  mount();
+  const selectors = await screen.findAllByRole('combobox');
+  fireEvent.change(selectors[0], { target: { value: '42' } });
+  expect(screen.getByRole('alert')).toHaveTextContent('Quy cách này đã có trong giỏ hàng');
+  expect(selectors[0]).toHaveValue('15');
+  expect(screen.getAllByRole('article')).toHaveLength(2);
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items).toEqual(items);
+  expect(screen.getByText('890.000 ₫', { selector: 'strong' })).toBeVisible();
+});
+
+it('keeps the current variant and data when the target price is invalid', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => Response.json({ ...cartCatalog, variants: [
+    cartCatalog.variants[0], { ...cartCatalog.variants[1], price: null },
+  ] })));
+  mount();
+  const select = await screen.findByRole('combobox');
+  fireEvent.change(select, { target: { value: '42' } });
+  expect(screen.getByRole('alert')).toHaveTextContent('Thông tin sản phẩm không hợp lệ');
+  expect(select).toHaveValue('15');
+  expect(screen.getByText('Quy cách: 1L')).toBeVisible();
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items).toEqual(fixedCart.items);
 });
 
 it('keeps a partially typed decimal out of the cart until blur', async () => {
