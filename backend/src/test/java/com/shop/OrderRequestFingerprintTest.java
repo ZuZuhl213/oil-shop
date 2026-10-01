@@ -79,6 +79,40 @@ class OrderRequestFingerprintTest {
     }
 
     @Test
+    void preservesTrimmedTextForOversizedVariantIds() {
+        String oversizedWithLeadingZero = "09223372036854775808";
+        String oversizedWithoutLeadingZero = "9223372036854775808";
+        CreateOrder padded = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput(" " + oversizedWithLeadingZero + " ", BigDecimal.ONE)));
+        CreateOrder trimmed = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput(oversizedWithLeadingZero, BigDecimal.ONE)));
+        CreateOrder withoutLeadingZero = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput(oversizedWithoutLeadingZero, BigDecimal.ONE)));
+
+        assertThat(fingerprint.hash(padded)).isEqualTo(fingerprint.hash(trimmed));
+        assertThat(fingerprint.hash(padded)).isNotEqualTo(fingerprint.hash(withoutLeadingZero));
+    }
+
+    @Test
+    void doesNotSortExtremelyLongNumericVariantIdsAsBigIntegers() {
+        String extremelyLong = "9".repeat(1000);
+        String maximumLong = Long.toString(Long.MAX_VALUE);
+        CreateOrder longValueFirst = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput(extremelyLong, BigDecimal.ONE),
+                        new ItemInput(maximumLong, BigDecimal.ONE)));
+        CreateOrder maximumLongFirst = new CreateOrder(
+                OrderType.ORDER, "A", "0912345678", null, null, null,
+                List.of(new ItemInput(maximumLong, BigDecimal.ONE),
+                        new ItemInput(extremelyLong, BigDecimal.ONE)));
+
+        assertThat(fingerprint.hash(longValueFirst)).isNotEqualTo(fingerprint.hash(maximumLongFirst));
+    }
+
+    @Test
     void hashesMalformedNullItemWithoutThrowingBeforeValidation() {
         CreateOrder malformed = new CreateOrder(
                 OrderType.ORDER, "A", "0912345678", null, null, null, Collections.nCopies(2, null));

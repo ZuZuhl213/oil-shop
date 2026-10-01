@@ -23,6 +23,7 @@ import com.shop.support.PostgresIntegrationTest;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,6 +48,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -129,7 +131,8 @@ class OrderCancellationIT extends PostgresIntegrationTest {
         jdbc.update("update orders set status = 'COMPLETED' where id = ?", order.getId());
 
         patchStatus(login(), order.getId(), OrderStatus.CANCELLED)
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("INVALID_TRANSITION"));
         assertThat(vouchers.findById(voucher.getId()).orElseThrow().getUsedCount()).isEqualTo(1);
     }
 
@@ -147,6 +150,22 @@ class OrderCancellationIT extends PostgresIntegrationTest {
 
         assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.NEW);
         assertThat(vouchers.findById(voucher.getId()).orElseThrow().getUsedCount()).isZero();
+    }
+
+    @Test
+    void rejectsCancellationWhenVoucherRecordIsMissing() throws Exception {
+        Data data = fixture.create();
+        CreateResult created = createWithVoucher(data, "WELCOME");
+        Order order = orders.findByOrderCode(created.receipt().orderCode()).orElseThrow();
+        Voucher voucher = vouchers.findByCode("WELCOME").orElseThrow();
+        doReturn(Optional.empty()).when(voucherSpy).findByIdForUpdate(voucher.getId());
+
+        patchStatus(login(), order.getId(), OrderStatus.CANCELLED)
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("VOUCHER_USAGE_INCONSISTENT"));
+
+        assertThat(orders.findById(order.getId()).orElseThrow().getStatus()).isEqualTo(OrderStatus.NEW);
+        assertThat(vouchers.findById(voucher.getId()).orElseThrow().getUsedCount()).isEqualTo(1);
     }
 
     @Test
