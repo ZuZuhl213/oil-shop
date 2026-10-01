@@ -57,6 +57,22 @@ tasks.register('integrationTest', Test) {
 	shouldRunAfter tasks.named('test')
 }
 
+tasks.named('bootRun') {
+	def envFile = file('.env')
+	if (!envFile.exists()) {
+		envFile = file('backend/.env')
+	}
+	if (envFile.exists()) {
+		envFile.eachLine { line ->
+			line = line.trim()
+			if (line && !line.startsWith('#') && line.contains('=')) {
+				def parts = line.split('=', 2)
+				environment parts[0].trim(), parts[1].trim()
+			}
+		}
+	}
+}
+
 tasks.named('check') {
 	dependsOn tasks.named('integrationTest')
 }

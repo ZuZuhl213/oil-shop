@@ -38,7 +38,18 @@ public class SecurityConfig {
             ActiveAdminFilter activeAdminFilter, OriginValidationFilter originValidationFilter,
             AdminAuthenticationPrecheckFilter adminAuthenticationPrecheckFilter) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/actuator/health", "/actuator/health/**", "/api/v1/csrf").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs",
+                                "/v3/api-docs/**",
+                                "/actuator/health",
+                                "/actuator/health/**",
+                                "/api/v1/csrf",
+                                "/api/v1/health",
+                                "/swagger-custom.css",
+                                "/docs",
+                                "/docs.html").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,

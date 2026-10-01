@@ -7,6 +7,12 @@ import com.shop.exception.BusinessException;
 import com.shop.repository.VoucherRepository;
 import com.shop.service.PricingService;
 import com.shop.service.VoucherPolicy;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -21,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "05. Mã giảm giá (Storefront)", description = "Kiểm tra và tính toán giảm giá voucher mà không làm tiêu hao lượt dùng")
 @RestController
 @RequestMapping("/api/v1/vouchers")
 public class VoucherController {
@@ -36,6 +43,13 @@ public class VoucherController {
         this.clock = clock;
     }
 
+    @Operation(summary = "Kiểm tra mã giảm giá với giỏ hàng",
+            description = "Tính trước mức chiết khấu cho giỏ hàng FIXED_PRICE mà không làm giảm số lượt dùng của voucher")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Mã hợp lệ, trả về số tiền giảm và tổng tiền sau giảm",
+                    content = @Content(schema = @Schema(implementation = PricePreview.class))),
+            @ApiResponse(responseCode = "422", description = "Mã không hợp lệ, hết hạn, hoặc giỏ hàng không đủ điều kiện")
+    })
     @PostMapping("/validate")
     @Transactional(readOnly = true)
     public PricePreview validate(@Valid @RequestBody ValidateRequest request) {
@@ -51,7 +65,10 @@ public class VoucherController {
     }
 
     public record ValidateRequest(
+            @Schema(description = "Mã voucher cần áp dụng", example = "GIAM10K")
             @NotBlank @Size(max = 50) String code,
+
+            @Schema(description = "Danh sách các món hàng trong giỏ")
             @NotEmpty @Size(max = 50) List<@Valid ItemInput> items) {
     }
 }

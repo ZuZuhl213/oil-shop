@@ -16,12 +16,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "11. Admin - Xác thực", description = "Đăng nhập, kiểm tra phiên làm việc và đăng xuất của Quản trị viên")
 @RestController
 @RequestMapping("/api/v1/admin/auth")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
@@ -35,6 +38,8 @@ public class AdminAuthController {
         this.sessionStrategy = sessionStrategy;
         this.contextRepository = contextRepository;
     }
+
+    @Operation(summary = "Đăng nhập Admin", description = "Xác thực email/mật khẩu, cấp session HttpOnly Cookie JSESSIONID")
     @PostMapping("/login")
     AdminProfile login(@Valid @RequestBody LoginRequest body, HttpServletRequest request, HttpServletResponse response) {
         var authentication = authenticationManager.authenticate(
@@ -46,8 +51,12 @@ public class AdminAuthController {
         contextRepository.saveContext(context, request, response);
         return AdminProfile.from((AdminPrincipal) authentication.getPrincipal());
     }
+
+    @Operation(summary = "Lấy thông tin tài khoản đang đăng nhập", description = "Trả về thông tin Admin hiện tại từ session")
     @GetMapping("/me")
     AdminProfile me(@AuthenticationPrincipal AdminPrincipal principal) { return AdminProfile.from(principal); }
+
+    @Operation(summary = "Đăng xuất Admin", description = "Hủy session trên server và xóa cookie JSESSIONID")
     @PostMapping("/logout")
     ResponseEntity<Void> logout(HttpServletRequest request, HttpServletResponse response) {
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());

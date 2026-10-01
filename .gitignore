@@ -1,6 +1,9 @@
 # Local design and execution plans
 docs/
 web-oil-shop-design.md
+frontend/references/
+HM_NATURALS_HANDOFF.md
+index.html
 
 # Environment
 .env
@@ -26,3 +29,10 @@ Thumbs.db
 .idea/
 *.iml
 .vscode/
+w
+# AI tooling
+.agents/
+.claude/
+skills-lock.json
+AGENTS.md
+CLAUDE.md
