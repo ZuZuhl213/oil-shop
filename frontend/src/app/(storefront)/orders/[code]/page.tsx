@@ -8,6 +8,7 @@ import { formatCurrencyVnd } from '@/lib/format/currency';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import type { OrderReceipt } from '@/lib/api/contracts/types';
 import { readReceipt } from '@/lib/checkout-storage';
+import { siteConfig } from '@/config/site';
 
 interface ReceiptItem {
   productId?: string;
@@ -305,11 +306,11 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
       {/* ── Action Buttons ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
         <a
-          href="tel:0912345678"
+          href={`tel:${siteConfig.phone.replace(/\s/g, '')}`}
           className="btn-action-touch quote-flow no-underline"
           style={{ width: '100%', textAlign: 'center' }}
         >
-          Liên Hệ Hotline Xưởng Ép: 0912 345 678
+          Liên Hệ Hotline Xưởng Ép: {siteConfig.phone}
         </a>
         <Link
           href="/"

@@ -625,28 +625,48 @@ body {
 .unlabeled-bottle-container {
   position: relative;
   z-index: 3;
-  transform-style: preserve-3d;
-  transition: transform 0.14s ease-out;
-  cursor: grab;
+  cursor: default;
   display: flex;
   align-items: center;
   justify-content: center;
+  will-change: transform;
+  transform-origin: 50% 88%;
+  user-select: none;
+  -webkit-user-drag: none;
 }
-.unlabeled-bottle-container:active {
-  cursor: grabbing;
+@keyframes gentleBottleSway {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-3px) rotate(-1.6deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-2px) rotate(1.6deg);
+  }
 }
-.unlabeled-bottle-container.spinning-360 {
-  animation: refSpin360 1.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+.bottle-sway-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: 50% 88%;
+  will-change: transform;
 }
-@keyframes refSpin360 {
-  0% { transform: perspective(1000px) rotateY(0deg); }
-  100% { transform: perspective(1000px) rotateY(360deg); }
+.bottle-gentle-sway {
+  animation: gentleBottleSway 5.5s ease-in-out infinite;
+  transform-origin: 50% 88%;
 }
 .unlabeled-bottle-svg {
   width: 420px;
   height: 480px;
   display: block;
   filter: drop-shadow(0 20px 28px rgba(50, 35, 20, 0.15));
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 /* Subtle Script Quote (Reduced Prominence) */
@@ -711,54 +731,6 @@ body {
   margin-top: 4px;
   white-space: nowrap;
 }
-.ref-360-badge {
-  margin-top: 4px;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1.5px solid #D5C7B4;
-  padding: 6px 10px;
-  border-radius: 999px;
-  font-size: 10.5px;
-  font-weight: 600;
-  color: var(--dark-cocoa);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  transition: background 0.15s, transform 0.15s;
-  white-space: nowrap;
-}
-.ref-360-badge:hover {
-  background: #FFFFFF;
-  transform: scale(1.05);
-}
-.ref-360-circle {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--peanut-bark);
-}
-.ref-360-text {
-  font-size: 8px;
-  color: var(--text-muted);
-}
-.ref-drag-indicator {
-  position: absolute;
-  bottom: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.8);
-  padding: 4px 12px;
-  border-radius: 99px;
-  border: 1px solid var(--soft-sand);
-  z-index: 4;
-}
-
 /* Section B: Compact Three-Value Section */
 .compact-values-section {
   background: #FAF6F0;
@@ -835,18 +807,35 @@ body {
   color: var(--text-muted);
 }
 .ref-mobile-hero .ref-stage-wrap {
-  min-height: 300px;
-  margin: 2px 0 6px;
+  min-height: 290px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px 0 10px;
+  overflow: visible;
+}
+.ref-mobile-hero .unlabeled-bottle-container {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
 }
 .ref-mobile-hero .unlabeled-bottle-svg {
-  width: 100%;
-  max-width: 280px;
-  height: 290px;
+  width: 240px;
+  max-width: 82vw;
+  height: 280px;
+  display: block;
+  margin: 0 auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 .ref-mobile-hero .subtle-script-quote {
-  right: 8px;
-  bottom: 8px;
-  font-size: 14px;
+  right: 12px;
+  bottom: 6px;
+  font-size: 13.5px;
 }
 .ref-mobile-selector-row {
   display: flex;
@@ -875,11 +864,6 @@ body {
   background: var(--forest-green);
   color: #FFFFFF;
   border-color: var(--forest-green);
-}
-.ref-mobile-sel-btn.btn-360 {
-  background: var(--peanut-gold-surface);
-  border-color: var(--peanut-gold);
-  color: var(--peanut-bark);
 }
 
 /* Scientific disclaimer in Knowledge */

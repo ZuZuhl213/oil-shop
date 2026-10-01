@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Be_Vietnam_Pro, Playfair_Display } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 import { siteConfig } from '@/config/site';
 
@@ -52,7 +53,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="vi"
       className={`${beVietnamPro.variable} ${playfairDisplay.variable}`}
     >
-      <body className="font-body">{children}</body>
+      <body className="font-body">
+        {children}
+        <Script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js" strategy="beforeInteractive" />
+        <Script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/Draggable.min.js" strategy="beforeInteractive" />
+      </body>
     </html>
   );
 }

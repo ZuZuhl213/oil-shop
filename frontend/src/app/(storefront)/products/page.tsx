@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import type { CategoryDto, PageDto, ProductDto } from '@/lib/api/contracts/types';
 import type { ExtendedProductDto } from '@/lib/mock-data';
 import { ProductCard } from '@/components/product/ProductCard';
-import { getCategories, getProducts } from '@/lib/api/client';
+import { getCategories } from '@/lib/api/categories';
+import { getProducts } from '@/lib/api/products';
 import { toUiProducts } from '@/lib/catalog-adapter';
 
 function ProductsContent() {

@@ -78,6 +78,7 @@ export default function AboutPage() {
           <div className="py-2 flex items-center justify-center">
             <UnlabeledBottle
               type="peanut"
+              idPrefix="about"
               className="w-[180px] h-[240px] drop-shadow-lg"
               ariaLabel="Chai dầu thủy tinh không nhãn minh họa HM NATURALS"
             />

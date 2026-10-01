@@ -6,18 +6,7 @@
  * of the client bundle.
  */
 
-import type {
-  ApiError,
-  CreateOrderRequest,
-  CsrfResponse,
-  CategoryDto,
-  ItemInput,
-  OrderReceipt,
-  PageDto,
-  PricePreview,
-  ProductDto,
-  VoucherValidateRequest,
-} from './contracts/types';
+import type { ApiError, CsrfResponse } from './contracts/types';
 
 const API_PREFIX = '/api/v1';
 
@@ -115,61 +104,9 @@ export function getCsrf(): Promise<CsrfResponse> {
   return apiFetch<CsrfResponse>('/csrf');
 }
 
-async function mutationHeaders(extra: HeadersInit = {}): Promise<Headers> {
+export async function mutationHeaders(extra: HeadersInit = {}): Promise<Headers> {
   const csrf = await getCsrf();
   const headers = new Headers(extra);
   headers.set(csrf.headerName, csrf.token);
   return headers;
 }
-
-// ─── Public Catalog API ──────────────────────────────────────────────
-
-export function getCategories(): Promise<CategoryDto[]> {
-  return apiFetch<CategoryDto[]>('/categories');
-}
-
-export function getProducts(params: {
-  page?: number;
-  size?: number;
-  category?: string;
-  keyword?: string;
-} = {}): Promise<PageDto<ProductDto>> {
-  const searchParams = new URLSearchParams();
-  searchParams.set('page', String(params.page ?? 0));
-  searchParams.set('size', String(params.size ?? 12));
-  if (params.category) searchParams.set('category', params.category);
-  if (params.keyword) searchParams.set('keyword', params.keyword);
-  return apiFetch<PageDto<ProductDto>>('/products?' + searchParams.toString());
-}
-
-export function getProductBySlug(slug: string): Promise<ProductDto> {
-  return apiFetch<ProductDto>('/products/' + encodeURIComponent(slug));
-}
-
-// ─── Voucher API ─────────────────────────────────────────────────────
-
-export async function validateVoucher(body: VoucherValidateRequest): Promise<PricePreview> {
-  return apiFetch<PricePreview>('/vouchers/validate', {
-    method: 'POST',
-    headers: await mutationHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify(body),
-  });
-}
-
-// ─── Order API ───────────────────────────────────────────────────────
-
-export async function createOrder(
-  body: CreateOrderRequest,
-  idempotencyKey: string,
-): Promise<OrderReceipt> {
-  return apiFetch<OrderReceipt>('/orders', {
-    method: 'POST',
-    headers: await mutationHeaders({
-      'Content-Type': 'application/json',
-      'Idempotency-Key': idempotencyKey,
-    }),
-    body: JSON.stringify(body),
-  });
-}
-
-export type { ItemInput };

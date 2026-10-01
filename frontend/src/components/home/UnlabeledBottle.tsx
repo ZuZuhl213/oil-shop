@@ -1,12 +1,13 @@
 import React from 'react';
 
-export type UnlabeledBottleOilType = 'peanut' | 'sesame' | 'sachi';
+export type UnlabeledBottleOilType = 'peanut' | 'sesame' | 'coconut' | 'sachi';
 
 interface UnlabeledBottleProps {
   type?: UnlabeledBottleOilType;
   className?: string;
   style?: React.CSSProperties;
   ariaLabel?: string;
+  idPrefix?: string;
 }
 
 export function UnlabeledBottle({
@@ -14,11 +15,26 @@ export function UnlabeledBottle({
   className = 'unlabeled-bottle-svg',
   style,
   ariaLabel = 'Chai dầu thủy tinh không nhãn HM NATURALS',
+  idPrefix,
 }: UnlabeledBottleProps) {
   const isPeanut = type === 'peanut';
   const isSesame = type === 'sesame';
+  const isCoconut = type === 'coconut';
 
-  const oilSurfaceColor = isPeanut ? '#FFE899' : isSesame ? '#FCD34D' : '#FEF08A';
+  const reactId = React.useId().replace(/:/g, '_');
+  const p = idPrefix ? `${idPrefix}_` : `ub_${reactId}_`;
+  const oilGradId = `${p}oilGrad_${type}`;
+  const woodCapGradId = `${p}woodCapGrad`;
+  const glassWallGradId = `${p}glassWallGrad`;
+  const bottleShadowId = `${p}bottleShadow`;
+
+  const oilSurfaceColor = isPeanut
+    ? '#FFE899'
+    : isSesame
+    ? '#FCD34D'
+    : isCoconut
+    ? '#FEF9C3'
+    : '#FEF08A';
 
   return (
     <svg
@@ -30,7 +46,7 @@ export function UnlabeledBottle({
       aria-label={ariaLabel}
     >
       <defs>
-        <linearGradient id={`oilGrad_${type}`} x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={oilGradId} x1="0%" y1="0%" x2="100%" y2="100%">
           {isPeanut ? (
             <>
               <stop offset="0%" stopColor="#FFDD80" stopOpacity="0.95" />
@@ -45,6 +61,13 @@ export function UnlabeledBottle({
               <stop offset="80%" stopColor="#78350F" stopOpacity="0.98" />
               <stop offset="100%" stopColor="#451A03" stopOpacity="0.98" />
             </>
+          ) : isCoconut ? (
+            <>
+              <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.98" />
+              <stop offset="30%" stopColor="#FEF9C3" stopOpacity="0.92" />
+              <stop offset="70%" stopColor="#FDE68A" stopOpacity="0.90" />
+              <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.85" />
+            </>
           ) : (
             <>
               <stop offset="0%" stopColor="#FDE047" stopOpacity="0.95" />
@@ -55,7 +78,7 @@ export function UnlabeledBottle({
           )}
         </linearGradient>
 
-        <linearGradient id="woodCapGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={woodCapGradId} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#4A2810" />
           <stop offset="25%" stopColor="#78441B" />
           <stop offset="60%" stopColor="#8F5324" />
@@ -63,24 +86,24 @@ export function UnlabeledBottle({
           <stop offset="100%" stopColor="#3D1E08" />
         </linearGradient>
 
-        <linearGradient id="glassWallGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <linearGradient id={glassWallGradId} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.5" />
           <stop offset="8%" stopColor="#FFFFFF" stopOpacity="0.15" />
           <stop offset="90%" stopColor="#FFFFFF" stopOpacity="0.05" />
           <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0.4" />
         </linearGradient>
 
-        <filter id="bottleShadow" x="-30%" y="-20%" width="160%" height="160%">
+        <filter id={bottleShadowId} x="-30%" y="-20%" width="160%" height="160%">
           <feDropShadow dx="-10" dy="24" stdDeviation="18" floodColor="#362212" floodOpacity="0.18" />
           <feDropShadow dx="-4" dy="8" stdDeviation="8" floodColor="#362212" floodOpacity="0.12" />
         </filter>
       </defs>
 
-      <g transform="translate(190, 240) rotate(-24) translate(-90, -185)" filter="url(#bottleShadow)">
+      <g transform="translate(190, 240) rotate(-24) translate(-90, -185)" filter={`url(#${bottleShadowId})`}>
         {/* Outer Glass Body (Rounded Rectangular Shape) */}
         <path
           d="M 30 75 C 30 62, 40 52, 54 48 L 74 44 L 74 18 C 74 12, 78 8, 84 8 L 96 8 C 102 8, 106 12, 106 18 L 106 44 L 126 48 C 140 52, 150 62, 150 75 L 150 310 C 150 326, 138 338, 122 338 L 58 338 C 42 338, 30 326, 30 310 Z"
-          fill="url(#glassWallGrad)"
+          fill={`url(#${glassWallGradId})`}
           stroke="rgba(255,255,255,0.45)"
           strokeWidth="1.5"
         />
@@ -100,12 +123,12 @@ export function UnlabeledBottle({
         {/* Translucent Edible Oil Interior (Nearly Full ~90%) */}
         <path
           d="M 36 82 L 144 82 L 144 304 C 144 316, 134 324, 120 324 L 60 324 C 46 324, 36 316, 36 304 Z"
-          fill={`url(#oilGrad_${type})`}
+          fill={`url(#${oilGradId})`}
         />
 
         {/* Exactly One Realistic Oil Surface (Meniscus Curve) */}
         <ellipse cx="90" cy="82" rx="54" ry="8" fill={oilSurfaceColor} opacity="0.85" />
-        <ellipse cx="90" cy="82" rx="50" ry="6" fill={`url(#oilGrad_${type})`} opacity="0.6" />
+        <ellipse cx="90" cy="82" rx="50" ry="6" fill={`url(#${oilGradId})`} opacity="0.6" />
         <path
           d="M 42 82 Q 90 87 138 82"
           stroke="rgba(255,255,255,0.6)"
@@ -162,7 +185,7 @@ export function UnlabeledBottle({
           width="40"
           height="28"
           rx="4"
-          fill="url(#woodCapGrad)"
+          fill={`url(#${woodCapGradId})`}
           stroke="#2D1505"
           strokeWidth="1"
         />
@@ -213,7 +236,14 @@ export function MiniBottleThumb({
 }) {
   const isPeanut = type === 'peanut';
   const isSesame = type === 'sesame';
-  const oilColor = isPeanut ? '#F59E0B' : isSesame ? '#B45309' : '#EAB308';
+  const isCoconut = type === 'coconut';
+  const oilColor = isPeanut
+    ? '#F59E0B'
+    : isSesame
+    ? '#B45309'
+    : isCoconut
+    ? '#FDE047'
+    : '#EAB308';
 
   return (
     <svg

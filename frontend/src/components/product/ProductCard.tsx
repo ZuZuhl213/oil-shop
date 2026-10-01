@@ -3,7 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { ExtendedProductDto } from '@/lib/mock-data';
-import { getCategories, getProductBySlug } from '@/lib/api/client';
+import { getCategories } from '@/lib/api/categories';
+import { getProductBySlug } from '@/lib/api/products';
 import { toUiProduct } from '@/lib/catalog-adapter';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { formatCurrencyVnd } from '@/lib/format/currency';

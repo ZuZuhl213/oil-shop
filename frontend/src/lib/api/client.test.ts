@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ApiClientError,
   apiFetch,
-  createOrder,
   getCsrf,
 } from './client';
+import { createOrder } from './orders';
 
 describe('apiFetch', () => {
   afterEach(() => vi.unstubAllGlobals());

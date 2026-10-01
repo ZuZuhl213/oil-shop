@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { UnlabeledBottle, MiniBottleThumb, type UnlabeledBottleOilType } from './UnlabeledBottle';
 
+export type HeroOilType = 'peanut' | 'sesame' | 'coconut';
+
 interface HeroProductInfo {
-  type: UnlabeledBottleOilType;
+  type: HeroOilType;
   titleL1: string;
   titleL2: string;
   mobileHeadline: string;
@@ -13,7 +15,7 @@ interface HeroProductInfo {
   slug: string;
 }
 
-const HERO_PRODUCTS: Record<UnlabeledBottleOilType, HeroProductInfo> = {
+const HERO_PRODUCTS: Record<HeroOilType, HeroProductInfo> = {
   peanut: {
     type: 'peanut',
     titleL1: 'Dầu Lạc',
@@ -30,45 +32,41 @@ const HERO_PRODUCTS: Record<UnlabeledBottleOilType, HeroProductInfo> = {
     desc: 'Hương thơm nồng nàn từ hạt mè đen nương đồi tuyển chọn, ép nhiệt cơ học nguyên chất.',
     slug: 'dau-vung-ep-lanh',
   },
-  sachi: {
-    type: 'sachi',
-    titleL1: 'Dầu Hạt Sachi',
-    titleL2: 'Ép Cơ Học',
-    mobileHeadline: 'Dầu Hạt Sachi Ép Cơ Học',
-    desc: 'Dầu hạt Sachi tự nhiên từ vùng nguyên liệu Tây Nguyên, quy trình mộc chỉn chu.',
-    slug: 'dau-sachi-ep-song',
+  coconut: {
+    type: 'coconut',
+    titleL1: 'Dầu Dừa',
+    titleL2: 'Ép Lạnh',
+    mobileHeadline: 'Dầu Dừa Ép Lạnh Tinh Khiết',
+    desc: 'Cơm dừa tươi Bến Tre ép lạnh ly tâm, thơm dịu ngọt lành, dùng ẩm thực và chăm sóc sức khỏe.',
+    slug: 'dau-dua-nguyen-chat',
   },
 };
 
 export function HeroSection() {
-  const [selectedProduct, setSelectedProduct] = useState<UnlabeledBottleOilType>('peanut');
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [tiltTransform, setTiltTransform] = useState('rotateX(0deg) rotateY(0deg)');
+  const [selectedProduct, setSelectedProduct] = useState<HeroOilType>('peanut');
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const mobWrapperRef = useRef<HTMLDivElement>(null);
 
   const current = HERO_PRODUCTS[selectedProduct];
 
-  const handleSpin = () => {
-    if (isSpinning) return;
-    setIsSpinning(true);
-    setTimeout(() => {
-      setIsSpinning(false);
-    }, 1250);
-  };
+  // Reusable gentle sway wobble trigger (Lắc nhẹ tự nhiên khi tương tác hoặc đổi loại dầu)
+  const triggerGentleSway = useCallback((el: HTMLElement | null) => {
+    if (!el || typeof window === 'undefined') return;
+    const gsap = (window as any).gsap;
+    if (!gsap) return;
+    gsap.killTweensOf(el);
+    const tl = gsap.timeline();
+    tl.to(el, { rotation: -2.8, duration: 0.16, ease: 'power1.out', transformOrigin: '50% 88%' })
+      .to(el, { rotation: 2.0, duration: 0.2, ease: 'power1.inOut' })
+      .to(el, { rotation: -0.8, duration: 0.16, ease: 'power1.inOut' })
+      .to(el, { rotation: 0, duration: 0.22, ease: 'power2.out' });
+  }, []);
 
-  const handleStageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isSpinning) return;
-    const stage = e.currentTarget;
-    const rect = stage.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    const rotateY = (x / (rect.width / 2)) * 12;
-    const rotateX = -(y / (rect.height / 2)) * 12;
-    setTiltTransform(`rotateX(${rotateX}deg) rotateY(${rotateY}deg)`);
-  };
-
-  const handleStageMouseLeave = () => {
-    setTiltTransform('rotateX(0deg) rotateY(0deg)');
-  };
+  // Soft settle sway whenever selected oil variant changes
+  useEffect(() => {
+    triggerGentleSway(wrapperRef.current);
+    triggerGentleSway(mobWrapperRef.current);
+  }, [selectedProduct, triggerGentleSway]);
 
   const scrollToDiscovery = (e: React.MouseEvent) => {
     const el = document.getElementById('desktopProductDiscovery');
@@ -127,12 +125,10 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right Column: Golden Sunlight Stage + Standalone Bottle + Selector */}
+          {/* Right Column: Golden Sunlight Stage + Product Image + Selector */}
           <div
             className="ref-stage-wrap"
             id="refDesktopStage"
-            onMouseMove={handleStageMouseMove}
-            onMouseLeave={handleStageMouseLeave}
           >
             {/* Layer 1: Ambient Sunlight Glow */}
             <div className="ref-stage-ambient-glow" aria-hidden="true" />
@@ -140,18 +136,20 @@ export function HeroSection() {
             {/* Layer 2: Soft Floor Shadow */}
             <div className="ref-stage-floor-shadow" aria-hidden="true" />
 
-            {/* Layer 3: Standalone Unlabeled Clear Glass Bottle (Visual Design Target & Boundary for future Blender GLB) */}
+            {/* Layer 3: Standalone Unlabeled Clear Glass Bottle */}
             <div
-              className={`unlabeled-bottle-container ${isSpinning ? 'spinning-360' : ''}`}
+              className="unlabeled-bottle-container"
               id="refBottleWrapper"
-              style={{ transform: isSpinning ? undefined : tiltTransform }}
+              ref={wrapperRef}
             >
-              <UnlabeledBottle type={selectedProduct} />
+              <div className="bottle-sway-inner bottle-gentle-sway">
+                <UnlabeledBottle type={selectedProduct} idPrefix="desk" />
+              </div>
             </div>
 
             {/* Layer 4: Subtle Cursive Script Quote */}
             <p className="subtle-script-quote" aria-hidden="true">
-              “Món ngon bắt đầu từ nguyên liệu tốt”
+              &ldquo;Món ngon bắt đầu từ nguyên liệu tốt&rdquo;
             </p>
 
             {/* Layer 5: Compact Right-Side Product Selector Dock */}
@@ -182,35 +180,15 @@ export function HeroSection() {
 
               <button
                 type="button"
-                className={`ref-thumb-card ${selectedProduct === 'sachi' ? 'active' : ''}`}
-                onClick={() => setSelectedProduct('sachi')}
+                className={`ref-thumb-card ${selectedProduct === 'coconut' ? 'active' : ''}`}
+                onClick={() => setSelectedProduct('coconut')}
                 role="tab"
-                aria-selected={selectedProduct === 'sachi'}
-                title="Dầu Hạt Sachi Ép Cơ Học"
+                aria-selected={selectedProduct === 'coconut'}
+                title="Dầu Dừa Ép Lạnh Tinh Khiết"
               >
-                <MiniBottleThumb type="sachi" />
-                <span className="ref-thumb-label">Dầu Sachi</span>
+                <MiniBottleThumb type="coconut" />
+                <span className="ref-thumb-label">Dầu Dừa</span>
               </button>
-
-              {/* 360 Degree Rotation Trigger Badge */}
-              <button
-                type="button"
-                className="ref-360-badge"
-                onClick={handleSpin}
-                aria-label="Xoay 360 độ chai dầu"
-                title="Bấm để xoay 360°"
-              >
-                <div className="ref-360-circle">
-                  <span className="ref-360-num">360°</span>
-                  <span className="ref-360-icon">↻</span>
-                </div>
-                <span className="ref-360-text">Kéo để xoay</span>
-              </button>
-            </div>
-
-            {/* Bottom Drag Indicator — subtle, no false promise */}
-            <div className="ref-drag-indicator">
-              <span>Di chuyển chuột để nghiêng chai</span>
             </div>
           </div>
         </div>
@@ -230,11 +208,17 @@ export function HeroSection() {
         <div className="ref-stage-wrap">
           <div className="ref-stage-ambient-glow" style={{ width: 260, height: 260 }} />
           <div className="ref-stage-floor-shadow" style={{ width: 200, bottom: 10 }} />
-          <div className={`unlabeled-bottle-container ${isSpinning ? 'spinning-360' : ''}`}>
-            <UnlabeledBottle type={selectedProduct} />
+          <div
+            className="unlabeled-bottle-container"
+            id="refMobileBottleWrapper"
+            ref={mobWrapperRef}
+          >
+            <div className="bottle-sway-inner bottle-gentle-sway">
+              <UnlabeledBottle type={selectedProduct} idPrefix="mob" />
+            </div>
           </div>
           <p className="subtle-script-quote" style={{ right: 8, bottom: 8, fontSize: 14 }}>
-            “Món ngon từ nguyên liệu tốt”
+            &ldquo;Món ngon từ nguyên liệu tốt&rdquo;
           </p>
         </div>
 
@@ -256,19 +240,10 @@ export function HeroSection() {
           </button>
           <button
             type="button"
-            className={`ref-mobile-sel-btn ${selectedProduct === 'sachi' ? 'active' : ''}`}
-            onClick={() => setSelectedProduct('sachi')}
+            className={`ref-mobile-sel-btn ${selectedProduct === 'coconut' ? 'active' : ''}`}
+            onClick={() => setSelectedProduct('coconut')}
           >
-            <span>Dầu Sachi</span>
-          </button>
-          <button
-            type="button"
-            className="ref-mobile-sel-btn btn-360"
-            onClick={handleSpin}
-            aria-label="Xoay 360 độ chai dầu"
-            title="Xoay 360°"
-          >
-            <span>↻</span> <span>360°</span>
+            <span>Dầu Dừa</span>
           </button>
         </div>
 

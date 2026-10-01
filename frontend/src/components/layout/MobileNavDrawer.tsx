@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { siteConfig } from '@/config/site';
 
 export function MobileNavDrawer() {
   const { isNavOpen, closeNav } = useCart();
@@ -145,12 +146,12 @@ export function MobileNavDrawer() {
             <span className="drawer-contact-title">Xưởng Ép HM NATURALS</span>
           </div>
           <div className="drawer-quick-actions">
-            <a href="tel:0912345678" className="drawer-contact-btn" aria-label="Gọi hotline xưởng">
+            <a href={`tel:${siteConfig.phone.replace(/\s/g, '')}`} className="drawer-contact-btn" aria-label="Gọi hotline xưởng">
               <span>📞</span>
               <span>Hotline xưởng</span>
             </a>
             <a
-              href="https://zalo.me/0912345678"
+              href={siteConfig.zalo}
               target="_blank"
               rel="noopener noreferrer"
               className="drawer-contact-btn"

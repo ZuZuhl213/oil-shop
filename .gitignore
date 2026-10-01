@@ -34,3 +34,5 @@ w
 .agents/
 .claude/
 skills-lock.json
+AGENTS.md
+CLAUDE.md
