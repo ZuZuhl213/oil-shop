@@ -77,10 +77,12 @@
   .od-touch   { min-width: 44px; min-height: 44px; }
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 html {
@@ -2977,4 +2979,6 @@ body {
   }
 }
 
-
+.checkout-input {
+  font-size: 16px;
+}

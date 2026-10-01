@@ -146,12 +146,14 @@ it('resets quantity to the selected variant minimum', async () => {
   const cart=JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!);
   expect(cart.items[0]).toMatchObject({variantId:'42',quantity:2});
 });
-it('allows choosing the quote quantity and retains the draft when storage fails', async () => {
+it('adds the selected quote quantity to a quote cart before checkout', async () => {
   const quote={...product,saleType:'QUOTE' as const,variants:[{...product.variants[0],price:null,minQuantity:0.5,quantityStep:0.5}]};
   catalogApi(quote);await renderDetail('dau-lac-api');
   fireEvent.click(await screen.findByRole('button',{name:'Tăng theo quy cách'}));
-  vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
   fireEvent.click(screen.getByRole('button',{name:'Gửi Yêu Cầu Báo Giá'}));
-  expect(readQuoteDraft()).toMatchObject({variantId:'41',quantity:1});
-  expect(navigation.push).toHaveBeenCalledWith('/checkout?mode=quote');
+  expect(readQuoteDraft()).toBeNull();
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!)).toMatchObject({
+    saleType:'QUOTE',items:[{variantId:'41',quantity:1,price:null}],
+  });
+  expect(navigation.push).toHaveBeenCalledWith('/checkout');
 });

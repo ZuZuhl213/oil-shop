@@ -21,7 +21,7 @@ interface ReceiptItem {
 }
 
 interface StoredOrder extends OrderReceipt {
-  customer: {
+  customer?: {
     fullName: string;
     phone: string;
     address: string;
@@ -29,7 +29,7 @@ interface StoredOrder extends OrderReceipt {
     note: string;
   };
   items: ReceiptItem[];
-  shippingFee: number;
+  shippingFee?: number;
 }
 
 interface OrderReceiptPageProps {
@@ -52,50 +52,6 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  // Mask phone for privacy (0912 *** *78)
-  const maskPhone = (phoneStr: string) => {
-    if (!phoneStr || phoneStr.length < 7) return '0912 *** *78';
-    return `${phoneStr.slice(0, 4)} *** *${phoneStr.slice(-2)}`;
-  };
-
-  const steps = [
-    {
-      num: 1,
-      title: 'Đã tiếp nhận yêu cầu',
-      desc: 'Hệ thống xưởng đã ghi nhận yêu cầu vào sổ theo dõi.',
-      time: 'Vừa xong',
-      status: 'completed',
-    },
-    {
-      num: 2,
-      title: 'Xác nhận đơn qua Zalo/Điện thoại',
-      desc: 'Nhân viên xưởng liên hệ thống nhất thời gian và quy cách.',
-      time: 'Dự kiến trong 30 phút',
-      status: 'active',
-    },
-    {
-      num: 3,
-      title: 'Ép mộc & Đóng chai thủy tinh',
-      desc: 'Rót chai thủy tinh sẫm màu, niêm phong tem mộc kiểm định.',
-      time: 'Trong ngày',
-      status: 'upcoming',
-    },
-    {
-      num: 4,
-      title: 'Đang vận chuyển giao tận bếp',
-      desc: 'Bàn giao đơn vị vận chuyển chuyên nghiệp bọc lót chống sốc.',
-      time: '1 - 3 ngày',
-      status: 'upcoming',
-    },
-    {
-      num: 5,
-      title: 'Hoàn tất đơn hàng',
-      desc: 'Khách hàng kiểm tra chất lượng mùi thơm sánh trước khi nhận.',
-      time: 'Hoàn tất',
-      status: 'upcoming',
-    },
-  ];
 
   if (!hasLoaded) {
     return (
@@ -134,7 +90,7 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
           {orderData.orderType === 'QUOTE_REQUEST' ? 'Biên Nhận Yêu Cầu Báo Giá' : 'Biên Nhận Đặt Hàng'}
         </h2>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.5 }}>
-          Hệ thống xưởng đã ghi nhận yêu cầu đặt hàng. Xưởng HM NATURALS sẽ liên hệ trực tiếp để xác nhận thông tin chi tiết và thống nhất thời gian giao nhận trước khi xuất kho.
+          Yêu cầu đã được ghi nhận. HM NATURALS sẽ liên hệ để xác nhận thông tin, giá và phí giao nhận trước khi xử lý.
         </p>
 
         {/* Official Order Code Returned by Backend */}
@@ -172,70 +128,27 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
         </div>
       </div>
 
-      {/* ── Status Progression Timeline Card (Stepper 5 bước) ── */}
       <div className="status-timeline-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-            Tiến độ xử lý yêu cầu:
-          </span>
-          <span style={{
-            padding: '4px 12px',
-            borderRadius: 99,
-            fontSize: 11.5,
-            fontWeight: 700,
-            background: 'var(--peanut-gold-surface)',
-            color: 'var(--peanut-bark)',
-          }}>
-            Bước 1/5: Tiếp nhận
-          </span>
-        </div>
-
-        <div className="stepper-list">
-          {steps.map((st) => (
-            <div
-              key={st.num}
-              className={`step-item ${st.status === 'completed' ? 'completed' : ''} ${st.status === 'active' ? 'active' : ''}`}
-            >
-              <div className="step-bullet">{st.num}</div>
-              <div className="step-content-text">
-                <h4>{st.title}</h4>
-                <p>{st.desc}</p>
-                <time>{st.time}</time>
-              </div>
-            </div>
-          ))}
-        </div>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+          Tiếp theo
+        </span>
+        <p className="mt-2 text-sm leading-6 text-text-muted">
+          Shop sẽ liên hệ theo thông tin bạn đã cung cấp để xác nhận yêu cầu. Đơn hàng chưa được thanh toán.
+        </p>
       </div>
 
       {/* ── Privacy Protected Customer Data Card ── */}
       <div className="privacy-info-card">
         <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--deep-olive)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
-          Thông tin bảo mật khách hàng:
+          Bảo mật thông tin liên hệ:
         </span>
         <div className="privacy-info-row">
           <span className="privacy-lbl">Mã yêu cầu đơn:</span>
           <span className="privacy-val">{orderData.orderCode}</span>
         </div>
-        <div className="privacy-info-row">
-          <span className="privacy-lbl">Người nhận:</span>
-          <span className="privacy-val">{orderData.customer?.fullName || 'Khách hàng'}</span>
-        </div>
-        <div className="privacy-info-row">
-          <span className="privacy-lbl">Số điện thoại:</span>
-          <span className="privacy-val">{maskPhone(orderData.customer?.phone)}</span>
-        </div>
-        <div className="privacy-info-row">
-          <span className="privacy-lbl">Địa bàn nhận hàng:</span>
-          <span className="privacy-val">{orderData.customer?.address || 'Hà Nội'}</span>
-        </div>
-        <div className="privacy-info-row">
-          <span className="privacy-lbl">Kênh liên hệ xác nhận:</span>
-          <span className="privacy-val">{orderData.customer?.channel || 'Zalo'}</span>
-        </div>
-        <div className="privacy-info-row">
-          <span className="privacy-lbl">Phương thức thanh toán:</span>
-          <span className="privacy-val">Thanh toán khi nhận hàng (COD)</span>
-        </div>
+        <p className="text-sm leading-6 text-text-muted">
+          Vì quyền riêng tư, thông tin liên hệ không hiển thị trên biên nhận.
+        </p>
       </div>
 
       {/* ── Order Summary Card ── */}
@@ -253,7 +166,9 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
                 Quy cách: {item.variantName} • Số lượng: {item.quantity}
               </span>
               <div style={{ fontWeight: 700, color: 'var(--dark-cocoa)', fontSize: 14.5, marginTop: 2 }}>
-                {item.price == null ? 'Shop sẽ báo giá sau khi xác nhận' : formatCurrencyVnd(item.price * item.quantity)}
+                {orderData.orderType === 'QUOTE_REQUEST' || item.price == null
+                  ? 'Shop sẽ báo giá sau khi xác nhận'
+                  : formatCurrencyVnd(item.price * item.quantity)}
               </div>
             </div>
           </div>
@@ -261,7 +176,11 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
       </div>
 
       {/* ── Total Cost Breakdown ── */}
-      <div
+      {orderData.orderType === 'QUOTE_REQUEST' ? (
+        <div className="rounded-xl border border-soft-sand bg-white-pure p-4 text-sm leading-6 text-text-muted">
+          Yêu cầu báo giá không có tổng tiền cố định. Shop sẽ liên hệ để xác nhận số lượng và mức giá.
+        </div>
+      ) : orderData.subtotal != null && orderData.totalAmount != null ? <div
         style={{
           background: 'var(--white-pure)',
           border: '1px solid var(--soft-sand)',
@@ -301,7 +220,7 @@ export default function OrderReceiptPage({ params }: OrderReceiptPageProps) {
           <span>Tổng thanh toán:</span>
           <span>{formatCurrencyVnd(orderData.totalAmount)}</span>
         </div>
-      </div>
+      </div> : null}
 
       {/* ── Action Buttons ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 14 }}>
