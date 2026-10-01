@@ -13,6 +13,7 @@ interface CartContextType {
   addItem: (item: CartItemInput) => CartActionResult;
   removeItem: (variantId: string) => CartActionResult;
   updateQuantity: (variantId: string, quantity: number) => CartActionResult;
+  changeVariant: (variantId: string, item: CartItemInput) => CartActionResult;
   clearCart: () => CartActionResult;
   clearCartIfMatches: (items: ReadonlyArray<Pick<CartItem, 'variantId' | 'quantity'>>) => boolean;
   totalItems: number;
@@ -117,6 +118,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeItem = useCallback((variantId: string) => apply({ type: 'remove', variantId }), [apply]);
   const updateQuantity = useCallback((variantId: string, quantity: number) => apply({ type: 'setQuantity', variantId, quantity }), [apply]);
+  const changeVariant = useCallback((variantId: string, item: CartItemInput) => apply({ type: 'changeVariant', variantId, item }), [apply]);
   const clearCart = useCallback(() => apply({ type: 'clear' }), [apply]);
   const clearCartIfMatches = useCallback((items: ReadonlyArray<Pick<CartItem, 'variantId' | 'quantity'>>) => {
     if (!cartMatchesItems(cartRef.current, items)) return false;
@@ -133,6 +135,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addItem,
       removeItem,
       updateQuantity,
+      changeVariant,
       clearCart,
       clearCartIfMatches,
       totalItems,

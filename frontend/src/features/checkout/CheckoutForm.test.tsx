@@ -2,7 +2,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { CartProvider } from '@/context/CartContext';
-import { clearPendingOrder, clearQuoteDraft } from '@/lib/checkout-storage';
+import { clearPendingOrder, clearQuoteDraft, saveQuoteDraft } from '@/lib/checkout-storage';
 import type { OrderReceipt } from '@/lib/api/contracts/types';
 import { CheckoutForm } from './CheckoutForm';
 
@@ -65,7 +65,7 @@ function continueToReview() {
 }
 
 function confirmSend() {
-  fireEvent.click(screen.getByRole('button', { name: /Xác nhận và gửi/ }));
+  fireEvent.click(screen.getByRole('button', { name: /Xác nhận và gửi|Thử lại với cùng mã gửi/ }));
 }
 
 beforeEach(() => {
@@ -100,7 +100,7 @@ it('shows a review step before sending an order', async () => {
 
 it('refreshes an expired CSRF token and retries with the same idempotency key', async () => {
   stubApi(async () => orderRequests.length === 1
-    ? Response.json({ code: 'FORBIDDEN', message: 'CSRF token expired', fieldErrors: {} }, { status: 403 })
+    ? Response.json({ code: 'CSRF_INVALID', message: 'CSRF token expired', fieldErrors: {} }, { status: 403 })
     : Response.json(receipt, { status: 201 }));
   mount();
   await fillContact();
@@ -208,7 +208,7 @@ it('links an unavailable variant response back to the cart', async () => {
   continueToReview();
   confirmSend();
 
-  expect(await screen.findByText('Catalog item is unavailable')).toBeVisible();
+  expect(await screen.findByText(/Catalog item is unavailable/)).toBeVisible();
   expect(screen.getByRole('link', { name: /Quay lại giỏ hàng/i })).toHaveAttribute('href', '/cart');
 });
 
@@ -239,4 +239,86 @@ it('removes a stale voucher preview after the backend rejects the voucher and ke
   expect(screen.getByText('Tổng ước lượng:').parentElement).toHaveTextContent('90.000 ₫');
   expect(orderCount).toBe(1);
   expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items).toHaveLength(1);
+});
+
+it('keeps the fixed price cart after a quote request succeeds', async () => {
+  saveQuoteDraft(undefined, {
+    productId: '2', productName: 'Dầu lạc sỉ', productSlug: 'dau-lac-si',
+    variantId: '99', variantName: '5L', quantity: 5, minQuantity: 5, quantityStep: 5, thumbnailType: 'peanut',
+  });
+  stubApi();
+  render(<CartProvider><CheckoutForm legacyQuoteMode /></CartProvider>);
+  await fillContact();
+  continueToReview();
+  confirmSend();
+  await waitFor(() => expect(navigation.push).toHaveBeenCalledWith('/orders/DH-CHECKOUT-1'));
+
+  expect(orderRequests[0].payload).toMatchObject({ orderType: 'QUOTE_REQUEST', items: [{ variantId: '99', quantity: 5 }] });
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items).toMatchObject([{ variantId: '15', quantity: 1 }]);
+});
+
+it('handles ITEM_UNAVAILABLE with empty fieldErrors and leaves cart items intact', async () => {
+  stubApi(async () => Response.json({ code: 'ITEM_UNAVAILABLE', message: 'Catalog item is unavailable', fieldErrors: {} }, { status: 422 }));
+  mount();
+  await fillContact();
+  continueToReview();
+  confirmSend();
+
+  expect(await screen.findByText(/Catalog item is unavailable/)).toBeVisible();
+  expect(screen.getByRole('link', { name: /Quay lại giỏ hàng/i })).toHaveAttribute('href', '/cart');
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items).toHaveLength(1);
+});
+
+it('does not retry a non-CSRF 403 and allows a new submission attempt', async () => {
+  stubApi(async () => Response.json({ code: 'FORBIDDEN', message: 'Origin is not allowed', fieldErrors: {} }, { status: 403 }));
+  mount();
+  await fillContact();
+  continueToReview();
+  confirmSend();
+
+  expect(await screen.findByText('Origin is not allowed')).toBeVisible();
+  expect(orderRequests).toHaveLength(1);
+  expect(screen.getByPlaceholderText('Ví dụ: Nguyễn Văn An')).not.toBeDisabled();
+});
+
+it('treats a 401 as a definite rejection and releases the saved attempt for correction', async () => {
+  stubApi(async () => Response.json({ code: 'UNAUTHENTICATED', message: 'Authentication is required', fieldErrors: {} }, { status: 401 }));
+  mount();
+  await fillContact();
+  continueToReview();
+  confirmSend();
+
+  expect(await screen.findByText('Authentication is required')).toBeVisible();
+  expect(orderRequests).toHaveLength(1);
+  expect(sessionStorage.getItem('hm_pending_order_v1')).toBeNull();
+  expect(screen.getByPlaceholderText('Ví dụ: Nguyễn Văn An')).not.toBeDisabled();
+});
+
+it('clears a conflicting pending key and does not offer an infinite retry with it', async () => {
+  stubApi(async () => Response.json({ code: 'IDEMPOTENCY_CONFLICT', message: 'conflict', fieldErrors: {} }, { status: 409 }));
+  mount();
+  await fillContact();
+  continueToReview();
+  confirmSend();
+
+  expect(await screen.findByText(/Mã gửi này đã được dùng/)).toBeVisible();
+  expect(sessionStorage.getItem('hm_pending_order_v1')).toBeNull();
+  expect(screen.getByPlaceholderText('Ví dụ: Nguyễn Văn An')).not.toBeDisabled();
+});
+
+it('reuses the persisted payload and key after remount when the result is unknown', async () => {
+  stubApi(async () => Response.json({ code: 'SERVICE_UNAVAILABLE', message: 'offline', fieldErrors: {} }, { status: 503 }));
+  const first = mount();
+  await fillContact();
+  continueToReview();
+  confirmSend();
+  expect(await screen.findByText(/Chưa xác định được kết quả gửi đơn/i)).toBeVisible();
+  const saved = JSON.parse(sessionStorage.getItem('hm_pending_order_v1')!);
+  first.unmount();
+
+  mount();
+  confirmSend();
+  await waitFor(() => expect(orderRequests).toHaveLength(2));
+  expect(orderRequests[1].key).toBe(saved.key);
+  expect(orderRequests[1].payload).toEqual(saved.payload);
 });

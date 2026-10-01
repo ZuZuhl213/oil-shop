@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { useCart, type CartItem } from '@/context/CartContext';
 import { formatCurrencyVnd } from '@/lib/format/currency';
+import { getProductBySlug } from '@/lib/api/products';
+import type { ProductDto } from '@/lib/api/contracts/types';
 
 function formatQuantity(quantity: number): string {
   return quantity.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
@@ -39,6 +41,31 @@ function QuantityInput({ item }: { item: CartItem }) {
       aria-label={`Số lượng ${item.productName}`}
     />
   );
+}
+
+function VariantSelect({ item }: { item: CartItem }) {
+  const { changeVariant } = useCart();
+  const [variants, setVariants] = useState<ProductDto['variants']>([]);
+  useEffect(() => {
+    if (!item.productSlug) return;
+    let active = true;
+    getProductBySlug(item.productSlug).then((product) => { if (active) setVariants(product.variants); }).catch(() => {});
+    return () => { active = false; };
+  }, [item.productSlug]);
+  if (variants.filter((variant) => variant.isActive).length < 2) return null;
+  return <label className="flex items-center gap-2 text-sm text-text-muted">
+    Đổi quy cách
+    <select aria-label={`Quy cách ${item.productName}`} value={item.variantId} onChange={(event) => {
+      const variant = variants.find((entry) => entry.id === event.currentTarget.value);
+      if (!variant) return;
+      changeVariant(item.variantId, {
+        ...item, variantId: variant.id, variantName: variant.name, price: variant.price,
+        minQuantity: variant.minQuantity, quantityStep: variant.quantityStep, quantity: variant.minQuantity,
+      });
+    }} className="rounded-lg border border-soft-sand bg-white-pure px-2 py-1 text-dark-cocoa">
+      {variants.filter((variant) => variant.isActive).map((variant) => <option key={variant.id} value={variant.id}>{variant.name}</option>)}
+    </select>
+  </label>;
 }
 
 export default function CartPage() {
@@ -102,6 +129,7 @@ export default function CartPage() {
                   <div className="min-w-0 flex-1">
                     <h2 className="font-semibold text-forest-green">{item.productName}</h2>
                     <p className="mt-1 text-sm text-text-muted">Quy cách: {item.variantName}</p>
+                    <div className="mt-2"><VariantSelect item={item} /></div>
                     <p className="mt-1 text-sm font-semibold text-dark-cocoa">
                       {item.price == null ? 'Shop sẽ báo giá sau khi liên hệ' : `${formatCurrencyVnd(item.price)} / quy cách`}
                     </p>

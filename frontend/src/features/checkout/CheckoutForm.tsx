@@ -118,6 +118,7 @@ export function CheckoutForm({ legacyQuoteMode = false }: CheckoutFormProps) {
   const [voucherCode, setVoucherCode] = useState('');
   const [fieldErrors, setFieldErrors] = useState<CheckoutFieldErrors>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [itemUnavailableError, setItemUnavailableError] = useState(false);
   const [attemptStorageWarning, setAttemptStorageWarning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionSucceeded, setSubmissionSucceeded] = useState(false);
@@ -155,7 +156,7 @@ export function CheckoutForm({ legacyQuoteMode = false }: CheckoutFormProps) {
   const displayTotal = isQuoteOrder ? null : activeVoucherPreview?.totalAmount ?? estimatedSubtotal;
   const displayDiscount = isQuoteOrder ? 0 : activeVoucherPreview?.discountAmount ?? 0;
   const errorEntries = Object.entries(fieldErrors).filter((entry): entry is [string, string] => Boolean(entry[1]));
-  const hasCartItemError = errorEntries.some(([field]) => field === 'variantId' || field.startsWith('items'));
+  const hasCartItemError = itemUnavailableError || errorEntries.some(([field]) => field === 'variantId' || field.startsWith('items'));
 
   useEffect(() => {
     const attempt = readCheckoutAttempt();
@@ -299,6 +300,7 @@ export function CheckoutForm({ legacyQuoteMode = false }: CheckoutFormProps) {
     submittingRef.current = true;
     setPendingAttempt(attempt);
     setSubmitError(null);
+    setItemUnavailableError(false);
     setIsSubmitting(true);
     setAttemptStorageWarning(!saveCheckoutAttempt(attempt));
 
@@ -316,27 +318,33 @@ export function CheckoutForm({ legacyQuoteMode = false }: CheckoutFormProps) {
         // The receipt remains available in memory for this tab.
       }
       clearCheckoutAttempt();
-      clearQuoteDraft();
+      if (payload.orderType === 'QUOTE_REQUEST') clearQuoteDraft();
       submissionSucceededRef.current = true;
       setSubmissionSucceeded(true);
       setPendingAttempt(null);
-      clearCartIfMatches(payload.items);
+      if (payload.orderType === 'ORDER') clearCartIfMatches(payload.items);
       router.push('/orders/' + receipt.orderCode);
     } catch (error) {
       const status = error instanceof ApiClientError ? error.status : 0;
-      const definitiveRejection = status === 422 || (!pendingAttempt && [400, 401, 403, 404].includes(status));
+      const definitiveRejection = status >= 400 && status < 500 && status !== 408;
       if (definitiveRejection) {
         clearCheckoutAttempt();
         setPendingAttempt(null);
         setAttemptStorageWarning(false);
         setFieldErrors(error instanceof ApiClientError ? error.fieldErrors as CheckoutFieldErrors : {});
-        if (error instanceof ApiClientError && ['VOUCHER_INVALID', 'VOUCHER_EXHAUSTED'].includes(error.code)) {
+        setItemUnavailableError(error instanceof ApiClientError && error.code === 'ITEM_UNAVAILABLE');
+        if (error instanceof ApiClientError && ['VOUCHER_INVALID', 'VOUCHER_EXHAUSTED', 'ITEM_UNAVAILABLE'].includes(error.code)) {
           voucherRequestSequence.current += 1;
           setVoucherPreview(null);
           setVoucherFeedback(null);
           setIsVoucherLoading(false);
         }
-        setSubmitError(messageFor(error, 'Vui lòng kiểm tra lại thông tin trước khi gửi.'));
+        const rejectionMessage = error instanceof ApiClientError && error.code === 'IDEMPOTENCY_CONFLICT'
+          ? 'Mã gửi này đã được dùng cho nội dung khác. Hãy kiểm tra đơn hàng gần nhất hoặc quay lại giỏ để bắt đầu lần gửi mới.'
+          : error instanceof ApiClientError && error.code === 'ITEM_UNAVAILABLE'
+            ? `${messageFor(error, 'Một sản phẩm không còn khả dụng.')} Hãy quay lại giỏ hàng để kiểm tra trước khi gửi lại.`
+            : messageFor(error, 'Yêu cầu đã bị từ chối. Vui lòng kiểm tra lại thông tin trước khi gửi.');
+        setSubmitError(rejectionMessage);
         setStep('form');
       } else {
         setSubmitError('Chưa xác định được kết quả gửi đơn. Lần gửi này được giữ nguyên; hãy thử lại để kiểm tra mà không tạo đơn trùng.');

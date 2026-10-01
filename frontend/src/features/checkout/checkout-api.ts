@@ -24,8 +24,8 @@ export async function createOrder(payload: CreateOrderRequest, key: string): Pro
   try {
     return await postOrder(payload, key);
   } catch (error) {
-    if (!(error instanceof ApiClientError) || error.status !== 403) throw error;
-    // postOrder fetches a new CSRF token through mutationHeaders and reuses the same idempotency key.
+    if (!(error instanceof ApiClientError) || error.status !== 403 ||
+      !(error.code === 'CSRF_INVALID' || /csrf.*(invalid|expired|missing)|((invalid|expired|missing).*csrf)/i.test(error.message))) throw error;
     return postOrder(payload, key);
   }
 }

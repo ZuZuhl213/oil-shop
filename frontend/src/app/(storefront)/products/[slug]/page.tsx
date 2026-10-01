@@ -15,6 +15,7 @@ import { formatCurrencyVnd } from '@/lib/format/currency';
 import { useCart } from '@/context/CartContext';
 import { AddToCartButton } from '@/components/cart/AddToCartButton';
 import type { CartItemInput } from '@/features/cart/cart-types';
+import { saveQuoteDraft, type QuoteDraft } from '@/lib/checkout-storage';
 import { ProductCard } from '@/components/product/ProductCard';
 import Product360Modal from '@/components/product/Product360Modal';
 
@@ -98,11 +99,26 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
 
   const handleAddToCart = (): boolean => {
     if (!selectedCartItem || !selectedVariant?.isActive) return false;
+    if (isQuote) {
+      const draft: QuoteDraft = {
+        productId: product!.id, productName: product!.name, productSlug: product!.slug,
+        variantId: selectedVariant.id, variantName: selectedVariant.name, quantity,
+        minQuantity: selectedVariant.minQuantity, quantityStep: selectedVariant.quantityStep,
+        thumbnailType: product!.visualType,
+      };
+      saveQuoteDraft(undefined, draft);
+      router.push('/checkout?mode=quote');
+      return true;
+    }
     return addItem(selectedCartItem).ok;
   };
 
   const handleBuyNow = () => {
     if (!product || !selectedVariant || !selectedVariant.isActive) return;
+    if (isQuote) {
+      handleAddToCart();
+      return;
+    }
     if (handleAddToCart()) {
       closeCart();
       router.push('/checkout');
@@ -280,13 +296,15 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           </span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          {selectedCartItem ? (
+          {selectedCartItem && !isQuote ? (
             <AddToCartButton
               item={selectedCartItem}
-              label={isQuote ? '+ Giỏ Báo Giá' : '+ Giỏ Hàng'}
+              label="+ Giỏ Hàng"
               className="btn-action-touch quote-flow"
               disabled={!selectedVariant?.isActive}
             />
+          ) : isQuote && selectedCartItem ? (
+            <button type="button" className="btn-action-touch quote-flow" onClick={handleAddToCart} disabled={!selectedVariant?.isActive}>Gửi báo giá</button>
           ) : (
             <button type="button" className="btn-action-touch quote-flow" disabled style={{ padding: '0 16px' }}>+ Giỏ Hàng</button>
           )}

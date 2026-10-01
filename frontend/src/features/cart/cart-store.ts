@@ -38,6 +38,10 @@ const errors = {
     code: 'TOTAL_TOO_LARGE',
     message: 'Tạm tính vượt giới hạn. Hãy giảm số lượng hoặc liên hệ cửa hàng.',
   },
+  duplicate: {
+    code: 'DUPLICATE_VARIANT',
+    message: 'Quy cách này đã có trong giỏ hàng.',
+  },
 } satisfies Record<string, CartActionError>;
 
 function toCents(value: number): number | null {
@@ -165,6 +169,27 @@ export function applyCartAction(state: CartState, action: CartAction): CartTrans
     if (getCartSubtotal(nextState) == null && nextState.saleType === 'FIXED_PRICE') {
       return failed(state, errors.total);
     }
+    return { state: nextState, error: null };
+  }
+
+  if (action.type === 'changeVariant') {
+    const existing = state.items.find((item) => item.variantId === action.variantId);
+    const replacement = normalizeCartItem(action.item);
+    if (!existing || !replacement || existing.saleType !== replacement.saleType ||
+      (existing.productId && replacement.productId && existing.productId !== replacement.productId)) {
+      return failed(state, errors.item);
+    }
+    if (replacement.variantId !== action.variantId && state.items.some((item) => item.variantId === replacement.variantId)) {
+      return failed(state, errors.duplicate);
+    }
+    const quantity = isQuantityValid(existing.quantity, replacement.minQuantity, replacement.quantityStep)
+      ? existing.quantity
+      : replacement.minQuantity;
+    const nextItems = state.items.map((item) => item.variantId === action.variantId
+      ? { ...replacement, quantity }
+      : item);
+    const nextState = finish(nextItems);
+    if (nextState.saleType === 'FIXED_PRICE' && getCartSubtotal(nextState) == null) return failed(state, errors.total);
     return { state: nextState, error: null };
   }
 

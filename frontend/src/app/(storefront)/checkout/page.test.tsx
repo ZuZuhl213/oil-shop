@@ -68,17 +68,16 @@ it('does not replace an uncertain payload with edited form data', async () => {
   expect(requests[1]).toEqual(sent);
 });
 
-it('keeps an uncertain attempt if a later retry is rejected before order lookup', async () => {
+it('clears an uncertain attempt after a definite origin rejection and allows editing', async () => {
   let count=0;
   api(async()=>++count===1 ? Promise.reject(new Error('lost response'))
     : Response.json({code:'FORBIDDEN',message:'Origin is not allowed',fieldErrors:{}},{status:403}));
   mount();await submit();await screen.findByRole('alert');
   const sent=requests[0];fireEvent.click(screen.getByRole('button',{name:'Thử lại với cùng mã gửi'}));
-  await waitFor(()=>expect(requests).toHaveLength(3));
+  await waitFor(()=>expect(requests).toHaveLength(2));
   expect(requests[1]).toEqual(sent);
-  expect(requests[2]).toEqual(sent);
-  await waitFor(()=>expect(screen.getByRole('button',{name:'Thử lại với cùng mã gửi'})).toBeEnabled());
-  expect(JSON.parse(sessionStorage.getItem('hm_pending_order_v1')!)).toEqual(sent);
+  await waitFor(()=>expect(screen.getByPlaceholderText('Ví dụ: Nguyễn Văn An')).toBeEnabled());
+  expect(sessionStorage.getItem('hm_pending_order_v1')).toBeNull();
 });
 
 it('can retry the saved payload even when the local cart is missing after reload', async () => {

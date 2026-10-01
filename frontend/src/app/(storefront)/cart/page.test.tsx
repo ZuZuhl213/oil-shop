@@ -4,6 +4,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { CartProvider } from '@/context/CartContext';
 import CartPage from './page';
+import { product } from '@/test/catalog-fixtures';
 
 const fixedCart = {
   version: 1,
@@ -34,6 +35,17 @@ it('edits quantity, updates the estimate, and removes a cart line', async () => 
   await waitFor(() => expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items[0].quantity).toBe(2));
   fireEvent.click(screen.getByRole('button', { name: 'Xóa Dầu lạc khỏi giỏ hàng' }));
   expect(await screen.findByRole('heading', { name: 'Giỏ hàng đang trống' })).toBeVisible();
+});
+
+it('changes the selected variant and applies its price and quantity rules', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => Response.json(product)));
+  mount();
+  const selector = await screen.findByRole('combobox', { name: 'Quy cách Dầu lạc' });
+  fireEvent.change(selector, { target: { value: '42' } });
+
+  await waitFor(() => expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items[0]).toMatchObject({
+    variantId: '42', variantName: 'Can 5L', quantity: 2, price: 400000,
+  }));
 });
 
 it('shows a quote request without rendering null totals as zero VND', async () => {

@@ -28,6 +28,7 @@ export type CartItemInput = Omit<CartItem, 'quantity'> & { quantity?: number; sa
 export type CartAction =
   | { type: 'hydrate'; state: CartState }
   | { type: 'add'; item: CartItemInput }
+  | { type: 'changeVariant'; variantId: string; item: CartItemInput }
   | { type: 'setQuantity'; variantId: string; quantity: number }
   | { type: 'remove'; variantId: string }
   | { type: 'clear' };
@@ -37,7 +38,8 @@ export type CartActionErrorCode =
   | 'CART_LIMIT'
   | 'INVALID_QUANTITY'
   | 'INVALID_ITEM'
-  | 'TOTAL_TOO_LARGE';
+  | 'TOTAL_TOO_LARGE'
+  | 'DUPLICATE_VARIANT';
 
 export interface CartActionError {
   code: CartActionErrorCode;

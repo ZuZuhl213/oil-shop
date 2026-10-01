@@ -124,6 +124,18 @@ describe('cart state', () => {
     expect(screen.getByTestId('action')).toHaveTextContent(/không thể.*cùng giỏ/i);
   });
 
+  it('changes a cart line to another variant and resets quantity to its minimum when needed', () => {
+    const current = applyCartAction(EMPTY_CART, { type: 'add', item: fixed('old', 3) }).state;
+    const next = applyCartAction(current, {
+      type: 'changeVariant', variantId: 'old',
+      item: { ...fixed('new', 2), variantName: '2L', minQuantity: 2, quantityStep: 2, price: 150000 },
+    });
+
+    expect(next.error).toBeNull();
+    expect(next.state.items).toHaveLength(1);
+    expect(next.state.items[0]).toMatchObject({ variantId: 'new', variantName: '2L', quantity: 2, price: 150000 });
+  });
+
   it('limits the cart to 50 distinct variants', () => {
     mountCart();
     fireEvent.click(screen.getByRole('button', { name: 'Add 51 variants' }));
