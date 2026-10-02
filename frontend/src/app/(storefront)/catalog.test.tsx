@@ -146,12 +146,14 @@ it('resets quantity to the selected variant minimum', async () => {
   const cart=JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!);
   expect(cart.items[0]).toMatchObject({variantId:'42',quantity:2});
 });
-it('allows choosing the quote quantity and retains the draft when storage fails', async () => {
+it('saves the selected quote quantity in a draft and starts separate checkout', async () => {
+  const fixedCart={version:1,saleType:'FIXED_PRICE',items:[{productId:'1',productName:'Dầu lạc',productSlug:'dau-lac',variantId:'15',variantName:'1L',price:90000,quantity:1,minQuantity:1,quantityStep:1,saleType:'FIXED_PRICE',thumbnailType:'peanut'}]};
+  localStorage.setItem('hm_naturals_cart_v1',JSON.stringify(fixedCart));
   const quote={...product,saleType:'QUOTE' as const,variants:[{...product.variants[0],price:null,minQuantity:0.5,quantityStep:0.5}]};
   catalogApi(quote);await renderDetail('dau-lac-api');
   fireEvent.click(await screen.findByRole('button',{name:'Tăng theo quy cách'}));
-  vi.spyOn(Storage.prototype,'setItem').mockImplementation(()=>{throw new Error('quota');});
   fireEvent.click(screen.getByRole('button',{name:'Gửi Yêu Cầu Báo Giá'}));
   expect(readQuoteDraft()).toMatchObject({variantId:'41',quantity:1});
+  expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!)).toEqual(fixedCart);
   expect(navigation.push).toHaveBeenCalledWith('/checkout?mode=quote');
 });

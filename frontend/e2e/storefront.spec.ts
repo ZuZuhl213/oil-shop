@@ -37,7 +37,7 @@ async function fixtureApi(page: Page, options: {detail?:ProductDto;order?:(route
 }
 async function fillCustomer(page: Page) {
   await page.getByPlaceholder('Ví dụ: Nguyễn Văn An').fill('Nguyen Van A');
-  await page.getByPlaceholder('Ví dụ: 0912 345 678').fill('0912345678');
+  await page.getByPlaceholder('0912345678 hoặc +84912345678').fill('0912345678');
 }
 
 test('3D viewer rotates, resets and releases the modal with keyboard focus restored', async ({ page, isMobile }, testInfo) => {
@@ -234,12 +234,13 @@ test('timeout then reload retries the exact payload and key for one order',async
     return route.fulfill({status:200,json:committed.get(key)});
   }});
   await page.goto('/checkout');await fillCustomer(page);
-  await page.getByRole('button',{name:'Gửi Yêu Cầu Đặt Hàng',exact:true}).click();
+  await page.getByRole('button',{name:'Xem lại thông tin'}).click();
+  await page.getByRole('button',{name:'Xác nhận và gửi yêu cầu'}).click();
   await expect(page.getByRole('alert').filter({hasText:'Chưa xác định'})).toBeVisible();
   await page.reload();
-  await expect(page.getByPlaceholder('Ví dụ: Nguyễn Văn An')).toHaveValue('Nguyen Van A');
-  await expect(page.getByPlaceholder('Ví dụ: Nguyễn Văn An')).toBeDisabled();
-  await page.getByRole('button',{name:'Thử Lại Yêu Cầu Đã Gửi',exact:true}).click();
+  await expect(page.getByRole('heading',{name:'Kiểm tra lại yêu cầu'})).toBeVisible();
+  await expect(page.getByText('Nguyen Van A')).toBeVisible();
+  await page.getByRole('button',{name:'Thử lại với cùng mã gửi',exact:true}).click();
   await expect(page).toHaveURL(/orders\/DH-E2E-1/);
   await expect(page.getByRole('heading',{name:'Biên Nhận Đặt Hàng'})).toBeVisible();
   expect(requests).toHaveLength(2);expect(requests[1]).toEqual(requests[0]);expect(committed.size).toBe(1);
@@ -251,7 +252,7 @@ test('quote mode with missing draft cannot submit the retail cart',async ({page}
   await expect(page.getByRole('button',{name:'Gửi Yêu Cầu Đặt Hàng',exact:true})).toHaveCount(0);
 });
 
-test('quote draft and successful receipt survive blocked session storage in memory',async ({page})=>{
+test('quote cart and successful receipt survive blocked session storage in memory',async ({page})=>{
   let sent:CreateOrderRequest|undefined;
   await page.addInitScript(()=>{
     Object.defineProperty(sessionStorage,'setItem',{value:()=>{throw new Error('quota');}});
@@ -267,8 +268,9 @@ test('quote draft and successful receipt survive blocked session storage in memo
   await page.goto('/products/dau-lac-api');
   await page.getByRole('button',{name:'Tăng theo quy cách'}).click();
   await page.getByRole('button',{name:'Gửi Yêu Cầu Báo Giá',exact:true}).click();
-  await expect(page).toHaveURL(/checkout\?mode=quote/);await fillCustomer(page);
-  await page.getByRole('button',{name:'Gửi Yêu Cầu Báo Giá',exact:true}).click();
+  await expect(page).toHaveURL(/\/checkout$/);await fillCustomer(page);
+  await page.getByRole('button',{name:'Xem lại thông tin'}).click();
+  await page.getByRole('button',{name:'Xác nhận và gửi yêu cầu báo giá'}).click();
   await expect(page.getByRole('heading',{name:'Biên Nhận Yêu Cầu Báo Giá'})).toBeVisible();
   expect(sent).toMatchObject({orderType:'QUOTE_REQUEST',items:[{variantId:'41',quantity:1}]});
   expect(sent?.voucherCode).toBeUndefined();

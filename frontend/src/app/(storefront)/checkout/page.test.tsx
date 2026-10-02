@@ -45,8 +45,9 @@ function mount() { return render(<CartProvider><CheckoutPage /></CartProvider>);
 async function submit(name = 'Nguyen Van A') {
   const input = await screen.findByPlaceholderText('Ví dụ: Nguyễn Văn An');
   fireEvent.change(input, { target: { value: name } });
-  fireEvent.change(screen.getByPlaceholderText('Ví dụ: 0912 345 678'), { target: { value: '0912345678' } });
-  fireEvent.submit(input.closest('form')!);
+  fireEvent.change(screen.getByPlaceholderText('0912345678 hoặc +84912345678'), { target: { value: '0912345678' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Xem lại thông tin' }));
+  fireEvent.click(screen.getByRole('button', { name: /Xác nhận và gửi/ }));
 }
 
 it('reuses the original key and payload after a timeout and remount', async () => {
@@ -54,8 +55,7 @@ it('reuses the original key and payload after a timeout and remount', async () =
   await screen.findByRole('alert');
   const sent = requests[0];
   first.unmount(); mount();
-  const retry = await screen.findByRole('button', { name: /Gửi|Thử/ });
-  fireEvent.submit(retry.closest('form')!);
+  fireEvent.click(await screen.findByRole('button', { name: 'Thử lại với cùng mã gửi' }));
   await waitFor(() => expect(requests).toHaveLength(2));
   expect(requests[1]).toEqual(sent);
 });
@@ -63,27 +63,27 @@ it('reuses the original key and payload after a timeout and remount', async () =
 it('does not replace an uncertain payload with edited form data', async () => {
   api(); mount(); await submit(); await screen.findByRole('alert');
   const sent = requests[0];
-  await submit('Changed name');
+  fireEvent.click(screen.getByRole('button', { name: 'Thử lại với cùng mã gửi' }));
   await waitFor(() => expect(requests).toHaveLength(2));
   expect(requests[1]).toEqual(sent);
 });
 
-it('keeps an uncertain attempt if a later retry is rejected before order lookup', async () => {
+it('clears an uncertain attempt after a definite origin rejection and allows editing', async () => {
   let count=0;
   api(async()=>++count===1 ? Promise.reject(new Error('lost response'))
     : Response.json({code:'FORBIDDEN',message:'Origin is not allowed',fieldErrors:{}},{status:403}));
   mount();await submit();await screen.findByRole('alert');
-  const sent=requests[0];await submit();
+  const sent=requests[0];fireEvent.click(screen.getByRole('button',{name:'Thử lại với cùng mã gửi'}));
   await waitFor(()=>expect(requests).toHaveLength(2));
-  await waitFor(()=>expect(screen.getByRole('button',{name:'Thử Lại Yêu Cầu Đã Gửi'})).toBeEnabled());
-  expect(JSON.parse(sessionStorage.getItem('hm_pending_order_v1')!)).toEqual(sent);
+  expect(requests[1]).toEqual(sent);
+  await waitFor(()=>expect(screen.getByPlaceholderText('Ví dụ: Nguyễn Văn An')).toBeEnabled());
+  expect(sessionStorage.getItem('hm_pending_order_v1')).toBeNull();
 });
 
 it('can retry the saved payload even when the local cart is missing after reload', async () => {
   api();const first=mount();await submit();await screen.findByRole('alert');
   const sent=requests[0];first.unmount();localStorage.clear();mount();
-  const retry=await screen.findByRole('button',{name:'Thử Lại Yêu Cầu Đã Gửi'});
-  fireEvent.submit(retry.closest('form')!);
+  fireEvent.click(await screen.findByRole('button',{name:'Thử lại với cùng mã gửi'}));
   await waitFor(()=>expect(requests).toHaveLength(2));
   expect(requests[1]).toEqual(sent);
 });
@@ -98,8 +98,8 @@ it('does not expose the retail cart when quote draft is missing', async () => {
 it('only sends one request when the form is submitted twice before response', async () => {
   let resolve!: (value: Response) => void;
   api(() => new Promise<Response>((done) => { resolve = done; })); mount(); await submit();
-  fireEvent.submit(screen.getByPlaceholderText('Ví dụ: Nguyễn Văn An').closest('form')!);
   await waitFor(() => expect(requests).toHaveLength(1));
+  expect(screen.getByRole('button', { name: 'Đang gửi yêu cầu…' })).toBeDisabled();
   resolve(Response.json(receipt, { status: 201 }));
   await waitFor(() => expect(navigation.push).toHaveBeenCalled());
   expect(requests).toHaveLength(1);
@@ -117,11 +117,9 @@ it('does not send a second quote while the successful request is leaving the pag
   await submit();
   await waitFor(() => expect(navigation.push).toHaveBeenCalledWith('/orders/BG-TEST-1'));
 
-  const form = screen.getByPlaceholderText('Ví dụ: Nguyễn Văn An').closest('form')!;
-  fireEvent.submit(form);
-
   await waitFor(() => expect(requests).toHaveLength(1));
-  expect(screen.getByRole('button', { name: 'Gửi Yêu Cầu Báo Giá' })).toBeDisabled();
+  expect(screen.getByText('Đã gửi yêu cầu báo giá. Shop sẽ liên hệ để xác nhận quy cách và mức giá.')).toBeVisible();
+  expect(screen.getByRole('heading', { name: 'Đã tiếp nhận yêu cầu' })).toBeVisible();
 });
 
 it('calculates a retry summary from the pending payload instead of the current cart', async () => {
@@ -133,8 +131,8 @@ it('calculates a retry summary from the pending payload instead of the current c
   api();
   mount();
 
-  await screen.findByText('Quy cách: 1L • Số lượng: 1');
-  const pricingSummary = screen.getByText('Tạm tính tiền hàng:').parentElement!;
+  await screen.findByText('Quy cách: 1L · Số lượng: 1');
+  const pricingSummary = screen.getByText('Tạm tính ước lượng:').parentElement!;
   expect(pricingSummary).toHaveTextContent('90.000 ₫');
   expect(pricingSummary).not.toHaveTextContent('450.000 ₫');
 });

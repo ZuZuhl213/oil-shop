@@ -10,10 +10,12 @@ import { ApiClientError } from '@/lib/api/client';
 import { getCategories } from '@/lib/api/categories';
 import { getProductBySlug, getProducts } from '@/lib/api/products';
 import { toUiProduct, toUiProducts } from '@/lib/catalog-adapter';
-import { saveQuoteDraft } from '@/lib/checkout-storage';
 import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { useCart } from '@/context/CartContext';
+import { AddToCartButton } from '@/components/cart/AddToCartButton';
+import type { CartItemInput } from '@/features/cart/cart-types';
+import { saveQuoteDraft, type QuoteDraft } from '@/lib/checkout-storage';
 import { ProductCard } from '@/components/product/ProductCard';
 import Product360Modal from '@/components/product/Product360Modal';
 
@@ -32,7 +34,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const product = current?.product;
   const isLoading = !current;
   const loadError = current?.error;
-  const { addItem } = useCart();
+  const { addItem, closeCart } = useCart();
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
   const [quantity, setQuantity] = useState<number>(1);
   const [show360Modal, setShow360Modal] = useState<boolean>(false);
@@ -81,10 +83,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const totalPrice = currentPrice == null ? null : currentPrice * quantity;
   const categoryName = product?.categoryName || 'Nông Sản Bản Địa';
 
-  const handleAddToCart = () => {
-    if (!product || !selectedVariant?.isActive || isQuote || selectedVariant.price == null) return;
-
-    addItem({
+  const selectedCartItem: CartItemInput | null = product && selectedVariant ? {
       productId: product.id,
       productName: product.name,
       productSlug: product.slug,
@@ -96,28 +95,34 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
       quantityStep: selectedVariant.quantityStep,
       saleType: product.saleType,
       thumbnailType: product.visualType,
-    });
+    } : null;
+
+  const handleAddToCart = (): boolean => {
+    if (!selectedCartItem || !selectedVariant?.isActive) return false;
+    if (isQuote) {
+      const draft: QuoteDraft = {
+        productId: product!.id, productName: product!.name, productSlug: product!.slug,
+        variantId: selectedVariant.id, variantName: selectedVariant.name, quantity,
+        minQuantity: selectedVariant.minQuantity, quantityStep: selectedVariant.quantityStep,
+        thumbnailType: product!.visualType,
+      };
+      saveQuoteDraft(undefined, draft);
+      router.push('/checkout?mode=quote');
+      return true;
+    }
+    return addItem(selectedCartItem).ok;
   };
 
   const handleBuyNow = () => {
     if (!product || !selectedVariant || !selectedVariant.isActive) return;
     if (isQuote) {
-      saveQuoteDraft(undefined, {
-            productId: product.id,
-            productName: product.name,
-            productSlug: product.slug,
-            variantId: selectedVariant.id,
-            variantName: selectedVariant.name,
-            quantity,
-            minQuantity: selectedVariant.minQuantity,
-            quantityStep: selectedVariant.quantityStep,
-            thumbnailType: product.visualType,
-      });
-      router.push('/checkout?mode=quote');
+      handleAddToCart();
       return;
     }
-    handleAddToCart();
-    router.push('/checkout');
+    if (handleAddToCart()) {
+      closeCart();
+      router.push('/checkout');
+    }
   };
 
   const relatedProducts = related?.key === requestKey ? related.products : [];
@@ -291,16 +296,17 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           </span>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          {!isQuote && (
-            <button
-              type="button"
+          {selectedCartItem && !isQuote ? (
+            <AddToCartButton
+              item={selectedCartItem}
+              label="+ Giỏ Hàng"
               className="btn-action-touch quote-flow"
-              onClick={handleAddToCart}
-              disabled={!selectedVariant?.isActive || selectedVariant.price == null}
-              style={{ padding: '0 16px' }}
-            >
-              + Giỏ Hàng
-            </button>
+              disabled={!selectedVariant?.isActive}
+            />
+          ) : isQuote && selectedCartItem ? (
+            <button type="button" className="btn-action-touch quote-flow" onClick={handleAddToCart} disabled={!selectedVariant?.isActive}>Gửi báo giá</button>
+          ) : (
+            <button type="button" className="btn-action-touch quote-flow" disabled style={{ padding: '0 16px' }}>+ Giỏ Hàng</button>
           )}
           <button
             type="button"

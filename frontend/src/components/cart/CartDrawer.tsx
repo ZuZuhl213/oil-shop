@@ -9,13 +9,17 @@ import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 export function CartDrawer() {
   const {
     items,
+    saleType,
     removeItem,
     updateQuantity,
     subtotal,
     isCartOpen,
     closeCart,
     totalItems,
+    storageMessage,
+    actionError,
   } = useCart();
+  const isQuote = saleType === 'QUOTE';
 
   if (!isCartOpen) return null;
 
@@ -55,6 +59,8 @@ export function CartDrawer() {
 
         {/* Items List */}
         <div className="cart-drawer-items-list">
+          {storageMessage && <p className="m-3 rounded-lg border border-soft-sand bg-white-pure p-3 text-sm text-text-muted" role="status">{storageMessage}</p>}
+          {actionError && <p className="m-3 rounded-lg border border-error-crimson bg-white-pure p-3 text-sm text-error-crimson" role="alert">{actionError.message}</p>}
           {items.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '40px 10px', color: 'var(--text-muted)' }}>
               <div style={{ fontSize: 36, marginBottom: 8 }}>🛍️</div>
@@ -93,11 +99,9 @@ export function CartDrawer() {
                 <div className="cart-item-info">
                   <div className="cart-item-title">{item.productName}</div>
                   <div className="cart-item-meta">
-                    {item.variantName} • {formatCurrencyVnd(item.price)}
+                    {item.variantName} • {item.price == null ? 'Báo giá sau khi liên hệ' : formatCurrencyVnd(item.price)}
                   </div>
-                  <div className="cart-item-price">
-                    {formatCurrencyVnd(item.price * item.quantity)}
-                  </div>
+                  {item.price != null && <div className="cart-item-price">{formatCurrencyVnd(item.price * item.quantity)}</div>}
                 </div>
 
                 {/* Qty & Remove */}
@@ -116,6 +120,7 @@ export function CartDrawer() {
                       className="qty-btn"
                       style={{ width: 30, height: 30, fontSize: 15 }}
                       onClick={() => updateQuantity(item.variantId, item.quantity - (item.quantityStep ?? 1))}
+                      disabled={item.quantity <= (item.minQuantity ?? 1)}
                       aria-label="Giảm"
                     >
                       −
@@ -142,22 +147,26 @@ export function CartDrawer() {
         {/* Footer */}
         {items.length > 0 && (
           <div className="cart-drawer-footer">
-            <div className="cart-drawer-subtotal">
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Tổng thanh toán:</span>
-              <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--dark-cocoa)' }}>
-                {formatCurrencyVnd(subtotal)}
-              </span>
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--peanut-bark)', marginBottom: 10, lineHeight: 1.4 }}>
-              * Hàng báo giá sỉ (Sachi, Bã đậu phộng) được lập phiếu riêng, không gộp chung trong giỏ này.
-            </div>
+            {isQuote ? (
+              <p className="mb-3 text-sm leading-5 text-text-muted">Giá sẽ được shop xác nhận khi liên hệ báo giá.</p>
+            ) : (
+              <div className="cart-drawer-subtotal">
+                <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Tạm tính ước lượng:</span>
+                <span style={{ fontSize: 17, fontWeight: 700, color: 'var(--dark-cocoa)' }}>{formatCurrencyVnd(subtotal)}</span>
+              </div>
+            )}
+            <Link
+              href="/cart"
+              onClick={closeCart}
+              className="mb-2 inline-flex min-h-11 w-full items-center justify-center rounded-full border border-soft-sand bg-white-pure text-sm font-semibold text-forest-green no-underline"
+            >Xem giỏ hàng</Link>
             <Link
               href="/checkout"
               onClick={closeCart}
               className="btn-action-touch fixed-flow no-underline"
               style={{ width: '100%', height: 44, textAlign: 'center' }}
             >
-              Tiến Hành Đặt Hàng ({totalItems})
+              {isQuote ? `Gửi yêu cầu báo giá (${totalItems})` : `Tiếp tục đặt hàng (${totalItems})`}
             </Link>
           </div>
         )}
