@@ -23,8 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProductService {
-    private final ProductRepository products; private final CategoryRepository categories; private final ProductVariantRepository variants; private final CatalogMapper mapper;
-    public ProductService(ProductRepository products, CategoryRepository categories, ProductVariantRepository variants, CatalogMapper mapper) { this.products=products; this.categories=categories; this.variants=variants; this.mapper=mapper; }
+    private final ProductRepository products; private final CategoryRepository categories; private final ProductVariantRepository variants; private final CatalogMapper mapper; private final ThumbnailUrlPolicy thumbnailUrls;
+    public ProductService(ProductRepository products, CategoryRepository categories, ProductVariantRepository variants, CatalogMapper mapper, ThumbnailUrlPolicy thumbnailUrls) { this.products=products; this.categories=categories; this.variants=variants; this.mapper=mapper; this.thumbnailUrls=thumbnailUrls; }
     @Transactional(readOnly = true) public PageDto<ProductDto> list(int page, int size) {
         Page<Product> values = products.findAllByOrderBySortOrderAscIdAsc(PageRequest.of(page, size, Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("id"))));
         List<Product> pageProducts = values.getContent();
@@ -36,8 +36,8 @@ public class ProductService {
         return new PageDto<>(mapped.getContent(), mapped.getNumber(), mapped.getSize(), mapped.getTotalElements(), mapped.getTotalPages());
     }
     @Transactional(readOnly = true) public ProductDto getAdmin(long id) { Product p=get(id); return mapper.product(p, variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
-    @Transactional public ProductDto create(ProductWrite b) { Category c=category(b.categoryId()); String slug=CategoryService.normalizeSlug(b.slug(), 180); unique(slug,null); Product p=new Product(c,b.name().trim(),slug,CategoryService.trim(b.shortDescription()),CategoryService.trim(b.description()),thumbnail(b.thumbnailUrl()),b.saleType(),status(b.status()),CategoryService.value(b.sortOrder())); return mapper.product(products.save(p), java.util.List.of()); }
-    @Transactional public ProductDto update(long id, ProductWrite b) { Product p=get(id); Category c=category(b.categoryId()); String slug=CategoryService.normalizeSlug(b.slug(), 180); unique(slug,id); if (b.saleType()!=p.getSaleType()) throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"VALIDATION_ERROR","saleType cannot be changed"); p.setCategory(c);p.setSlug(slug);p.setName(b.name().trim());p.setShortDescription(CategoryService.trim(b.shortDescription()));p.setDescription(CategoryService.trim(b.description()));p.setThumbnailUrl(thumbnail(b.thumbnailUrl()));p.setStatus(status(b.status()));p.setSortOrder(CategoryService.value(b.sortOrder())); return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
+    @Transactional public ProductDto create(ProductWrite b) { Category c=category(b.categoryId()); String slug=CategoryService.normalizeSlug(b.slug(), 180); unique(slug,null); Product p=new Product(c,b.name().trim(),slug,CategoryService.trim(b.shortDescription()),CategoryService.trim(b.description()),thumbnailUrls.validate(b.thumbnailUrl()),b.saleType(),status(b.status()),CategoryService.value(b.sortOrder())); return mapper.product(products.save(p), java.util.List.of()); }
+    @Transactional public ProductDto update(long id, ProductWrite b) { Product p=get(id); Category c=category(b.categoryId()); String slug=CategoryService.normalizeSlug(b.slug(), 180); unique(slug,id); if (b.saleType()!=p.getSaleType()) throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"VALIDATION_ERROR","saleType cannot be changed"); p.setCategory(c);p.setSlug(slug);p.setName(b.name().trim());p.setShortDescription(CategoryService.trim(b.shortDescription()));p.setDescription(CategoryService.trim(b.description()));p.setThumbnailUrl(thumbnailUrls.validate(b.thumbnailUrl()));p.setStatus(status(b.status()));p.setSortOrder(CategoryService.value(b.sortOrder())); return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
     @Transactional public ProductDto status(long id, ProductStatus value) { Product p=get(id);p.setStatus(value);return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id)); }
     Product get(long id) { return products.findById(id).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,"NOT_FOUND","Product not found")); }
     Category category(String id) {
@@ -52,11 +52,4 @@ public class ProductService {
     }
     private void unique(String slug, Long id) { products.findBySlug(slug).filter(p -> id==null || !p.getId().equals(id)).ifPresent(p->{throw new BusinessException(HttpStatus.CONFLICT,"CONFLICT","Product slug already exists");}); }
     private ProductStatus status(String value) { try { return value==null?ProductStatus.ACTIVE:ProductStatus.valueOf(value); } catch(Exception e) { throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"VALIDATION_ERROR","Invalid product status"); } }
-    private String thumbnail(String value) {
-        String normalized = CategoryService.trim(value);
-        if (normalized != null && !normalized.startsWith("https://")) {
-            throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "VALIDATION_ERROR", "Thumbnail URL must use HTTPS");
-        }
-        return normalized;
-    }
 }

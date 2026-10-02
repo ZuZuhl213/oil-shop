@@ -6,7 +6,7 @@ import type { ExtendedProductDto } from '@/lib/mock-data';
 import { getCategories } from '@/lib/api/categories';
 import { getProductBySlug } from '@/lib/api/products';
 import { toUiProduct } from '@/lib/catalog-adapter';
-import { ProductBottleImage } from '@/components/product/ProductBottleImage';
+import { ProductThumbnail } from '@/components/product/ProductThumbnail';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { useCart } from '@/context/CartContext';
 
@@ -59,8 +59,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <Link href={`/products/${product.slug}`} className="grid-product-card group no-underline">
       {/* 1:1 Thumb with Bottle Image & Tag */}
       <div className="grid-card-thumb">
-        <ProductBottleImage type={product.visualType} alt={product.name} />
-        <span className="photo-illustrate-tag">Ảnh minh họa</span>
+        <ProductThumbnail url={product.thumbnailUrl} type={product.visualType} alt={product.name} />
         {product.tag ? (
           <span className="grid-card-badge">{product.tag}</span>
         ) : (

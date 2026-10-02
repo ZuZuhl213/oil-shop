@@ -15,6 +15,16 @@ spring:
     deserialization:
       fail-on-unknown-properties: true
       accept-float-as-int: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+app:
+  media:
+    supabase-url: ${SUPABASE_URL:}
+    bucket: ${SUPABASE_MEDIA_BUCKET:}
+    service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}
 
 server:
   port: ${SERVER_PORT:8080}

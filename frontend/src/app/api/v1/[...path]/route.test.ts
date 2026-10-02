@@ -1,10 +1,25 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { GET, OPTIONS, POST } from './route';
+import { GET, OPTIONS, PATCH, POST } from './route';
 
 const context = (path: string[]) => ({ params: Promise.resolve({ path }) });
 
 describe('API proxy route', () => {
   afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.useRealTimers(); });
+
+  it('forwards variant status mutations and multipart media with a separate 6 MiB cap', async () => {
+    const fetchMock = vi.fn().mockImplementation(async () => Response.json({ url: 'https://media.test/image.png' }, { status: 201 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const status = await PATCH(new Request('http://localhost/api/v1/admin/variants/42/status', { method: 'PATCH', body: '{"isActive":false}' }), context(['admin', 'variants', '42', 'status']));
+    expect(status.status).toBe(201);
+    const body = new Uint8Array(5 * 1024 * 1024 + 100);
+    const response = await POST(new Request('http://localhost/api/v1/admin/media', { method: 'POST', headers: { 'content-type': 'multipart/form-data; boundary=boundary', cookie: 'JSESSIONID=admin', 'x-csrf-token': 'csrf' }, body }), context(['admin', 'media']));
+    expect(response.status).toBe(201);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(new Headers(fetchMock.mock.calls[1][1].headers).get('content-type')).toBe('multipart/form-data; boundary=boundary');
+    expect(new Headers(fetchMock.mock.calls[1][1].headers).get('cookie')).toBe('JSESSIONID=admin');
+    expect((await POST(new Request('http://localhost/api/v1/admin/media', { method: 'POST', body: new Uint8Array(6 * 1024 * 1024 + 1) }), context(['admin', 'media']))).status).toBe(413);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
 
   it('preserves separate cookies including an Expires date and disables admin caching', async () => {
     const headers = new Headers({'cache-control':'public, max-age=3600'});

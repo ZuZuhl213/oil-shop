@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = "app.security.allowed-origins=http://localhost:3000")
+@SpringBootTest(properties = { "app.security.allowed-origins=http://localhost:3000", "app.media.supabase-url=https://img.test", "app.media.bucket=catalog" })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class CatalogAdminIT extends PostgresIntegrationTest {
@@ -60,7 +60,7 @@ class CatalogAdminIT extends PostgresIntegrationTest {
         String productId = id(mockMvc.perform(post("/api/v1/admin/products")
                         .session(session).header("Origin", ORIGIN).header("X-CSRF-TOKEN", csrf(session))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"categoryId\":\"%s\",\"name\":\"Dầu lạc\",\"slug\":\"dau-lac\",\"shortDescription\":\"Chai\",\"description\":\"Plain text\",\"thumbnailUrl\":\"https://img.test/oil.jpg\",\"saleType\":\"FIXED_PRICE\",\"status\":\"ACTIVE\",\"sortOrder\":1}".formatted(categoryId)))
+                        .content("{\"categoryId\":\"%s\",\"name\":\"Dầu lạc\",\"slug\":\"dau-lac\",\"shortDescription\":\"Chai\",\"description\":\"Plain text\",\"thumbnailUrl\":\"https://img.test/storage/v1/object/public/catalog/products/oil.jpg\",\"saleType\":\"FIXED_PRICE\",\"status\":\"ACTIVE\",\"sortOrder\":1}".formatted(categoryId)))
                 .andExpect(status().isCreated()).andReturn());
 
         String bottleId = id(mockMvc.perform(post("/api/v1/admin/products/%s/variants".formatted(productId))

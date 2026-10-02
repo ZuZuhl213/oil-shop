@@ -10,7 +10,7 @@ import { ApiClientError } from '@/lib/api/client';
 import { getCategories } from '@/lib/api/categories';
 import { getProductBySlug, getProducts } from '@/lib/api/products';
 import { toUiProduct, toUiProducts } from '@/lib/catalog-adapter';
-import { ProductBottleImage } from '@/components/product/ProductBottleImage';
+import { ProductThumbnail } from '@/components/product/ProductThumbnail';
 import { formatCurrencyVnd } from '@/lib/format/currency';
 import { useCart } from '@/context/CartContext';
 import { AddToCartButton } from '@/components/cart/AddToCartButton';
@@ -150,8 +150,7 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </Link>
-          <ProductBottleImage type={product.visualType} alt={product.name} />
-          <span className="photo-illustrate-tag">Ảnh mẫu minh họa</span>
+          <ProductThumbnail url={product.thumbnailUrl} type={product.visualType} alt={product.name} illustrationLabel="Ảnh mẫu minh họa" />
         </div>
 
         {/* Product Information Body */}
