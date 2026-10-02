@@ -1,5 +1,7 @@
 package com.shop.service;
 
+import com.shop.integration.google.SheetSyncOutbox;
+
 import com.shop.dto.OrderDtos.AdminOrder;
 import com.shop.entity.Order;
 import com.shop.exception.BusinessException;
@@ -15,16 +17,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OrderNoteService {
     private final OrderRepository orders;
+    private final SheetSyncOutbox sheetSync;
     private final OrderItemRepository orderItems;
     private final OrderMapper mapper;
     private final EntityManager entityManager;
 
     public OrderNoteService(OrderRepository orders, OrderItemRepository orderItems, OrderMapper mapper,
-            EntityManager entityManager) {
+            EntityManager entityManager, SheetSyncOutbox sheetSync) {
         this.orders = orders;
         this.orderItems = orderItems;
         this.mapper = mapper;
         this.entityManager = entityManager;
+        this.sheetSync = sheetSync;
     }
 
     @Transactional
@@ -35,9 +39,13 @@ public class OrderNoteService {
             throw new BusinessException(HttpStatus.CONFLICT, "NOTE_CONFLICT",
                     "Admin note has changed; reload and review before saving");
         }
-        order.setAdminNote(normalize(adminNote));
-        orders.saveAndFlush(order);
-        entityManager.refresh(order);
+        String normalized = normalize(adminNote);
+        if (!Objects.equals(normalize(order.getAdminNote()), normalized)) {
+            order.setAdminNote(normalized);
+            orders.saveAndFlush(order);
+            entityManager.refresh(order);
+            sheetSync.enqueue(id);
+        }
         return mapper.adminOrder(order, orderItems.findAllByOrder_IdOrderByIdAsc(id));
     }
 
