@@ -111,3 +111,23 @@ Tests use disposable PostgreSQL and a fake Storage adapter, with a mocked HTTP c
 ## Conditional admin notes (Plan 11.1)
 
 `PATCH /api/v1/admin/orders/{id}/note` accepts `{adminNote, expectedAdminNote}`. Both values are nullable strings (max 2000 characters); `expectedAdminNote` must be present, otherwise 400. Blank normalizes to null, other values are trimmed. Within the existing transaction and pessimistic order row lock, compare the expected and stored note before writing. A mismatch returns 409 `NOTE_CONFLICT` and preserves the stored note. Status changes do not invalidate this comparison; no schema migration or shared updatedAt token is used. Value comparison is the V1 contract and cannot detect A → B → A changes. Existing auth, CSRF, order transitions and cancellation/voucher transactions remain in effect.
+
+## Google Sheets mirror (Plan 12)
+
+V4 adds a persistent `sheet_sync_jobs` outbox and backfills one pending job per existing order. Order creation and actual status/admin-note changes enqueue within the business transaction; replay and no-op writes do not enqueue. Sync failure cannot roll back a committed order. The worker loads the current snapshot, overwrites `Orders_Raw` at `order.id + 1` with `valueInputOption=RAW`, and ensures grid capacity first. It never writes Orders_Working or reads Sheets to update the database.
+
+Set backend-only `GOOGLE_SHEETS_SPREADSHEET_ID` and `GOOGLE_SHEETS_CREDENTIALS_PATH` (a trusted mounted service-account JSON), share the spreadsheet with that service account, then enable `GOOGLE_SHEETS_SYNC_ENABLED=true`. Default is disabled; mutations still record jobs. `GOOGLE_SHEETS_POLL_DELAY_MS` defaults to 5000. Prepare/protect the raw header and column order before enabling. Credentials stay outside Git and browser code. Google auth library is pinned to 1.50.0 and disables automatic token retries; Sheets requests use 5-second connect / 15-second request timeouts with no redirects.
+
+One synchronized worker in the single-instance V1 backend claims up to 20 jobs per tick, one just before each send. Earlier unsucceeded jobs block successors of the same order. Claims use short transactions, skip locked rows and a 5-minute lease; network calls run outside database transactions. Retry delays are 5s, 30s, 2m, 10m, then 1h indefinitely. Errors persist as controlled diagnostic codes. A timeout after a remote write retries the same row. Stop the old process fully before starting its replacement: lease tokens protect database acknowledgements, but cannot fence an HTTP call already dispatched to Google.
+
+The local runbook and three-tab templates are in `../docs/operations/google-sheets.md` and `../docs/operations/sheets/` (currently ignored by repository policy). Working rows carry manually entered order-code values, with lookups keyed by code and manual notes moved together on whole-row sorting. Statistics aggregates raw snapshots, separates expected revenue from completed order value (not payment received), excludes quote money and finds new customers using full phone-normalized history. Deploy the Apps Script and configure its reporting period separately; no live spreadsheet is created automatically.
+
+```bash
+./gradlew integrationTest --tests '*SheetSyncIT' --tests '*SheetSyncMigrationIT'
+./gradlew test --tests '*GoogleSheetsAdapterTest'
+./gradlew check
+# From repository root:
+node --test docs/operations/sheets/statistics.test.cjs
+```
+
+Transport tests and disposable PostgreSQL tests do not verify live Google permissions, quotas, three-tab setup or Apps Script triggers. Those need a dedicated test spreadsheet and the runbook smoke before enabling production sync.

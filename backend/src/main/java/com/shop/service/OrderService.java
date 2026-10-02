@@ -1,5 +1,7 @@
 package com.shop.service;
 
+import com.shop.integration.google.SheetSyncOutbox;
+
 import com.shop.dto.CalculatedCart;
 import com.shop.dto.ItemInput;
 import com.shop.dto.OrderDtos.CreateOrder;
@@ -30,6 +32,7 @@ public class OrderService {
     private final VoucherRepository vouchers;
     private final VoucherPolicy voucherPolicy;
     private final OrderRepository orders;
+    private final SheetSyncOutbox sheetSync;
     private final OrderItemRepository orderItems;
     private final OrderCodeGenerator codes;
     private final OrderMapper mapper;
@@ -43,7 +46,7 @@ public class OrderService {
             OrderItemRepository orderItems,
             OrderCodeGenerator codes,
             OrderMapper mapper,
-            Clock clock) {
+            Clock clock, SheetSyncOutbox sheetSync) {
         this.pricing = pricing;
         this.vouchers = vouchers;
         this.voucherPolicy = voucherPolicy;
@@ -52,6 +55,7 @@ public class OrderService {
         this.codes = codes;
         this.mapper = mapper;
         this.clock = clock;
+        this.sheetSync = sheetSync;
     }
 
     @Transactional
@@ -98,6 +102,7 @@ public class OrderService {
             voucher.setUsedCount(voucher.getUsedCount() + 1);
             vouchers.save(voucher);
         }
+        sheetSync.enqueue(id);
         return new CreateResult(mapper.receipt(orders.findById(id).orElseThrow()), false);
     }
 

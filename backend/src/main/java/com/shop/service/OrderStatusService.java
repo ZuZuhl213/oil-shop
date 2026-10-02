@@ -1,5 +1,7 @@
 package com.shop.service;
 
+import com.shop.integration.google.SheetSyncOutbox;
+
 import com.shop.dto.OrderDtos.AdminOrder;
 import com.shop.entity.Order;
 import com.shop.entity.OrderItem;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class OrderStatusService {
     private final OrderRepository orders;
+    private final SheetSyncOutbox sheetSync;
     private final VoucherRepository vouchers;
     private final OrderItemRepository orderItems;
     private final OrderMapper mapper;
@@ -26,13 +29,14 @@ public class OrderStatusService {
     private final EntityManager entityManager;
 
     public OrderStatusService(OrderRepository orders, VoucherRepository vouchers, OrderItemRepository orderItems,
-            OrderMapper mapper, OrderTransitions transitions, EntityManager entityManager) {
+            OrderMapper mapper, OrderTransitions transitions, EntityManager entityManager, SheetSyncOutbox sheetSync) {
         this.orders = orders;
         this.vouchers = vouchers;
         this.orderItems = orderItems;
         this.mapper = mapper;
         this.transitions = transitions;
         this.entityManager = entityManager;
+        this.sheetSync = sheetSync;
     }
 
     @Transactional
@@ -59,6 +63,7 @@ public class OrderStatusService {
             order.setStatus(target);
             orders.saveAndFlush(order);
             entityManager.refresh(order);
+            sheetSync.enqueue(orderId);
         }
         List<OrderItem> items = orderItems.findAllByOrder_IdOrderByIdAsc(orderId);
         return mapper.adminOrder(order, items);

@@ -21,6 +21,11 @@ spring:
       max-request-size: 6MB
 
 app:
+  sheets:
+    enabled: ${GOOGLE_SHEETS_SYNC_ENABLED:false}
+    spreadsheet-id: ${GOOGLE_SHEETS_SPREADSHEET_ID:}
+    credentials-path: ${GOOGLE_SHEETS_CREDENTIALS_PATH:}
+    poll-delay-ms: ${GOOGLE_SHEETS_POLL_DELAY_MS:5000}
   media:
     supabase-url: ${SUPABASE_URL:}
     bucket: ${SUPABASE_MEDIA_BUCKET:}

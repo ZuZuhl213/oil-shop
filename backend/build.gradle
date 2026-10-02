@@ -19,6 +19,7 @@ repositories {
 }
 
 dependencies {
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.50.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-flyway'
