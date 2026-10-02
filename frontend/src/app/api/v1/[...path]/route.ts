@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { readRequestBody, RequestBodyTooLargeError } from './request-body';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -106,6 +107,7 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
   const maxBodyBytes = Number.isSafeInteger(configuredLimit) && configuredLimit > 0 ? configuredLimit : defaultLimit;
   const contentLength = Number(request.headers.get('content-length') ?? '0');
   if (Number.isFinite(contentLength) && contentLength > maxBodyBytes) {
+    void request.body?.cancel().catch(() => {});
     return errorResponse(413, 'REQUEST_TOO_LARGE', 'Request body is too large');
   }
 
@@ -117,9 +119,12 @@ async function proxy(request: Request, context: RouteContext): Promise<Response>
 
   let body: ArrayBuffer | undefined;
   if (!['GET', 'HEAD'].includes(method)) {
-    body = await request.arrayBuffer();
-    if (body.byteLength > maxBodyBytes) {
-      return errorResponse(413, 'REQUEST_TOO_LARGE', 'Request body is too large');
+    try {
+      body = await readRequestBody(request, maxBodyBytes);
+    } catch (error) {
+      return error instanceof RequestBodyTooLargeError
+        ? errorResponse(413, 'REQUEST_TOO_LARGE', 'Request body is too large')
+        : errorResponse(400, 'VALIDATION_ERROR', 'The request body could not be read');
     }
   }
 

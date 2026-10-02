@@ -58,6 +58,9 @@ test.describe('Real catalog and media administration', () => {
     expect(limitUpload.status()).toBe(201);
     const tooLarge = await page.request.post('/api/v1/admin/media', { headers, multipart: { file: { name: 'large.png', mimeType: 'image/png', buffer: Buffer.alloc(5 * 1024 * 1024 + 1) } } });
     expect(tooLarge.status()).toBe(413);
+    const proxyTooLarge = await page.request.post('/api/v1/admin/media', { headers, multipart: { file: { name: 'large.png', mimeType: 'image/png', buffer: Buffer.alloc(6 * 1024 * 1024 + 1) } } });
+    expect(proxyTooLarge.status()).toBe(413);
+    expect(await proxyTooLarge.json()).toMatchObject({ code: 'REQUEST_TOO_LARGE', fieldErrors: {}, traceId: expect.any(String) });
     const before = await (await page.request.get(`/api/v1/admin/products/${id}`)).json();
     await page.getByLabel('Chọn ảnh đại diện').setInputFiles({ name: 'oil.png', mimeType: 'image/png', buffer: image });
     await page.getByRole('button', { name: 'Tải ảnh lên', exact: true }).click();
