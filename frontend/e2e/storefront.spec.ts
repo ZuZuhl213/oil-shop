@@ -254,6 +254,7 @@ test('quote mode with missing draft cannot submit the retail cart',async ({page}
 
 test('quote cart and successful receipt survive blocked session storage in memory',async ({page})=>{
   let sent:CreateOrderRequest|undefined;
+  await seedCart(page);
   await page.addInitScript(()=>{
     Object.defineProperty(sessionStorage,'setItem',{value:()=>{throw new Error('quota');}});
     Object.defineProperty(sessionStorage,'getItem',{value:()=>{throw new Error('blocked');}});
@@ -268,10 +269,13 @@ test('quote cart and successful receipt survive blocked session storage in memor
   await page.goto('/products/dau-lac-api');
   await page.getByRole('button',{name:'Tăng theo quy cách'}).click();
   await page.getByRole('button',{name:'Gửi Yêu Cầu Báo Giá',exact:true}).click();
-  await expect(page).toHaveURL(/\/checkout$/);await fillCustomer(page);
+  await expect(page).toHaveURL(/\/checkout\?mode=quote$/);await fillCustomer(page);
   await page.getByRole('button',{name:'Xem lại thông tin'}).click();
   await page.getByRole('button',{name:'Xác nhận và gửi yêu cầu báo giá'}).click();
   await expect(page.getByRole('heading',{name:'Biên Nhận Yêu Cầu Báo Giá'})).toBeVisible();
   expect(sent).toMatchObject({orderType:'QUOTE_REQUEST',items:[{variantId:'41',quantity:1}]});
   expect(sent?.voucherCode).toBeUndefined();
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!))).toMatchObject({
+    saleType: 'FIXED_PRICE', items: [cartLine],
+  });
 });

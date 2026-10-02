@@ -5,10 +5,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import { siteConfig } from '@/config/site';
+import { useModalDrawer } from '@/lib/use-modal-drawer';
 
 export function MobileNavDrawer() {
   const { isNavOpen, closeNav } = useCart();
   const pathname = usePathname();
+  const { panelRef, closeRef } = useModalDrawer(isNavOpen, closeNav);
 
   if (!isNavOpen) return null;
 
@@ -23,6 +25,8 @@ export function MobileNavDrawer() {
 
       {/* Nav Drawer Slide-over */}
       <aside
+        ref={panelRef}
+        tabIndex={-1}
         className={`cart-drawer nav-drawer ${isNavOpen ? 'open' : ''}`}
         role="dialog"
         aria-modal="true"
@@ -40,6 +44,7 @@ export function MobileNavDrawer() {
             </div>
           </Link>
           <button
+            ref={closeRef}
             type="button"
             className="drawer-close-btn"
             onClick={closeNav}

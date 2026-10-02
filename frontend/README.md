@@ -83,3 +83,23 @@ Repo đã có UI/cart/checkout/receipt đang được ghép API. Các phần nà
 Knowledge/about/contact/tracking chứa nội dung UI local; không coi là tính năng quản trị hay tracking trực tiếp từ backend. Bước tiếp theo: nghiệm thu plan09, rồi plan10 admin.
 
 Cần bổ sung sau: ảnh sản phẩm thật và host Supabase nếu dùng, xác nhận nội dung thương hiệu/liên hệ trước khi public, thông tin deploy ở plan13.
+
+## Admin catalog và media — plan 10
+
+- `/admin/login`, `/admin/categories`, `/admin/products`, `/admin/products/[id]` dùng API hiện có qua proxy, cookie HttpOnly và CSRF; không lưu session ID bằng JavaScript. Redirect sau login chỉ chấp nhận đường dẫn admin nội bộ.
+- Khi nhận 401 trong lúc sửa, form vẫn mounted và giữ bản nháp, hiển thị dialog đăng nhập lại; đăng nhập thành công không tự gửi lại thao tác lưu. Lỗi mạng/422/409 có thông báo và retry bằng thao tác lưu rõ ràng.
+- Quản lý danh mục/sản phẩm/quy cách, tạo/sửa/ẩn/kích hoạt lại; không delete, saleType không đổi sau create. Giá nguyên VND, ID string, minQuantity/quantityStep tối đa 2 số thập phân và tương thích tiền nguyên. Sản phẩm chưa có variant active có cảnh báo.
+- Lọc admin sản phẩm trên toàn bộ các trang API đã tải, không chỉ trang đầu. Đây là cách làm cho catalog V1; catalog lớn nên bổ sung bộ lọc backend.
+- Upload JPEG/PNG/WebP ≤5 MiB qua backend; preview/URL mới chỉ ở bản nháp cho đến khi lưu product thành công. Lỗi upload giữ ảnh cũ; lỗi save giữ URL mới để retry. Storefront dùng thumbnail đã lưu và trở về hình minh họa nếu ảnh lỗi.
+- Đơn hàng/voucher trong navigation là phần tiếp theo (plan 11), chưa triển khai ở plan 10.
+
+Server-only `PROXY_MAX_MEDIA_BODY_BYTES` mặc định 6291456 (6 MiB), riêng endpoint media; JSON vẫn dùng `PROXY_MAX_BODY_BYTES` 1 MiB. Backend cần cấu hình Supabase theo `backend/README.md`. Host triển khai phải hỗ trợ file 5 MiB **cộng multipart overhead**; chưa xác nhận giới hạn production. Nếu host không đáp ứng, cần đổi contract trước deploy.
+
+Kiểm thử admin thật qua proxy:
+
+```bash
+# Cần Docker, Java toolchain 21 và dependencies frontend đã cài.
+npm run test:admin:e2e
+```
+
+Lệnh build frontend, chạy Spring với PostgreSQL Testcontainers, tạo admin dùng riêng cho test, chạy Playwright desktop/mobile trên port3200, rồi dọn các process/container do nó tạo. Đổi port bằng `PLAN10_FRONTEND_PORT`. Storage dùng fake adapter; không dùng database, admin hoặc Supabase credentials thật của người dùng. Plain `npm run test:e2e` skip các test admin yêu cầu fixture này. Nếu lỗi, log được giữ trong `/tmp/hm-admin-e2e-*`.

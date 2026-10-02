@@ -16,6 +16,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -23,6 +25,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiError> handleUploadTooLarge() {
+        return response(HttpStatus.CONTENT_TOO_LARGE, "REQUEST_TOO_LARGE", "File exceeds the upload limit", Map.of("file", "Maximum file size is 5 MiB"));
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    ResponseEntity<ApiError> handleMissingUploadPart() {
+        return response(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Missing file part", Map.of("file", "A file is required"));
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ApiError> handleMalformedJson() {

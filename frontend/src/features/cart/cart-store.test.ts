@@ -136,6 +136,37 @@ describe('cart state', () => {
     expect(next.state.items[0]).toMatchObject({ variantId: 'new', variantName: '2L', quantity: 2, price: 150000 });
   });
 
+  it('keeps valid quantities while updating all target variant fields', () => {
+    for (const quantity of [4, 4.5]) {
+      const source = { ...fixed('old', quantity), minQuantity: 0.5, quantityStep: 0.5 };
+      const state = applyCartAction(EMPTY_CART, { type: 'add', item: source }).state;
+      const next = applyCartAction(state, {
+        type: 'changeVariant', variantId: 'old',
+        item: { ...fixed('new', 0.5), variantName: 'Can', price: 400000, minQuantity: 0.5, quantityStep: 0.5 },
+      });
+      expect(next.error).toBeNull();
+      expect(next.state.items[0]).toMatchObject({ variantId: 'new', variantName: 'Can', price: 400000, minQuantity: 0.5, quantityStep: 0.5, quantity });
+    }
+  });
+
+  it('rejects a duplicate variant without changing either line', () => {
+    const state = applyCartAction(applyCartAction(EMPTY_CART, { type: 'add', item: fixed('old', 3) }).state,
+      { type: 'add', item: fixed('new', 2) }).state;
+    const next = applyCartAction(state, { type: 'changeVariant', variantId: 'old', item: fixed('new') });
+    expect(next.error?.code).toBe('DUPLICATE_VARIANT');
+    expect(next.state).toBe(state);
+    expect(next.state.items.map((item) => item.quantity)).toEqual([3, 2]);
+  });
+
+  it('preserves the cart when changing to invalid metadata or a different sale type', () => {
+    const state = applyCartAction(EMPTY_CART, { type: 'add', item: fixed('old', 3) }).state;
+    for (const item of [fixed('new', 0.5), halfStep, { ...fixed('new'), price: -1 }]) {
+      const next = applyCartAction(state, { type: 'changeVariant', variantId: 'old', item });
+      expect(next.error?.code).toBe('INVALID_ITEM');
+      expect(next.state).toBe(state);
+    }
+  });
+
   it('limits the cart to 50 distinct variants', () => {
     mountCart();
     fireEvent.click(screen.getByRole('button', { name: 'Add 51 variants' }));
