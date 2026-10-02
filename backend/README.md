@@ -131,3 +131,19 @@ node --test docs/operations/sheets/statistics.test.cjs
 ```
 
 Transport tests and disposable PostgreSQL tests do not verify live Google permissions, quotas, three-tab setup or Apps Script triggers. Those need a dedicated test spreadsheet and the runbook smoke before enabling production sync.
+
+## Release verification
+
+The [Dockerfile](Dockerfile) pins Java 21 image digests, runs UID 10001 and defaults to the prod profile. Supply DB_HOST/DB_DATABASE/DB_USERNAME/DB_PASSWORD and explicit APP_SECURITY_ALLOWED_ORIGINS. Production defaults to PostgreSQL sslmode=verify-full; mount the database CA. DB_POOL_MAX_SIZE/DB_POOL_MIN_IDLE default to 10/2. Keep one backend process and one Sheets worker, with no overlap during replacement.
+
+```bash
+docker build -t hm-naturals-backend:plan13-local .
+python3 scripts/release-rehearsal.py
+./gradlew test integrationTest bootJar
+```
+
+The [rehearsal](scripts/release-rehearsal.py) never reads .env and provisions only disposable synthetic PostgreSQL containers/databases. It verifies process restart/session loss, database readiness failure/recovery, exact pg_dump/restore equality including sequences/idempotency/outbox, Sheets failure recovery, production startup secrets and real edge rate limits. The [Nginx reference](deploy/nginx.conf) belongs before the Next frontend; putting it behind Next would group customers under the proxy IP. Real domain/TLS and Vercel edge policies still require deployment configuration.
+
+From frontend use `npm run test:release:e2e` for the real Next/Spring/PostgreSQL browser suite, and `npm run test:e2e -- --workers=2` for general UI checks. Storage in the browser fixture is a fake adapter. A separate sentinel build can be scanned with `PUBLIC_SECRET_SENTINELS=... node scripts/check-public-secrets.mjs`.
+
+Local evidence and open gates are in [release-results.md](../docs/operations/release-results.md); docs stay local/ignored by repository policy. HTTPS browser/provider smoke, backup retention and Vercel's media payload mismatch remain launch checks. Full lint currently has an existing protected HeroSection error; no production deployment is claimed.
