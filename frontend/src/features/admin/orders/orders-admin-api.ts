@@ -12,6 +12,6 @@ export function listOrders(query: OrderQuery) {
 }
 async function patch(url: string, body: unknown) { return apiFetch<AdminOrder>(url, { method: 'PATCH', headers: await mutationHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify(body) }); }
 export const setOrderStatus = (id: string, status: OrderStatus) => patch(path(id) + '/status', { status });
-export const saveOrderNote = (id: string, adminNote: string | null) => patch(path(id) + '/note', { adminNote });
+export const saveOrderNote = (id: string, adminNote: string | null, expectedAdminNote: string | null) => patch(path(id) + '/note', { adminNote, expectedAdminNote });
 export const statusLabels: Record<OrderStatus, string> = { NEW: 'Mới', CONTACTED: 'Đã liên hệ', CONFIRMED: 'Đã xác nhận', COMPLETED: 'Đã hoàn tất', CANCELLED: 'Đã hủy' };
 export const nextStatus: Partial<Record<OrderStatus, OrderStatus>> = { NEW: 'CONTACTED', CONTACTED: 'CONFIRMED', CONFIRMED: 'COMPLETED' };

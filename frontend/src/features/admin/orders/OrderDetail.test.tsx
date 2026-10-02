@@ -53,14 +53,114 @@ it('refreshes real state after 409 while preserving unsaved note draft', async (
   expect(await screen.findByRole('alert')).toHaveTextContent('Trạng thái đã thay đổi'); expect(screen.getByText('Đã hủy')).toBeVisible();
   expect(screen.getByLabelText('Ghi chú quản trị')).toHaveValue('Draft cần giữ'); expect(screen.queryByRole('button', { name: 'Xác nhận yêu cầu' })).not.toBeInTheDocument();
 });
-it('retains note after 503 and 401 and saves only adminNote without localStorage PII', async () => {
+it('retains note after 503 and 401 and sends its baseline without localStorage PII', async () => {
   mount(); await screen.findByText('Dầu cũ'); const storage = vi.spyOn(Storage.prototype, 'setItem');
   fireEvent.change(screen.getByLabelText('Ghi chú quản trị'), { target: { value: 'Draft nhạy cảm' } });
   write = async () => Response.json({ code: 'SERVICE_UNAVAILABLE' }, { status: 503 }); fireEvent.click(screen.getByRole('button', { name: 'Lưu ghi chú' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Không lưu được'); expect(screen.getByLabelText('Ghi chú quản trị')).toHaveValue('Draft nhạy cảm');
   write = async () => Response.json({ code: 'UNAUTHENTICATED' }, { status: 401 }); fireEvent.click(screen.getByRole('button', { name: 'Lưu ghi chú' }));
   expect(await screen.findByRole('dialog', { name: 'Đăng nhập lại' })).toBeVisible(); expect(screen.getByLabelText('Ghi chú quản trị')).toHaveValue('Draft nhạy cảm');
-  expect(calls[0].body).toEqual({ adminNote: 'Draft nhạy cảm' }); expect(storage).not.toHaveBeenCalled();
+  expect(calls[0].body).toEqual({ adminNote: 'Draft nhạy cảm', expectedAdminNote: 'Note cũ' }); expect(storage).not.toHaveBeenCalled();
+});
+
+it('keeps the original baseline when a status response refreshes a dirty note', async () => {
+  mount(); await screen.findByText('Dầu cũ');
+  fireEvent.change(screen.getByLabelText('Ghi chú quản trị'), { target: { value: 'My draft' } });
+  write = async (_, body) => Response.json({ ...order, ...body, adminNote: 'B changed' });
+  fireEvent.click(screen.getByRole('button', { name: 'Đã liên hệ' }));
+  await screen.findByRole('button', { name: 'Xác nhận yêu cầu' });
+  write = async (_, body) => Response.json({ ...latest, ...body });
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu ghi chú' }));
+  await waitFor(() => expect(calls.at(-1)?.body).toEqual({ adminNote: 'My draft', expectedAdminNote: 'Note cũ' }));
+});
+
+it('preserves A draft on NOTE_CONFLICT, shows B note and requires review before another PATCH', async () => {
+  mount(); await screen.findByText('Dầu cũ');
+  fireEvent.change(screen.getByLabelText('Ghi chú quản trị'), { target: { value: 'Draft A' } });
+  latest = { ...order, adminNote: 'Saved by B' };
+  write = async () => Response.json({ code: 'NOTE_CONFLICT' }, { status: 409 });
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu ghi chú' }));
+  expect(await screen.findByText('Saved by B')).toBeVisible();
+  expect(screen.getByLabelText('Ghi chú quản trị')).toHaveValue('Draft A');
+  expect(screen.getByRole('button', { name: 'Lưu ghi chú' })).toBeDisabled(); expect(calls).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Đã xem ghi chú mới, tiếp tục chỉnh sửa' }));
+  expect(calls).toHaveLength(1);
+  write = async (_, body) => Response.json({ ...latest, ...body });
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu ghi chú' }));
+  await screen.findByText('Đã lưu ghi chú.');
+  expect(calls[1].body).toEqual({ adminNote: 'Draft A', expectedAdminNote: 'Saved by B' });
+});
+
+it('keeps note saves blocked after conflict GET failure until retry and review', async () => {
+  mount(); await screen.findByText('Dầu cũ');
+  fireEvent.change(screen.getByLabelText('Ghi chú quản trị'), { target: { value: 'Draft A' } });
+  const prior = globalThis.fetch; let failed = true;
+  vi.stubGlobal('fetch', vi.fn((url: string, init?: RequestInit) => !init?.method && url.endsWith('/orders/' + order.id) && failed
+    ? Promise.resolve(Response.json({}, { status: 503 })) : prior(url, init)));
+  write = async () => Response.json({ code: 'NOTE_CONFLICT' }, { status: 409 });
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu ghi chú' }));
+  const retry = await screen.findByRole('button', { name: 'Tải lại ghi chú' });
+  expect(screen.getByRole('button', { name: 'Lưu ghi chú' })).toBeDisabled();
+  failed = false; latest = { ...order, adminNote: 'B' }; fireEvent.click(retry);
+  await screen.findByText('B'); expect(screen.getByLabelText('Ghi chú quản trị')).toHaveValue('Draft A');
+  expect(screen.getByRole('button', { name: 'Lưu ghi chú' })).toBeDisabled(); expect(calls).toHaveLength(1);
+});
+
+it.each(['timeout', 'network', 502, 503, 504, 500, 408])('locks unknown outcome (%s), then GET confirms cancellation without another PATCH', async (failure) => {
+  mount(); await screen.findByText('Dầu cũ'); vi.spyOn(window, 'confirm').mockReturnValue(true);
+  fireEvent.change(screen.getByLabelText('Ghi chú quản trị'), { target: { value: 'Dirty note' } });
+  write = async () => {
+    latest = { ...order, status: 'CANCELLED', adminNote: 'B new' };
+    if (typeof failure !== 'number') {
+      if (failure === 'timeout') throw new DOMException('timed out', 'TimeoutError');
+      throw new TypeError('connection lost');
+    }
+    return Response.json({}, { status: failure });
+  };
+  fireEvent.click(screen.getByRole('button', { name: 'Hủy yêu cầu' }));
+  await screen.findByText(/Kết quả đổi trạng thái chưa được xác nhận/);
+  expect(screen.getByRole('button', { name: 'Đã liên hệ' })).toBeDisabled(); expect(calls).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Tải lại trạng thái' }));
+  await screen.findByText('Đã hủy'); expect(calls).toHaveLength(1);
+  expect(screen.getByLabelText('Ghi chú quản trị')).toHaveValue('Dirty note');
+  expect(screen.queryByRole('button', { name: 'Hủy yêu cầu' })).not.toBeInTheDocument();
+});
+
+it('only enables manual retry after GET verifies unchanged state', async () => {
+  mount(); await screen.findByText('Dầu cũ'); write = async () => Response.json({}, { status: 503 });
+  fireEvent.click(screen.getByRole('button', { name: 'Đã liên hệ' }));
+  await screen.findByText(/Kết quả đổi trạng thái chưa được xác nhận/);
+  expect(screen.getByRole('button', { name: 'Đã liên hệ' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Tải lại trạng thái' }));
+  await screen.findByText(/Trạng thái chưa thay đổi/);
+  expect(screen.getByRole('button', { name: 'Đã liên hệ' })).toBeEnabled(); expect(calls).toHaveLength(1);
+  write = async (_, body) => Response.json({ ...latest, ...body });
+  fireEvent.click(screen.getByRole('button', { name: 'Đã liên hệ' }));
+  await screen.findByText('Đã cập nhật trạng thái.'); expect(calls).toHaveLength(2);
+});
+
+it('keeps status locked after GET failure and renders another admin valid actions after retry', async () => {
+  mount(); await screen.findByText('Dầu cũ'); write = async () => Response.json({}, { status: 503 });
+  fireEvent.click(screen.getByRole('button', { name: 'Đã liên hệ' }));
+  await screen.findByText(/Kết quả đổi trạng thái chưa được xác nhận/);
+  const prior = globalThis.fetch; let failed = true;
+  vi.stubGlobal('fetch', vi.fn((url: string, init?: RequestInit) => !init?.method && url.endsWith('/orders/' + order.id) && failed
+    ? Promise.resolve(Response.json({}, { status: 503 })) : prior(url, init)));
+  fireEvent.click(screen.getByRole('button', { name: 'Tải lại trạng thái' }));
+  await waitFor(() => expect(screen.getByRole('button', { name: 'Tải lại trạng thái' })).toBeEnabled());
+  expect(screen.getByRole('button', { name: 'Đã liên hệ' })).toBeDisabled();
+  failed = false; latest = { ...order, status: 'CONFIRMED' };
+  fireEvent.click(screen.getByRole('button', { name: 'Tải lại trạng thái' }));
+  expect(await screen.findByRole('button', { name: 'Hoàn tất xử lý' })).toBeEnabled(); expect(calls).toHaveLength(1);
+});
+
+it.each([401, 422])('does not classify definite status HTTP %s as unknown', async (status) => {
+  mount(); await screen.findByText('Dầu cũ');
+  write = async () => Response.json({ code: status === 401 ? 'UNAUTHENTICATED' : 'VALIDATION_ERROR' }, { status });
+  fireEvent.click(screen.getByRole('button', { name: 'Đã liên hệ' }));
+  await screen.findByRole('alert');
+  expect(screen.queryByText(/Kết quả đổi trạng thái chưa được xác nhận/)).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Tải lại trạng thái' })).not.toBeInTheDocument();
 });
 it('applies status/type/keyword/exclusive date filters, paginates, resets page for new filters', async () => {
   mount(<OrderList />); await screen.findByText(order.orderCode);

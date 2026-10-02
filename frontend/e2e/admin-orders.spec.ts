@@ -5,6 +5,71 @@ import type { OrderReceipt } from '../src/lib/api/contracts/types';
 
 test.describe('Real order operations', () => {
   test.skip(process.env.PLAN10_REAL_BACKEND !== '1', 'Run npm run test:admin:e2e -- e2e/admin-orders.spec.ts');
+  test('two note editors preserve the winning note and require explicit review of the stale draft', async ({ page, context }) => {
+    await signIn(page); const origin = new URL(page.url()).origin;
+    const { variant } = await catalogFixture(page, `notes-${Date.now()}-${test.info().project.name}`);
+    const receipt = await mutate<OrderReceipt>(page.request, origin, '/orders', { orderType: 'ORDER', customerName: 'Khách ghi chú', phone: '0901234567', items: [{ variantId: variant.id, quantity: 1 }] });
+    const order = await orderByCode(page, receipt.orderCode);
+    await page.goto('/admin/orders/' + order.id);
+    const second = await context.newPage();
+    try {
+      await second.goto('/admin/orders/' + order.id);
+      await page.getByLabel('Ghi chú quản trị').fill('Bản nháp A cần giữ');
+      await second.getByLabel('Ghi chú quản trị').fill('Ghi chú mới của B');
+      await second.getByRole('button', { name: 'Lưu ghi chú' }).click();
+      await expect(second.getByRole('status').filter({ hasText: 'Đã lưu ghi chú' })).toBeVisible();
+      let patches = 0;
+      page.on('request', (request) => { if (request.method() === 'PATCH' && request.url().endsWith('/note')) patches++; });
+      await page.getByRole('button', { name: 'Lưu ghi chú' }).click();
+      const review = page.getByRole('region', { name: 'Xem lại xung đột ghi chú' });
+      await expect(review.getByText('Ghi chú mới của B', { exact: true })).toBeVisible();
+      await expect(page.getByLabel('Ghi chú quản trị')).toHaveValue('Bản nháp A cần giữ');
+      await expect(page.getByRole('button', { name: 'Lưu ghi chú' })).toBeDisabled();
+      expect((await (await page.request.get('/api/v1/admin/orders/' + order.id)).json()).adminNote).toBe('Ghi chú mới của B');
+      expect(patches).toBe(1);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await page.screenshot({ path: test.info().outputPath('admin-note-conflict.png'), fullPage: true });
+      await page.getByRole('button', { name: 'Đã xem ghi chú mới, tiếp tục chỉnh sửa' }).click();
+      expect(patches).toBe(1);
+      await page.getByRole('button', { name: 'Lưu ghi chú' }).click();
+      await expect(page.getByRole('status').filter({ hasText: 'Đã lưu ghi chú' })).toBeVisible();
+      expect((await (await page.request.get('/api/v1/admin/orders/' + order.id)).json()).adminNote).toBe('Bản nháp A cần giữ');
+      expect(patches).toBe(2);
+    } finally { await second.close(); }
+  });
+
+  for (const failure of ['timeout', '503']) test(`committed cancellation with lost ${failure} response recovers by GET and releases voucher once`, async ({ page }) => {
+    await signIn(page); const origin = new URL(page.url()).origin;
+    const suffix = `recover-${failure}-${Date.now()}-${test.info().project.name}`;
+    const { variant } = await catalogFixture(page, suffix);
+    const voucher = await voucherFixture(page, suffix);
+    const receipt = await mutate<OrderReceipt>(page.request, origin, '/orders', { orderType: 'ORDER', customerName: 'Khách phục hồi', phone: '0901234567', voucherCode: voucher.code, items: [{ variantId: variant.id, quantity: 1 }] });
+    const order = await orderByCode(page, receipt.orderCode);
+    await page.goto('/admin/orders/' + order.id);
+    await page.getByLabel('Ghi chú quản trị').fill('Draft qua phục hồi trạng thái');
+    let patches = 0;
+    await page.route(`**/api/v1/admin/orders/${order.id}/status`, async (route) => {
+      patches++;
+      const response = await route.fetch(); expect(response.status()).toBe(200);
+      if (failure === 'timeout') await route.abort('timedout');
+      else await route.fulfill({ status: 503, json: { code: 'SERVICE_UNAVAILABLE' } });
+    });
+    page.once('dialog', (dialog) => dialog.accept());
+    await page.getByRole('button', { name: 'Hủy yêu cầu' }).click();
+    await expect(page.getByRole('alert').filter({ hasText: 'Kết quả đổi trạng thái chưa được xác nhận' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Đã liên hệ', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: 'Hủy yêu cầu' })).toBeDisabled();
+    expect(patches).toBe(1);
+    expect((await (await page.request.get('/api/v1/admin/vouchers/' + voucher.id)).json()).usedCount).toBe(0);
+    await page.screenshot({ path: test.info().outputPath(`admin-status-unknown-${failure}.png`), fullPage: true });
+    await page.getByRole('button', { name: 'Tải lại trạng thái' }).click();
+    await expect(page.getByText('Đã hủy', { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Hủy yêu cầu' })).toHaveCount(0);
+    await expect(page.getByLabel('Ghi chú quản trị')).toHaveValue('Draft qua phục hồi trạng thái');
+    expect(patches).toBe(1);
+    expect((await (await page.request.get('/api/v1/admin/vouchers/' + voucher.id)).json()).usedCount).toBe(0);
+  });
+
   test('guest checkout with voucher, status lifecycle, cancellation/conflict, expired note draft and quote completion', async ({ page, browser, context }) => {
     test.setTimeout(90_000);
     const suffix = `${Date.now()}-${test.info().project.name}`;
