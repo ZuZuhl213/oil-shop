@@ -44,7 +44,7 @@ try {
   }, path.join(scratch, 'frontend.log'));
   await until(async () => (await fetch(baseURL + '/admin/login')).ok, 'Frontend');
   console.log('Running admin browser tests through the real Next proxy and Spring session cookies; Storage is a fake adapter.');
-  const tests = run('npm', ['run', 'test:e2e', '--', 'e2e/admin-auth.spec.ts', 'e2e/admin-catalog.spec.ts', '--workers=1'], frontend, {
+  const tests = run('npm', ['run', 'test:e2e', '--', ...(process.argv.length > 2 ? process.argv.slice(2) : ['e2e/admin-auth.spec.ts', 'e2e/admin-catalog.spec.ts', 'e2e/admin-vouchers.spec.ts', 'e2e/admin-orders.spec.ts']), '--workers=1'], frontend, {
     PLAYWRIGHT_BASE_URL: baseURL, PLAN10_REAL_BACKEND: '1', PLAN10_ADMIN_EMAIL: fixture.email, PLAN10_ADMIN_PASSWORD: fixture.password,
   });
   const code = await tests.done;
