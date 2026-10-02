@@ -91,7 +91,7 @@ Cần bổ sung sau: ảnh sản phẩm thật và host Supabase nếu dùng, x�
 - Quản lý danh mục/sản phẩm/quy cách, tạo/sửa/ẩn/kích hoạt lại; không delete, saleType không đổi sau create. Giá nguyên VND, ID string, minQuantity/quantityStep tối đa 2 số thập phân và tương thích tiền nguyên. Sản phẩm chưa có variant active có cảnh báo.
 - Lọc admin sản phẩm trên toàn bộ các trang API đã tải, không chỉ trang đầu. Đây là cách làm cho catalog V1; catalog lớn nên bổ sung bộ lọc backend.
 - Upload JPEG/PNG/WebP ≤5 MiB qua backend; preview/URL mới chỉ ở bản nháp cho đến khi lưu product thành công. Lỗi upload giữ ảnh cũ; lỗi save giữ URL mới để retry. Storefront dùng thumbnail đã lưu và trở về hình minh họa nếu ảnh lỗi.
-- Đơn hàng/voucher trong navigation là phần tiếp theo (plan 11), chưa triển khai ở plan 10.
+- Navigation quản trị có thêm Đơn hàng và Voucher từ plan 11.
 
 Server-only `PROXY_MAX_MEDIA_BODY_BYTES` mặc định 6291456 (6 MiB), riêng endpoint media; JSON vẫn dùng `PROXY_MAX_BODY_BYTES` 1 MiB. Backend cần cấu hình Supabase theo `backend/README.md`. Host triển khai phải hỗ trợ file 5 MiB **cộng multipart overhead**; chưa xác nhận giới hạn production. Nếu host không đáp ứng, cần đổi contract trước deploy.
 
@@ -103,3 +103,21 @@ npm run test:admin:e2e
 ```
 
 Lệnh build frontend, chạy Spring với PostgreSQL Testcontainers, tạo admin dùng riêng cho test, chạy Playwright desktop/mobile trên port3200, rồi dọn các process/container do nó tạo. Đổi port bằng `PLAN10_FRONTEND_PORT`. Storage dùng fake adapter; không dùng database, admin hoặc Supabase credentials thật của người dùng. Plain `npm run test:e2e` skip các test admin yêu cầu fixture này. Nếu lỗi, log được giữ trong `/tmp/hm-admin-e2e-*`.
+
+
+## Admin orders và vouchers — plan 11
+
+- `/admin/vouchers`, `/admin/vouchers/[id]`: danh sách phân trang, tạo/sửa voucher và PATCH bật/tắt. `usedCount` chỉ hiển thị, không gửi trong body. Khi server từ chối quantity sau lần khách dùng mới, tải lại số đã dùng và giữ nguyên bản nháp để sửa. Phần trăm 1–100; minOrderValue=0 và quantity=0 hợp lệ; cap trống là null, cap 0 báo lỗi. FIXED luôn gửi cap null.
+- Bắt đầu/kết thúc voucher và bộ lọc thời gian đơn nhập theo Việt Nam (UTC+7), chuyển sang Instant UTC độc lập timezone browser/host; không gắn Z vào giờ local. Giữ độ chính xác Instant cũ khi không sửa field. Bộ lọc đơn dùng khoảng `[from,to)`.
+- `/admin/orders`, `/admin/orders/[id]`: filter status/type/mã đơn hoặc phone/date và phân trang API; snapshot customer/items/giá/voucher và totals do backend cung cấp. Không sửa customer/items/giá, không có tra cứu public PII.
+- Status theo NEW → CONTACTED → CONFIRMED → COMPLETED; hủy từ ba trạng thái chưa kết thúc có confirmation và nhắc hoàn voucher. Pending chặn gửi trùng; 409 tải trạng thái thật, giữ note draft. Mạng/timeout/408/5xx báo kết quả chưa xác nhận và khóa status actions cho đến GET thành công qua nút Tải lại trạng thái. GET lỗi giữ khóa; GET xác nhận đã áp dụng thì hiển thị trạng thái thật, chưa đổi thì mới cho thử lại thủ công. Không tự PATCH lại, không sửa usedCount ở client.
+- QUOTE_REQUEST hiển thị “Yêu cầu báo giá”, giá NULL là “Chưa có giá”; hoàn tất chỉ đánh dấu xử lý, không ghi nhận doanh thu.
+- Customer note và admin note riêng. PATCH note gửi `{adminNote, expectedAdminNote}`; draft giữ ghi chú đã đọc làm baseline cả khi status refresh. Backend so sánh dưới row lock, lệch trả 409 NOTE_CONFLICT. UI giữ draft, GET ghi chú hiện tại, hiển thị cạnh baseline đã đọc; admin xác nhận đã xem rồi mới chủ động lưu (không tự replay). GET lỗi có nút Tải lại ghi chú và vẫn khóa lưu. Note save lỗi/401 giữ draft tại trang qua dialog đăng nhập lại; không lưu PII vào localStorage/URL. Rời trang/reload mất note chưa lưu. So sánh giá trị V1 không phát hiện A → B → A; không có migration.
+
+Kiểm thử riêng Plan 11 qua backend thật:
+
+```bash
+npm run test:admin:e2e -- e2e/admin-vouchers.spec.ts e2e/admin-orders.spec.ts
+```
+
+Runner nhận file/option Playwright sau `--`. Không truyền file thì chạy toàn bộ auth/catalog/orders/vouchers desktop/mobile. Full lint còn lỗi baseline `HeroSection.tsx` thuộc protected code; kiểm tra ESLint riêng các file Plan 11 trước bàn giao. Chưa nghiệm thu host/domain/credentials production.

@@ -1,5 +1,6 @@
 package com.shop.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.shop.entity.OrderStatus;
 import com.shop.entity.OrderType;
 import jakarta.validation.Valid;
@@ -66,7 +67,8 @@ public final class OrderDtos {
             Long lineTotal) {
     }
 
-    public record AdminNoteWrite(@Size(max = 2000) String adminNote) {
+    public record AdminNoteWrite(@Size(max = 2000) String adminNote,
+            @JsonProperty(value = "expectedAdminNote", required = true) @Size(max = 2000) String expectedAdminNote) {
     }
 
     public record OrderStatusWrite(@NotNull OrderStatus status) {

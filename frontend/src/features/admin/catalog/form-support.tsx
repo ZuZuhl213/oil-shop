@@ -8,7 +8,7 @@ export const fieldClass = 'mt-1 min-h-11 min-w-0 max-w-full w-full rounded-lg bo
 export const formClass = 'space-y-4 rounded-2xl border border-soft-sand bg-white-pure p-4 sm:p-6';
 export const actionClass = 'min-h-11 rounded-lg border border-soft-sand px-4 py-2 text-sm font-medium text-forest-green disabled:opacity-50';
 
-function errorMessage(error: unknown): string {
+export function errorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {
     if (error.status === 401) return 'Phiên đăng nhập đã hết hạn. Bản nháp vẫn được giữ; đăng nhập lại rồi lưu.';
     if (error.status === 409) return 'Slug hoặc SKU đã tồn tại. Kiểm tra lại thông tin; bản nháp vẫn được giữ.';
@@ -18,7 +18,7 @@ function errorMessage(error: unknown): string {
   return 'Không lưu được. Kiểm tra kết nối và thử lại; bản nháp vẫn được giữ.';
 }
 
-export function useAdminMutation() {
+export function useAdminMutation(describeError: (error: unknown) => string = errorMessage) {
   const { execute } = useAdminSession();
   const busy = useRef(false);
   const [pending, setPending] = useState(false);
@@ -31,7 +31,7 @@ export function useAdminMutation() {
       const result = await execute(operation);
       onSaved(result); setMessage(success); return true;
     } catch (failure) {
-      setError({ message: errorMessage(failure), fields: failure instanceof ApiClientError ? failure.fieldErrors : {} });
+      setError({ message: describeError(failure), fields: failure instanceof ApiClientError ? failure.fieldErrors : {} });
       return false;
     } finally { busy.current = false; setPending(false); }
   };
@@ -52,7 +52,7 @@ export function FormFeedback({ mutation, prefix }: { mutation: ReturnType<typeof
 
 export function TextField({ label, name, value, onChange, prefix, errors, type = 'text', required = false, maxLength, min, step }: {
   label: string; name: string; value: string; onChange: (value: string) => void; prefix: string;
-  errors?: Record<string, string>; type?: 'text' | 'url' | 'number' | 'textarea'; required?: boolean; maxLength?: number; min?: number; step?: string;
+  errors?: Record<string, string>; type?: 'text' | 'url' | 'number' | 'textarea' | 'datetime-local'; required?: boolean; maxLength?: number; min?: number; step?: string;
 }) {
   const id = `${prefix}-${name}`;
   const props = { id, value, required, maxLength, onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(event.target.value), className: fieldClass, 'aria-invalid': errors?.[name] ? true : undefined, 'aria-describedby': errors?.[name] ? id + '-error' : undefined };

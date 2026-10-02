@@ -37,9 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     </header>
     <div className="mx-auto grid max-w-7xl gap-6 p-4 md:grid-cols-[12rem_minmax(0,1fr)] sm:p-8">
       <nav aria-label="Quản trị" className="flex flex-wrap gap-2 md:flex-col">
-        {[['categories', 'Danh mục'], ['products', 'Sản phẩm']].map(([path, label]) => <Link key={path} href={'/admin/' + path} aria-current={pathname.startsWith('/admin/' + path) ? 'page' : undefined} className="rounded-xl border border-soft-sand bg-white-pure px-4 py-3 font-medium text-forest-green aria-[current=page]:bg-forest-green aria-[current=page]:text-white-pure">{label}</Link>)}
-        <span aria-disabled="true" className="px-4 py-3 text-sm text-text-muted">Đơn hàng · sắp có</span>
-        <span aria-disabled="true" className="px-4 py-3 text-sm text-text-muted">Voucher · sắp có</span>
+        {[['categories', 'Danh mục'], ['products', 'Sản phẩm'], ['orders', 'Đơn hàng'], ['vouchers', 'Voucher']].map(([path, label]) => <Link key={path} href={'/admin/' + path} aria-current={pathname.startsWith('/admin/' + path) ? 'page' : undefined} className="rounded-xl border border-soft-sand bg-white-pure px-4 py-3 font-medium text-forest-green aria-[current=page]:bg-forest-green aria-[current=page]:text-white-pure">{label}</Link>)}
       </nav>
       <main className="min-w-0">
         {logoutError && <p role="alert" className="mb-4 text-error-crimson">Không đăng xuất được. Hãy thử lại.</p>}

@@ -64,7 +64,7 @@ public class AdminOrderController {
     @Operation(summary = "Cập nhật ghi chú nội bộ cho đơn hàng")
     @PatchMapping("/{id}/note")
     public AdminOrder note(@PathVariable long id, @Valid @RequestBody AdminNoteWrite body) {
-        return notes.update(id, body.adminNote());
+        return notes.update(id, body.adminNote(), body.expectedAdminNote());
     }
 
     @Operation(summary = "Chuyển trạng thái đơn hàng (tuân thủ State Machine)")

@@ -107,3 +107,7 @@ Verification:
 ```
 
 Tests use disposable PostgreSQL and a fake Storage adapter, with a mocked HTTP client for the Supabase transport. Real Supabase credentials/bucket access and production upload limits remain unverified. `AdminBrowserFixtureIT` is opt-in and runs only via `frontend/npm run test:admin:e2e`; it never reads `backend/.env` or touches the user's database.
+
+## Conditional admin notes (Plan 11.1)
+
+`PATCH /api/v1/admin/orders/{id}/note` accepts `{adminNote, expectedAdminNote}`. Both values are nullable strings (max 2000 characters); `expectedAdminNote` must be present, otherwise 400. Blank normalizes to null, other values are trimmed. Within the existing transaction and pessimistic order row lock, compare the expected and stored note before writing. A mismatch returns 409 `NOTE_CONFLICT` and preserves the stored note. Status changes do not invalidate this comparison; no schema migration or shared updatedAt token is used. Value comparison is the V1 contract and cannot detect A → B → A changes. Existing auth, CSRF, order transitions and cancellation/voucher transactions remain in effect.
