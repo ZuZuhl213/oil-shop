@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:admin:e2e": "node scripts/admin-e2e.mjs"
+    "test:admin:e2e": "node scripts/admin-e2e.mjs",
+    "test:release:e2e": "node scripts/admin-e2e.mjs e2e/admin-auth.spec.ts e2e/admin-catalog.spec.ts e2e/admin-vouchers.spec.ts e2e/admin-orders.spec.ts e2e/release.spec.ts"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",

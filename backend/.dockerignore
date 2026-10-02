@@ -1,0 +1,9 @@
+.gradle
+build
+.env
+.env.*
+!.env.example
+Dockerfile
+README.md
+src/test
+*.log
