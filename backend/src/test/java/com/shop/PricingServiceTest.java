@@ -133,7 +133,7 @@ class PricingServiceTest {
 
     private PricingService pricing(CatalogLine... lines) {
         Map<Long, CatalogLine> byId = Arrays.stream(lines).collect(java.util.stream.Collectors.toMap(CatalogLine::variantId, line -> line));
-        CatalogQueryService catalog = new CatalogQueryService(null, null, null, null) {
+        CatalogQueryService catalog = new CatalogQueryService(null, null, null, null, null) {
             @Override
             public List<CatalogLine> loadSellable(List<Long> ids) {
                 return ids.stream().map(byId::get).toList();

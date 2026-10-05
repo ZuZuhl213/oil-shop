@@ -62,7 +62,7 @@ test.describe('Real catalog and media administration', () => {
     expect(proxyTooLarge.status()).toBe(413);
     expect(await proxyTooLarge.json()).toMatchObject({ code: 'REQUEST_TOO_LARGE', fieldErrors: {}, traceId: expect.any(String) });
     const before = await (await page.request.get(`/api/v1/admin/products/${id}`)).json();
-    await page.getByLabel('Chọn ảnh đại diện').setInputFiles({ name: 'oil.png', mimeType: 'image/png', buffer: image });
+    await page.getByLabel('Chọn ảnh sản phẩm').setInputFiles({ name: 'oil.png', mimeType: 'image/png', buffer: image });
     await page.getByRole('button', { name: 'Tải ảnh lên', exact: true }).click();
     await expect(page.getByText('Đã tải ảnh lên.', { exact: false })).toBeVisible();
     const uploaded = await page.getByLabel('URL ảnh đại diện').inputValue();
@@ -76,18 +76,41 @@ test.describe('Real catalog and media administration', () => {
     await page.getByRole('button', { name: 'Lưu sản phẩm', exact: true }).click();
     await expect(page.getByRole('alert').filter({ hasText: 'Không lưu được' })).toBeVisible();
     await expect(page.getByLabel('URL ảnh đại diện')).toHaveValue(uploaded);
+    await expect(page.getByRole('button', { name: 'Lưu sản phẩm', exact: true })).toBeDisabled();
     await page.unroute(`**/api/v1/admin/products/${id}`);
+    await page.getByRole('button', { name: 'Tải phiên bản đã lưu để đối chiếu' }).click();
+    await page.getByRole('button', { name: 'Giữ bản nháp và cho phép lưu lại' }).click();
     await page.getByRole('button', { name: 'Lưu sản phẩm', exact: true }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Đã lưu' })).toBeVisible();
     expect((await (await page.request.get(`/api/v1/admin/products/${id}`)).json()).thumbnailUrl).toBe(uploaded);
-    expect(await page.getByRole('img', { name: 'Ảnh đại diện trong bản nháp' }).evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBe(1);
+    expect(await page.getByRole('img', { name: 'Ảnh 1 trong bản nháp' }).evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBe(1);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.screenshot({ path: test.info().outputPath('admin-product.png'), fullPage: true });
     expect((await (await page.request.get(`/api/v1/products/${`oil-${suffix}`}`)).json()).name).toBe(product);
+    await page.getByLabel('Chọn ảnh sản phẩm').setInputFiles([
+      { name: 'second.png', mimeType: 'image/png', buffer: image },
+      { name: 'third.png', mimeType: 'image/png', buffer: image },
+    ]);
+    await page.getByRole('button', { name: 'Tải ảnh lên', exact: true }).click();
+    await expect(page.getByRole('img', { name: 'Ảnh 3 trong bản nháp' })).toBeVisible();
+    await page.getByRole('button', { name: 'Đưa ảnh 3 lên' }).click();
+    await page.getByRole('button', { name: 'Chọn ảnh 2 làm đại diện' }).click();
+    const newCover = await page.getByLabel('URL ảnh đại diện').inputValue();
+    await page.getByRole('button', { name: 'Lưu sản phẩm', exact: true }).click();
+    await expect.poll(async () => (await (await page.request.get(`/api/v1/admin/products/${id}`)).json()).thumbnailUrl).toBe(newCover);
+    const galleryData = await (await page.request.get(`/api/v1/products/oil-${suffix}`)).json();
+    expect(galleryData.images).toHaveLength(3);
+    expect(galleryData.images[1].url).toBe(newCover);
     await page.goto(`/products/oil-${suffix}`);
-    const publicThumbnail = page.getByRole('img', { name: product, exact: true });
+    const publicThumbnail = page.getByRole('img', { name: `${product} — ảnh 1 trên 3`, exact: true });
     await expect(publicThumbnail).toHaveAttribute('src', uploaded);
     await expect.poll(() => publicThumbnail.evaluate((element) => (element as HTMLImageElement).naturalWidth)).toBe(1);
+    const gallery = page.getByRole('region', { name: `Ảnh sản phẩm ${product}` });
+    await page.getByRole('button', { name: 'Ảnh tiếp theo' }).click();
+    await expect(gallery.getByRole('img')).toHaveAttribute('src', galleryData.images[1].url);
+    await page.getByRole('button', { name: 'Xem ảnh 3' }).click();
+    await expect(gallery.getByRole('img')).toHaveAttribute('src', galleryData.images[2].url);
+    await page.screenshot({ path: test.info().outputPath('product-gallery.png'), fullPage: true });
     await page.goto('/admin/categories');
     await page.getByRole('button', { name: `Ẩn ${category}`, exact: true }).click();
     await expect(page.getByRole('button', { name: `Kích hoạt ${category}`, exact: true })).toBeVisible();

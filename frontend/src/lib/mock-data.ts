@@ -67,6 +67,7 @@ export const mockProducts: ExtendedProductDto[] = [
     description:
       'Dầu phộng (dầu lạc) được ép từ 100% hạt lạc sẻ đỏ Bắc Bộ thuần bản địa, hạt vỏ mỏng giàu dầu và thơm bùi. Quy trình ép cơ học cối đá tốc độ chậm không sinh nhiệt cao, sau đó lắng lọc tự nhiên qua vải mộc 48 tiếng. Thích hợp cho các món chiên xào lửa vừa, phi hành tỏi dậy mùi và ướp thịt nướng.',
     thumbnailUrl: null,
+    images: [], imagesRevision: 0,
     saleType: 'FIXED_PRICE',
     status: 'ACTIVE',
     sortOrder: 0,
@@ -94,6 +95,7 @@ export const mockProducts: ExtendedProductDto[] = [
     description:
       'Hạt mè đen đồi thuần chủng được làm sạch, phơi nắng tự nhiên rồi rang chín tới trên than củi nhãn trước khi đưa vào cối ép chậm. Dầu có sắc nâu hổ phách sẫm, độ sánh đặc quánh và hương thơm nồng nàn. Lý tưởng cho các món trộn gỏi, nêm canh, ướp thịt nướng và bổ sung vi chất cho trẻ nhỏ.',
     thumbnailUrl: null,
+    images: [], imagesRevision: 0,
     saleType: 'FIXED_PRICE',
     status: 'ACTIVE',
     sortOrder: 1,
@@ -121,6 +123,7 @@ export const mockProducts: ExtendedProductDto[] = [
     description:
       'Hạt Sachi hữu cơ thu hái từ các nông hộ Tây Nguyên, ép sống cơ học hoàn toàn không qua gia nhiệt hay tinh luyện hóa học. Hàm lượng Omega 3-6-9 cao gấp nhiều lần dầu cá, thích hợp dùng ăn sống, trộn salad tươi, sốt vinaigrette hoặc bổ sung trực tiếp vào bát cháo ăn dặm của bé.',
     thumbnailUrl: null,
+    images: [], imagesRevision: 0,
     saleType: 'QUOTE',
     status: 'ACTIVE',
     sortOrder: 2,
@@ -152,6 +155,7 @@ export const mockProducts: ExtendedProductDto[] = [
     description:
       'Dầu gấc chiết xuất từ màng hạt của những quả gấc nếp chín mọng vườn đồi Bắc Bộ. Màu đỏ thắm tự nhiên, giàu tiền vitamin A (beta-carotene) và lycopene chống oxy hóa. Thích hợp cho vào nấu xôi gấc, làm màu tự nhiên cho món ăn dặm, canh súp hoặc chăm sóc làn da mịn màng.',
     thumbnailUrl: null,
+    images: [], imagesRevision: 0,
     saleType: 'FIXED_PRICE',
     status: 'ACTIVE',
     sortOrder: 3,
@@ -176,6 +180,7 @@ export const mockProducts: ExtendedProductDto[] = [
     description:
       'Dầu dừa nguyên chất ép lạnh từ cơm dừa tươi Bến Tre vừa thu hái. Không qua xử lý tẩy trắng hay khử mùi hóa chất, giữ nguyên vẹn axit lauric kháng khuẩn và mùi thơm dừa mộc mạc.',
     thumbnailUrl: null,
+    images: [], imagesRevision: 0,
     saleType: 'FIXED_PRICE',
     status: 'ACTIVE',
     sortOrder: 4,
@@ -199,6 +204,7 @@ export const mockProducts: ExtendedProductDto[] = [
     description:
       'Lạc sẻ đỏ Bắc Bộ loại 1, trồng trên đất phù sa bãi bồi ven sông. Hạt nhỏ chắc, vỏ lụa màu đỏ thắm, hàm lượng dầu cao. Thích hợp làm nhân bánh truyền thống, rang muối ớt, nấu chè hoặc tự ép dầu thủ công tại nhà.',
     thumbnailUrl: null,
+    images: [], imagesRevision: 0,
     saleType: 'FIXED_PRICE',
     status: 'ACTIVE',
     sortOrder: 5,
@@ -221,6 +227,7 @@ export const mockProducts: ExtendedProductDto[] = [
     description:
       'Bã lạc sau khi ép kiệt dầu bằng máy cơ học, giữ độ sạch tinh khiết tuyệt đối không lẫn tạp chất hay hóa chất dung môi. Giàu protein thực vật và khoáng chất, là nguồn thức ăn giàu đạm cho bò sữa, gia súc hoặc ủ vi sinh làm phân bón hữu cơ cao cấp cho cây trồng đặc sản.',
     thumbnailUrl: null,
+    images: [], imagesRevision: 0,
     saleType: 'QUOTE',
     status: 'ACTIVE',
     sortOrder: 6,
@@ -250,6 +257,7 @@ export const mockProducts: ExtendedProductDto[] = [
     description:
       'Bã mè đen nguyên chất sau quy trình ép dầu cối chậm. Có mùi thơm nhẹ của hạt mè rang, giàu canxi, phospho và đạm thực vật. Rất được ưa chuộng trong nông nghiệp sinh thái, ủ phân bón hoa hồng, hoa lan và cây ăn trái cao cấp.',
     thumbnailUrl: null,
+    images: [], imagesRevision: 0,
     saleType: 'QUOTE',
     status: 'ACTIVE',
     sortOrder: 7,

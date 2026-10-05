@@ -8,9 +8,13 @@ import { VariantEditor } from './VariantEditor';
 import { categories, product } from '@/test/catalog-fixtures';
 
 let calls: { url: string; body: Record<string, unknown> }[];
+let readProduct: () => Promise<Response>;
+let readProducts: () => Promise<Response>;
 let write: (url: string, init: RequestInit) => Promise<Response>;
 beforeEach(() => {
   calls = [];
+  readProduct = async () => Response.json(product);
+  readProducts = async () => Response.json({ content: [], totalPages: 0 });
   write = async () => Response.json(categories[0]);
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {
     if (url.endsWith('/me')) return Response.json({ id: '1', name: 'Admin', email: 'owner@example.com' });
@@ -19,6 +23,8 @@ beforeEach(() => {
       calls.push({ url, body: JSON.parse(init.body as string) });
       return write(url, init);
     }
+    if (url.endsWith('/admin/products/' + product.id)) return readProduct();
+    if (url.includes('/admin/products?page=')) return readProducts();
     throw new Error('Unexpected URL ' + url);
   }));
 });
@@ -113,4 +119,64 @@ it('keeps server variant status when PATCH fails and only applies successful ret
   await waitFor(() => expect(saved).toHaveBeenCalledWith(expect.objectContaining({ isActive: false })));
   expect(screen.getByLabelText('Đang bán')).not.toBeChecked();
   expect(calls[0]).toMatchObject({ url: `/api/v1/admin/variants/${variant.id}/status`, body: { isActive: false } });
+});
+
+
+it('sends gallery revision and retains draft through conflict until explicit review', async () => {
+  write = async () => Response.json({ code: 'IMAGE_CONFLICT' }, { status: 409 });
+  readProduct = async () => Response.json({ ...product, imagesRevision: 4, images: [{ id: '9', url: 'https://media.test/server.png', sortOrder: 0 }], thumbnailUrl: 'https://media.test/server.png' });
+  mount(<ProductForm product={{ ...product, images: [], imagesRevision: 0 }} categories={categories} onSaved={vi.fn()} />);
+  fireEvent.change(screen.getByLabelText('Tên sản phẩm'), { target: { value: 'Draft name' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Ảnh sản phẩm đã thay đổi');
+  expect(calls[0].body).toMatchObject({ imageUrls: [], expectedImagesRevision: 0 });
+  expect(screen.getByRole('button', { name: 'Lưu sản phẩm' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Tải phiên bản đã lưu để đối chiếu' }));
+  expect(await screen.findByRole('button', { name: 'Giữ bản nháp và cho phép lưu lại' })).toBeInTheDocument();
+  expect(screen.getByLabelText('Tên sản phẩm')).toHaveValue('Draft name');
+  fireEvent.click(screen.getByRole('button', { name: 'Giữ bản nháp và cho phép lưu lại' }));
+  write = async () => Response.json({ ...product, imagesRevision: 5 });
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
+  await waitFor(() => expect(calls).toHaveLength(2));
+  expect(calls[1].body.expectedImagesRevision).toBe(4);
+});
+
+it('blocks replay after unknown save outcome even if reconciliation GET fails', async () => {
+  write = async () => { throw new Error('network'); };
+  readProduct = async () => Response.json({ code: 'SERVICE_UNAVAILABLE' }, { status: 503 });
+  mount(<ProductForm product={product} categories={categories} onSaved={vi.fn()} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Chưa xác định');
+  fireEvent.submit(screen.getByRole('button', { name: 'Lưu sản phẩm' }).closest('form')!);
+  expect(calls).toHaveLength(1);
+  fireEvent.click(screen.getByRole('button', { name: 'Tải phiên bản đã lưu để đối chiếu' }));
+  expect(await screen.findByText('Không tải được phiên bản đã lưu. Bản nháp vẫn được giữ.')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Lưu sản phẩm' })).toBeDisabled();
+});
+
+
+it('reconciles an unknown create using the normalized slug and saves to the recovered ID', async () => {
+  write = async () => { throw new Error('response lost'); };
+  readProducts = async () => Response.json({ content: [{ ...product, slug: 'new-oil', imagesRevision: 0 }], totalPages: 1 });
+  mount(<ProductForm categories={categories} onSaved={vi.fn()} />);
+  fireEvent.change(screen.getByLabelText('Tên sản phẩm'), { target: { value: 'New Oil' } });
+  fireEvent.change(screen.getByLabelText('Slug sản phẩm'), { target: { value: 'New-Oil' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
+  await screen.findByRole('alert');
+  fireEvent.click(screen.getByRole('button', { name: 'Tải phiên bản đã lưu để đối chiếu' }));
+  await screen.findByRole('button', { name: 'Giữ bản nháp và cho phép lưu lại' });
+  fireEvent.click(screen.getByRole('button', { name: 'Giữ bản nháp và cho phép lưu lại' }));
+  write = async () => Response.json(product);
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
+  await waitFor(() => expect(calls).toHaveLength(2));
+  expect(calls[1].url).toBe('/api/v1/admin/products/' + product.id);
+  expect(calls[1].body).toHaveProperty('expectedImagesRevision', 0);
+});
+
+it('blocks uploads and gallery edits while recovery awaits review', async () => {
+  write = async () => Response.json({ code: 'IMAGE_CONFLICT' }, { status: 409 });
+  mount(<ProductForm product={product} categories={categories} onSaved={vi.fn()} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
+  await screen.findByRole('alert');
+  expect(screen.getByLabelText('Chọn ảnh sản phẩm')).toBeDisabled();
 });

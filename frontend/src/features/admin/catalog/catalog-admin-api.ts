@@ -2,7 +2,7 @@ import { apiFetch, mutationHeaders } from '@/lib/api/client';
 import type { CategoryDto, PageDto, ProductDto, VariantDto } from '@/lib/api/contracts/types';
 
 export type CategoryWrite = Omit<CategoryDto, 'id'>;
-export type ProductWrite = Omit<ProductDto, 'id' | 'variants'>;
+export type ProductWrite = Omit<ProductDto, 'id' | 'variants' | 'images' | 'imagesRevision'> & { imageUrls: string[]; expectedImagesRevision?: number };
 export type VariantWrite = Omit<VariantDto, 'id' | 'productId'>;
 export type MediaUpload = { url: string; objectKey: string };
 

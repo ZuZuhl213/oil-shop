@@ -27,6 +27,13 @@ app:
     credentials-path: ${GOOGLE_SHEETS_CREDENTIALS_PATH:}
     poll-delay-ms: ${GOOGLE_SHEETS_POLL_DELAY_MS:5000}
   media:
+    provider: ${MEDIA_PROVIDER:supabase}
+    r2:
+      endpoint: ${R2_ENDPOINT:}
+      bucket: ${R2_BUCKET:}
+      access-key-id: ${R2_ACCESS_KEY_ID:}
+      secret-access-key: ${R2_SECRET_ACCESS_KEY:}
+      public-base-url: ${R2_PUBLIC_BASE_URL:}
     supabase-url: ${SUPABASE_URL:}
     bucket: ${SUPABASE_MEDIA_BUCKET:}
     service-role-key: ${SUPABASE_SERVICE_ROLE_KEY:}

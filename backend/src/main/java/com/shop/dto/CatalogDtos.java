@@ -16,7 +16,8 @@ public final class CatalogDtos {
                                 @Size(max = 10000) String description, Integer sortOrder, Boolean isActive) {}
     public record ProductWrite(@NotBlank String categoryId, @NotBlank @Size(max = 150) String name,
                                @NotBlank @Size(max = 180) String slug, String shortDescription, String description,
-                               String thumbnailUrl, @NotNull SaleType saleType, String status, Integer sortOrder) {}
+                               String thumbnailUrl, @NotNull SaleType saleType, String status, Integer sortOrder,
+                               List<String> imageUrls, Long expectedImagesRevision) {}
     public record VariantWrite(@NotBlank @Size(max = 100) String name, @Size(max = 50) String sku, Long price,
                                @NotNull @DecimalMin("0.01") BigDecimal minQuantity,
                                @NotNull @DecimalMin("0.01") BigDecimal quantityStep, Boolean isActive, Integer sortOrder) {}
@@ -25,8 +26,9 @@ public final class CatalogDtos {
     public record CategoryDto(String id, String name, String slug, String description, int sortOrder, boolean isActive) {}
     public record VariantDto(String id, String productId, String name, String sku, Long price, BigDecimal minQuantity,
                              BigDecimal quantityStep, boolean isActive, int sortOrder) {}
+    public record ProductImageDto(String id, String url, int sortOrder) {}
     public record ProductDto(String id, String categoryId, String name, String slug, String shortDescription,
                              String description, String thumbnailUrl, SaleType saleType, String status, int sortOrder,
-                             List<VariantDto> variants) {}
+                             List<VariantDto> variants, List<ProductImageDto> images, long imagesRevision) {}
     public record PageDto<T>(List<T> content, int page, int size, long totalElements, int totalPages) {}
 }
