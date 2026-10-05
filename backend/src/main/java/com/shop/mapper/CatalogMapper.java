@@ -6,6 +6,8 @@ import com.shop.dto.CatalogDtos.VariantDto;
 import com.shop.entity.Category;
 import com.shop.entity.Product;
 import com.shop.entity.ProductVariant;
+import com.shop.entity.ProductImage;
+import com.shop.dto.CatalogDtos.ProductImageDto;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -20,9 +22,10 @@ public class CatalogMapper {
                 value.getSku(), value.getPrice(), value.getMinQuantity(), value.getQuantityStep(), value.isActive(),
                 value.getSortOrder());
     }
-    public ProductDto product(Product value, List<ProductVariant> variants) {
+    public ProductDto product(Product value, List<ProductVariant> variants, List<ProductImage> images) {
         return new ProductDto(value.getId().toString(), value.getCategory().getId().toString(), value.getName(),
                 value.getSlug(), value.getShortDescription(), value.getDescription(), value.getThumbnailUrl(),
-                value.getSaleType(), value.getStatus().name(), value.getSortOrder(), variants.stream().map(this::variant).toList());
+                value.getSaleType(), value.getStatus().name(), value.getSortOrder(), variants.stream().map(this::variant).toList(),
+                images.stream().map(i -> new ProductImageDto(i.getId().toString(), i.getUrl(), i.getSortOrder())).toList(), value.getImagesRevision());
     }
 }

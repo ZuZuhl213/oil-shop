@@ -24,8 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CatalogQueryService {
-    private final CategoryRepository categories; private final ProductRepository products; private final ProductVariantRepository variants; private final CatalogMapper mapper;
-    public CatalogQueryService(CategoryRepository categories, ProductRepository products, ProductVariantRepository variants, CatalogMapper mapper) { this.categories=categories;this.products=products;this.variants=variants;this.mapper=mapper; }
+    private final CategoryRepository categories; private final ProductRepository products; private final ProductVariantRepository variants; private final CatalogMapper mapper; private final ProductImagesService images;
+    public CatalogQueryService(CategoryRepository categories, ProductRepository products, ProductVariantRepository variants, CatalogMapper mapper, ProductImagesService images) { this.categories=categories;this.products=products;this.variants=variants;this.mapper=mapper;this.images=images; }
     @Transactional(readOnly = true) public List<CategoryDto> publicCategories() { return categories.findAllByOrderBySortOrderAscIdAsc().stream().filter(c -> c.isActive()).map(mapper::category).toList(); }
     @Transactional(readOnly = true) public PageDto<ProductDto> publicProducts(int page, int size, String category, String keyword) {
         PageRequest request = PageRequest.of(page, size, Sort.by(Sort.Order.asc("sortOrder"), Sort.Order.asc("id")));
@@ -49,13 +49,14 @@ public class CatalogQueryService {
         Map<Long, List<ProductVariant>> variantsByProduct = pageVariants.stream()
                 .filter(ProductVariant::isActive)
                 .collect(Collectors.groupingBy(v -> v.getProduct().getId(), Collectors.toList()));
-        Page<ProductDto> mapped = values.map(p -> mapper.product(p, variantsByProduct.getOrDefault(p.getId(), List.of())));
+        var imagesByProduct = images.forProducts(pageProducts);
+        Page<ProductDto> mapped = values.map(p -> mapper.product(p, variantsByProduct.getOrDefault(p.getId(), List.of()), imagesByProduct.getOrDefault(p.getId(), List.of())));
         return new PageDto<>(mapped.getContent(), mapped.getNumber(), mapped.getSize(), mapped.getTotalElements(), mapped.getTotalPages());
     }
     @Transactional(readOnly = true) public ProductDto publicProduct(String slug) {
         var product = products.findPublicBySlug(slug).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,"NOT_FOUND","Product not found"));
         var active = variants.findByProductIdOrderBySortOrderAscIdAsc(product.getId()).stream().filter(ProductVariant::isActive).toList();
-        return mapper.product(product, active);
+        return mapper.product(product, active, images.get(product.getId()));
     }
     @Transactional(readOnly = true) public List<CatalogLine> loadSellable(List<Long> ids) {
         if (ids.isEmpty()) {

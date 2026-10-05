@@ -4,6 +4,16 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.*;
 
 class ThumbnailUrlPolicyTest {
+    @Test void acceptsConfiguredR2OnlyWithGeneratedKeysAndRetainsLegacyBucket() {
+        var policy = new ThumbnailUrlPolicy("https://project.supabase.co", "catalog", "https://media.example.test/");
+        String valid = "https://media.example.test/products/12345678-1234-1234-1234-123456789abc.webp";
+        assertThat(policy.validate(valid)).isEqualTo(valid);
+        assertThat(policy.validate("https://project.supabase.co/storage/v1/object/public/catalog/products/image.png")).contains("image.png");
+        for (String value : new String[]{valid + "?q=1", valid + "#x", valid.replace("media.example.test", "foreign.test"), valid.replace("products/", "other/"), valid.replace("12345678-1234-1234-1234-123456789abc", "image"), valid.replace("products/", "products/../"), valid.replace("products/", "products/%2e%2e/"), valid.replace(".webp", ".svg")}) {
+            assertThatThrownBy(() -> policy.validate(value)).hasMessageContaining("configured media");
+        }
+    }
+
     @Test void acceptsOnlyConfiguredPublicBucketAndKeepsNullableThumbnail() {
         var policy = new ThumbnailUrlPolicy("https://project.supabase.co/", "catalog");
         assertThat(policy.validate(null)).isNull();

@@ -40,6 +40,12 @@ public class Product {
     @Column(name = "thumbnail_url", columnDefinition = "text")
     private String thumbnailUrl;
 
+    @Column(name = "images_revision", nullable = false)
+    private long imagesRevision;
+
+    public long getImagesRevision() { return imagesRevision; }
+    public void incrementImagesRevision() { imagesRevision++; }
+
     @Enumerated(EnumType.STRING)
     @Column(name = "sale_type", nullable = false, length = 20)
     private SaleType saleType;

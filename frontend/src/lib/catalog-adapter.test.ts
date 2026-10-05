@@ -12,6 +12,7 @@ describe('catalog adapter', () => {
         shortDescription: 'Mè đen ép chậm',
         description: null,
         thumbnailUrl: null,
+    images: [], imagesRevision: 0,
         saleType: 'FIXED_PRICE',
         status: 'ACTIVE',
         sortOrder: 1,

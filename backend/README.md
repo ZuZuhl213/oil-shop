@@ -94,9 +94,9 @@ The example environment is in `.env.example`. Spring builds its JDBC connection 
 
 `POST /api/v1/admin/media` accepts one multipart `file` and requires the existing admin session, allowed Origin and CSRF token. It returns `201 {url, objectKey}`. JPEG, PNG and WebP must match their declared MIME and decode successfully, at most 5 MiB / 40 million pixels. SVG, traversal filenames and invalid images return 422; size violations return 413. Object keys are generated UUIDs under `products/`; client filenames never become storage paths.
 
-Set backend-only `SUPABASE_URL` (HTTPS project origin), `SUPABASE_MEDIA_BUCKET` (an existing public media bucket), and `SUPABASE_SERVICE_ROLE_KEY`. The service key must never enter `NEXT_PUBLIC_*`, browser storage, responses or logs. The adapter sends bytes to Supabase Storage with a 5-second connect / 15-second request timeout and no redirects. Missing configuration, storage errors and timeouts return sanitized 503; there is no fabricated success URL. JPEG/PNG use JDK ImageIO; WebP uses the pinned TwelveMonkeys 3.12.0 reader.
+For the default Supabase provider, set backend-only `SUPABASE_URL` (HTTPS project origin), `SUPABASE_MEDIA_BUCKET` (an existing public media bucket), and `SUPABASE_SERVICE_ROLE_KEY`. The service key must never enter `NEXT_PUBLIC_*`, browser storage, responses or logs. The adapter sends bytes to Supabase Storage with a 5-second connect / 15-second request timeout and no redirects. Missing configuration, storage errors and timeouts return sanitized 503; there is no fabricated success URL. JPEG/PNG use JDK ImageIO; WebP uses the pinned TwelveMonkeys 3.12.0 reader.
 
-Upload never writes product data. Saving a product separately validates that `thumbnailUrl` belongs to the configured HTTPS public bucket. Existing images are not deleted; unused uploads need a separate operator cleanup policy. No bucket is created or published by the application.
+Upload never writes product data. Saving a product separately validates image URLs against configured Supabase bucket / R2 public origins and the gallery contract below. Existing images are not deleted; unused uploads need a separate operator cleanup policy. No bucket is created or published by the application.
 
 Verification:
 
@@ -147,3 +147,53 @@ The [rehearsal](scripts/release-rehearsal.py) never reads .env and provisions on
 From frontend use `npm run test:release:e2e` for the real Next/Spring/PostgreSQL browser suite, and `npm run test:e2e -- --workers=2` for general UI checks. Storage in the browser fixture is a fake adapter. A separate sentinel build can be scanned with `PUBLIC_SECRET_SENTINELS=... node scripts/check-public-secrets.mjs`.
 
 Local evidence and open gates are in [release-results.md](../docs/operations/release-results.md); docs stay local/ignored by repository policy. HTTPS browser/provider smoke, backup retention and Vercel's media payload mismatch remain launch checks. Full lint currently has an existing protected HeroSection error; no production deployment is claimed.
+
+## Cloudflare R2 product images
+
+The upload endpoint remains `POST /api/v1/admin/media` with an authenticated admin session, valid Origin and CSRF token. Files are decoded/validated by the backend before upload (JPEG/PNG/WebP, up to 5 MiB and 40 million pixels). R2 stores bytes; PostgreSQL stores public URLs. Default `MEDIA_PROVIDER=supabase` preserves existing deployments.
+
+### Set up R2
+
+1. In Cloudflare Dashboard, enable R2 and create a bucket dedicated to public product images, for example `hm-naturals-products`.
+2. Under the bucket's Settings, attach a custom domain you control, for example `media.your-domain.vn`. Wait for it to become active with HTTPS. Public access is configured at the bucket domain, not with object ACLs. `r2.dev` may be used for local rehearsal, but is not intended for production.
+3. Create R2 S3 credentials with **Object Read & Write** scoped to this bucket. Store Access Key ID and Secret Access Key in backend secrets. Copy the exact S3 endpoint from Dashboard, including a jurisdiction hostname if applicable.
+4. Set these backend variables (replace examples locally; do not send secrets to chat or Git):
+
+```dotenv
+MEDIA_PROVIDER=r2
+R2_ENDPOINT=https://<32-character-account-id>.r2.cloudflarestorage.com
+R2_BUCKET=hm-naturals-products
+R2_ACCESS_KEY_ID=<backend-secret>
+R2_SECRET_ACCESS_KEY=<backend-secret>
+R2_PUBLIC_BASE_URL=https://media.your-domain.vn
+```
+
+Keep `SUPABASE_URL` and `SUPABASE_MEDIA_BUCKET` configured while old Supabase URLs are still referenced. Selecting R2 does not migrate or delete old objects. R2 public URLs use `R2_PUBLIC_BASE_URL/products/{uuid}.{ext}`, not the authenticated S3 endpoint.
+
+5. Restart the backend. Invalid provider, missing R2 credentials, unsafe endpoints or malformed public origin fail startup. Flyway V5 adds ordered product images and backfills existing thumbnails without changing URLs; back up the DB before applying migrations to a deployed environment.
+6. In admin, upload multiple images, choose a cover, reorder and save. Verify the public product API returns `images`, then open product detail and check arrows/swipe/autoplay. Reload to verify persistence; product cards still use `thumbnailUrl`.
+7. With the real bucket, verify PNG/JPEG/WebP upload, a valid image near 5 MiB, rejection above 5 MiB, and anonymous HTTPS image GET from the public domain. Check reverse-proxy/hosting upload limits; R2 does not bypass the existing 6 MiB Next proxy limit or a lower hosting limit.
+
+No browser-to-R2 upload is used, so bucket upload CORS is unnecessary. Ordinary public `<img>` display is supported; canvas/WebGL use needs separate CORS review. Upload uses AWS SDK v2, region `auto`, bounded timeouts/retries, path-style access and disabled chunked encoding as required by Cloudflare's Java example.
+
+### Optional live R2 smoke test
+
+After configuring the six R2/provider variables in `backend/.env`, run from `backend/`:
+
+```bash
+HM_R2_LIVE_SMOKE=1 JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew integrationTest --tests '*R2LiveSmokeIT' --rerun-tasks
+```
+
+This opt-in test uses real R2 credentials with a disposable PostgreSQL Testcontainer. It uploads PNG/JPEG/WebP and a valid 5 MiB image through the authenticated admin API, checks anonymous public GET bytes/content type, saves and reloads gallery order/cover, and checks upload size/Origin rejection. It deletes only its newly generated objects in cleanup and verifies they are absent. Existing bucket objects and the configured application database are untouched. Without `HM_R2_LIVE_SMOKE=1`, the test is skipped. Docker and public bucket access are required; this does not verify the deployed host/proxy or browser with live R2.
+
+### Gallery contract and recovery
+
+Read `ProductDto` now includes `images: [{id, url, sortOrder}]` and `imagesRevision`. Product create/update accepts ordered `imageUrls` (maximum 10, no duplicates); `thumbnailUrl` must be in that list, or null when the list is empty. Update sends `expectedImagesRevision`; stale media edits return `409 IMAGE_CONFLICT` and roll back the whole edit. Identical media data does not increment the revision. List reads batch images for the page.
+
+Legacy creates with only thumbnail create one image. Legacy updates that keep thumbnail preserve images; changing the cover of an existing gallery requires the new contract. Read fields `images`, `imagesRevision` and `variants` are not accepted as write fields.
+
+Uploads belong to a form draft until Save. Failed uploads preserve successes; failed saves preserve draft URLs/order/cover. Conflict or an unknown save result requires an explicit GET/review before retry, including create reconciliation by the attempted slug. Review compares saved data without automatically overwriting or replaying the draft.
+
+Removing an image removes its DB association only after Save; it does not delete the R2 file. Abandoned uploads remain orphaned. Automatic object deletion/retry cleanup and migration of existing provider objects are separate work. Do not mark application storage deletion complete in the deploy checklist.
+
+References: [Cloudflare Java SDK](https://developers.cloudflare.com/r2/examples/aws/aws-sdk-java/), [public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/), [R2 credentials](https://developers.cloudflare.com/r2/api/tokens/).

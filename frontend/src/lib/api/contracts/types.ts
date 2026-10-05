@@ -33,6 +33,12 @@ export interface VariantDto {
   sortOrder: number;
 }
 
+export interface ProductImageDto {
+  id: string;
+  url: string;
+  sortOrder: number;
+}
+
 export interface ProductDto {
   id: string;
   categoryId: string;
@@ -41,6 +47,8 @@ export interface ProductDto {
   shortDescription: string | null;
   description: string | null;
   thumbnailUrl: string | null;
+  images: ProductImageDto[];
+  imagesRevision: number;
   saleType: SaleType;
   status: ProductStatus;
   sortOrder: number;
