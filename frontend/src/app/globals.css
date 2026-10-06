@@ -786,36 +786,80 @@ body {
 
 /* Mobile Hero Adaptations */
 .ref-mobile-hero {
-  padding: 24px var(--screen-pad) 20px;
+  padding: 24px var(--screen-pad, 18px) 24px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 14px;
   background: radial-gradient(ellipse at 85% 15%, rgba(255, 245, 225, 0.95) 0%, rgba(250, 240, 225, 0.5) 45%, var(--warm-cream) 80%);
 }
-.ref-mobile-hero .ref-hero-eyebrow {
-  font-size: 11px;
-  margin-bottom: 2px;
+
+/* Header block: eyebrow + heading + description */
+.ref-mobile-hero-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+.ref-mobile-hero .ref-eyebrow {
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: var(--peanut-gold, #9E6B24);
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 0;
 }
 .ref-mobile-hero .ref-hero-headline {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: clamp(24px, 7vw, 32px);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.2;
   color: var(--dark-cocoa);
+  margin: 0;
+  text-wrap: balance;
 }
 .ref-mobile-hero .ref-hero-sub {
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.55;
   color: var(--text-muted);
+  margin: 0;
+  max-width: 380px;
 }
+
+/* Bottle Stage */
 .ref-mobile-hero .ref-stage-wrap {
-  min-height: 290px;
+  width: 100%;
+  max-width: 320px;
+  min-height: 260px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 4px 0 10px;
+  margin: 0 auto;
   overflow: visible;
+}
+.ref-mobile-hero .ref-stage-ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  height: 240px;
+  pointer-events: none;
+}
+.ref-mobile-hero .ref-stage-floor-shadow {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  height: 28px;
+  pointer-events: none;
 }
 .ref-mobile-hero .unlabeled-bottle-container {
   width: 100%;
@@ -825,33 +869,48 @@ body {
   cursor: default;
 }
 .ref-mobile-hero .unlabeled-bottle-svg {
-  width: 240px;
-  max-width: 82vw;
-  height: 280px;
+  width: 220px;
+  max-width: 78vw;
+  height: 260px;
   display: block;
   margin: 0 auto;
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
 }
-.ref-mobile-hero .subtle-script-quote {
-  right: 12px;
-  bottom: 6px;
-  font-size: 13.5px;
+
+/* Brand Quote — standalone centered element */
+.ref-mobile-hero-quote {
+  font-family: var(--font-script, 'Playfair Display', serif);
+  font-size: 14.5px;
+  font-weight: 600;
+  font-style: italic;
+  color: #554A3F;
+  opacity: 0.85;
+  text-align: center;
+  margin: 0 auto;
+  width: 100%;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
 }
+
+/* Product Selector Row */
 .ref-mobile-selector-row {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin: 4px 0 8px;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 340px;
   flex-wrap: wrap;
 }
 .ref-mobile-sel-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--dark-cocoa);
   background: var(--white-pure);
@@ -859,13 +918,73 @@ body {
   padding: 8px 14px;
   border-radius: 99px;
   cursor: pointer;
-  min-height: 44px;
+  min-height: 42px;
   transition: all 0.15s;
 }
 .ref-mobile-sel-btn.active {
   background: var(--forest-green);
   color: #FFFFFF;
   border-color: var(--forest-green);
+  box-shadow: 0 2px 8px rgba(34, 60, 42, 0.2);
+}
+
+/* Feature Badges */
+.ref-mobile-hero .ref-hero-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+}
+.ref-mobile-hero .ref-indicator-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--forest-green);
+  background: #FAF6F0;
+  border: 1px solid var(--soft-sand);
+  border-radius: 999px;
+  padding: 6px 13px;
+  line-height: 1.2;
+}
+
+/* CTA Buttons — stacked on mobile, side-by-side on wider mobile/tablet */
+.ref-mobile-hero .ref-ctas-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 270px;
+  margin: 2px auto 0;
+}
+.ref-mobile-hero .ref-btn-order,
+.ref-mobile-hero .ref-btn-explore {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 12px 20px;
+  font-size: 14.5px;
+}
+@media (min-width: 480px) and (max-width: 1023px) {
+  .ref-mobile-hero .ref-ctas-row {
+    flex-direction: row;
+    max-width: none;
+    justify-content: center;
+    gap: 12px;
+  }
+  .ref-mobile-hero .ref-btn-order,
+  .ref-mobile-hero .ref-btn-explore {
+    width: auto;
+    min-width: 180px;
+  }
 }
 
 /* Scientific disclaimer in Knowledge */
