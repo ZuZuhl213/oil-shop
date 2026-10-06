@@ -8,7 +8,7 @@
 export type SaleType = 'FIXED_PRICE' | 'QUOTE';
 export type ProductStatus = 'ACTIVE' | 'INACTIVE';
 export type OrderType = 'ORDER' | 'QUOTE_REQUEST';
-export type OrderStatus = 'NEW' | 'CONTACTED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+export type OrderStatus = 'NEW' | 'CONTACTED' | 'CONFIRMED' | 'DELIVERING' | 'COMPLETED' | 'CANCELLED';
 export type DiscountType = 'FIXED' | 'PERCENT';
 export type FieldErrors = Record<string, string>;
 
@@ -86,6 +86,25 @@ export interface OrderReceipt {
   discountAmount: number;
   totalAmount: number | null;
   createdAt: string;
+}
+
+export interface OrderTrackingItem {
+  productName: string;
+  variantName: string | null;
+  quantity: number;
+  unitPrice: number | null;
+  lineTotal: number | null;
+}
+
+export interface OrderTracking {
+  orderCode: string;
+  orderType: OrderType;
+  status: OrderStatus;
+  subtotal: number | null;
+  discountAmount: number;
+  totalAmount: number | null;
+  createdAt: string;
+  items: OrderTrackingItem[];
 }
 
 export interface VoucherValidateRequest {

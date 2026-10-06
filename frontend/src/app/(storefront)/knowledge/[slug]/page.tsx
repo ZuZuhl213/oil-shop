@@ -1,8 +1,8 @@
-import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Lightbulb } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getMockArticleBySlug, mockKnowledgeArticles } from '@/lib/mock-data';
-import { ProductBottleImage } from '@/components/product/ProductBottleImage';
 import { ProductCardBySlug } from '@/components/product/ProductCard';
 
 interface ArticlePageProps {
@@ -12,157 +12,71 @@ interface ArticlePageProps {
 export default async function KnowledgeArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
   const article = getMockArticleBySlug(slug);
-
-  if (!article) {
-    notFound();
-  }
-
-  const relatedProduct = article.relatedProductSlug;
-
-  const relatedArticles = mockKnowledgeArticles
-    .filter((a) => a.id !== article.id && a.categoryKey === article.categoryKey)
-    .slice(0, 2);
+  if (!article) notFound();
+  const otherArticles = mockKnowledgeArticles.filter((item) => item.id !== article.id);
+  const relatedArticles = [
+    ...otherArticles.filter((item) => item.categoryKey === article.categoryKey),
+    ...otherArticles.filter((item) => item.categoryKey !== article.categoryKey),
+  ].slice(0, 2);
 
   return (
-    <article className="article-detail-wrap">
-      {/* Back nav */}
-      <Link href="/knowledge" className="article-back-nav">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-        <span>Quay lại Góc kiến thức</span>
-      </Link>
-
-      {/* Header */}
-      <div className="article-header">
-        <div className="article-meta-row">
-          <span
-            style={{
-              fontSize: 11,
-              fontWeight: 700,
-              padding: '3px 10px',
-              borderRadius: 99,
-              background: 'var(--peanut-gold-surface)',
-              color: 'var(--peanut-bark)',
-            }}
-          >
-            {article.categoryName}
-          </span>
-          <span>{article.date}</span>
-          <span>•</span>
-          <span>{article.readTime}</span>
-        </div>
+    <article className="article-detail-wrap knowledge-article">
+      <Link href="/knowledge" className="article-back-nav"><ArrowLeft size={18} aria-hidden="true" />Quay lại Góc kiến thức</Link>
+      <header className="article-header">
+        <div className="article-meta-row"><span className="article-topic">{article.categoryName}</span></div>
         <h1 className="article-detail-title">{article.title}</h1>
-      </div>
+        <p className="article-introduction">{article.introduction}</p>
+      </header>
 
-      {/* Cover Image Container */}
-      <div className="article-cover-box">
-        <ProductBottleImage type={article.thumbnailType ?? 'peanut'} alt={article.title} />
-      </div>
+      <figure className="article-figure">
+        <div className="article-cover-box">
+          <Image src={article.imageUrl} alt={article.title} width={800} height={450} loading="eager"
+            sizes="(min-width: 768px) 760px, 100vw" />
+        </div>
+        {article.imageSource && <figcaption>Ảnh minh họa: <a href={article.imageSource.url} target="_blank" rel="noopener noreferrer">
+          {article.imageSource.name} <ArrowUpRight size={12} aria-hidden="true" /></a></figcaption>}
+      </figure>
 
-      {/* Key Takeaway Card */}
       <div className="article-takeaway-box">
-        <div className="article-takeaway-title">💡 Điểm cốt lõi cần nhớ</div>
-        <div className="article-takeaway-text">{article.takeaway}</div>
+        <div className="article-takeaway-title"><Lightbulb size={17} aria-hidden="true" />Điều cần nhớ</div>
+        <p className="article-takeaway-text">{article.takeaway}</p>
       </div>
 
-      {/* Rich Editorial Body Text */}
-      <div
-        className="article-body-text"
-        dangerouslySetInnerHTML={{ __html: article.bodyHtml }}
-      />
+      <nav className="article-contents" aria-label="Mục lục bài viết">
+        <h2>Trong bài viết này</h2>
+        <ol>{article.sections.map((section, index) => <li key={section.id}>
+          <a href={`#${section.id}`}><span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{section.title}</a>
+        </li>)}</ol>
+      </nav>
 
-      {/* Scientific References */}
-      {article.sources && article.sources.length > 0 && (
-        <div
-          style={{
-            marginTop: 24,
-            padding: '16px 18px',
-            background: 'var(--white-pure)',
-            border: '1px solid var(--soft-sand)',
-            borderRadius: 14,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
-            <span style={{ fontSize: 15 }}>📚</span>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--forest-green)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Tài Liệu Tham Khảo Khoa Học
-            </span>
-          </div>
-          <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.65 }}>
-            {article.sources.map((src, i) => (
-              <li key={i}>
-                <a
-                  href={src.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: 'var(--peanut-bark)', fontWeight: 500, textDecoration: 'none' }}
-                  className="hover:underline"
-                >
-                  {src.name} ↗
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <div className="article-body-text" dangerouslySetInnerHTML={{ __html: article.bodyHtml }} />
 
-      {/* Scientific & Dietary Disclaimer */}
-      <div
-        className="knowledge-scientific-disclaimer"
-        style={{ marginTop: 16 }}
-      >
-        <p style={{ margin: 0, fontSize: 12, lineHeight: 1.55, color: 'var(--text-muted)' }}>
-          {article.disclaimer || '⚠️ Lưu ý y khoa: Thông tin trong bài viết nhằm mục đích phổ biến kiến thức dinh dưỡng tổng quát dựa trên các hướng dẫn của WHO và AHA. Sản phẩm dầu nông sản là thực phẩm phục vụ nấu ăn hàng ngày, không phải thuốc và không có tác dụng thay thế thuốc chữa bệnh.'}
-        </p>
-      </div>
+      {article.sources?.length ? <aside className="article-sources" aria-label="Nguồn tham khảo">
+        <h2><BookOpen size={18} aria-hidden="true" />Nguồn đọc thêm</h2>
+        <ul>{article.sources.map((source) => <li key={source.url}>
+          <a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}<ArrowUpRight size={14} aria-hidden="true" /></a>
+        </li>)}</ul>
+      </aside> : null}
+      <p className="article-editorial-note">{article.disclaimer}</p>
 
-      {/* Related Products Section */}
-      {relatedProduct && (
-        <div className="article-related-box" id="artRelatedProductsBox">
-          <span className="section-eyebrow">Nông phẩm đề xuất trong bài</span>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--forest-green)', margin: '4px 0 12px' }}>
-            Sản Phẩm Khuyên Dùng
-          </h3>
-          <div className="max-w-xs">
-            <ProductCardBySlug slug={relatedProduct} />
-          </div>
-        </div>
-      )}
+      {article.relatedProductSlug && <section className="article-related-box" aria-labelledby="related-product-heading">
+        <span className="section-eyebrow">Khám phá nông phẩm</span>
+        <h2 id="related-product-heading">Sản phẩm liên quan</h2>
+        <div className="max-w-xs"><ProductCardBySlug slug={article.relatedProductSlug} /></div>
+      </section>}
 
-      {/* Related Articles Section */}
-      {relatedArticles.length > 0 && (
-        <div className="article-related-box" id="artRelatedArticlesBox" style={{ marginTop: 24 }}>
-          <span className="section-eyebrow">Đọc tiếp cùng chuyên mục</span>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--forest-green)', margin: '4px 0 12px' }}>
-            Bài Viết Liên Quan
-          </h3>
-          <div className="knowledge-featured-list" style={{ padding: 0 }}>
-            {relatedArticles.map((rel) => (
-              <Link key={rel.id} href={`/knowledge/${rel.slug}`} className="knowledge-card">
-                <div className="knowledge-card-body">
-                  <h4 className="knowledge-card-title">{rel.title}</h4>
-                  <p className="knowledge-card-excerpt">{rel.excerpt}</p>
-                  <div className="knowledge-card-meta">
-                    <span>⏱ {rel.readTime}</span>
-                    <span>Đọc tiếp →</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div style={{ marginTop: 28, textAlign: 'center' }}>
-        <Link
-          href="/knowledge"
-          className="btn-action-touch quote-flow no-underline inline-flex"
-          style={{ width: '100%' }}
-        >
-          ← Khám Phá Thêm Bài Viết Khác
-        </Link>
-      </div>
+      <section className="article-related-box" aria-labelledby="related-articles-heading">
+        <span className="section-eyebrow">Tiếp tục khám phá</span>
+        <h2 id="related-articles-heading">Có thể bạn quan tâm</h2>
+        <div className="article-related-cards">{relatedArticles.map((related) => (
+          <Link key={related.id} href={`/knowledge/${related.slug}`} className="article-related-card">
+            <span className="article-related-category">{related.categoryName}</span>
+            <h3>{related.title}</h3>
+            <span className="knowledge-card-action">Xem bài viết <ArrowRight size={16} aria-hidden="true" /></span>
+          </Link>
+        ))}</div>
+      </section>
+      <Link href="/knowledge" className="article-return-link"><ArrowLeft size={16} aria-hidden="true" />Xem tất cả bài viết</Link>
     </article>
   );
 }

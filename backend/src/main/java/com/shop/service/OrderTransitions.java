@@ -15,7 +15,8 @@ public class OrderTransitions {
         return switch (from) {
             case NEW -> to == OrderStatus.CONTACTED || to == OrderStatus.CANCELLED;
             case CONTACTED -> to == OrderStatus.CONFIRMED || to == OrderStatus.CANCELLED;
-            case CONFIRMED -> to == OrderStatus.COMPLETED || to == OrderStatus.CANCELLED;
+            case CONFIRMED -> to == OrderStatus.DELIVERING || to == OrderStatus.CANCELLED;
+            case DELIVERING -> to == OrderStatus.COMPLETED || to == OrderStatus.CANCELLED;
             case COMPLETED, CANCELLED -> false;
         };
     }

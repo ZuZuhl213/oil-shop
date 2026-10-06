@@ -1,5 +1,7 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useId, useState } from 'react';
 import type { CategoryDto } from '@/lib/api/contracts/types';
 import { saveCategory } from './catalog-admin-api';
@@ -25,7 +27,7 @@ export function CategoryForm({ category, onSaved }: { category?: CategoryDto; on
       <TextField label="Mô tả danh mục" name="description" value={description} onChange={setDescription} prefix={prefix} errors={mutation.error?.fields} type="textarea" maxLength={10000} />
       <TextField label="Thứ tự" name="sortOrder" value={order} onChange={setOrder} prefix={prefix} errors={mutation.error?.fields} type="number" step="1" required />
       <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={active} onChange={(event) => setActive(event.target.checked)} />Danh mục hoạt động</label>
-      <button disabled={mutation.pending} className="btn-action-touch fixed-flow" type="submit">{mutation.pending ? 'Đang lưu…' : 'Lưu danh mục'}</button>
+      <button disabled={mutation.pending} className={adminButtonClass('primary')} type="submit">{mutation.pending ? 'Đang lưu…' : 'Lưu danh mục'}</button>
     </fieldset>
   </form>;
 }

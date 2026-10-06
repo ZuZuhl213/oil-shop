@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { ApiClientError } from '@/lib/api/client';
 import { useAdminSession } from '../AdminSessionProvider';
+import { adminButtonClass } from '../button-styles';
 
 export const fieldClass = 'mt-1 min-h-11 min-w-0 max-w-full w-full rounded-lg border border-soft-sand bg-white-pure px-3 py-2 text-dark-cocoa focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest-green disabled:opacity-60';
 export const formClass = 'space-y-4 rounded-2xl border border-soft-sand bg-white-pure p-4 sm:p-6';
-export const actionClass = 'min-h-11 rounded-lg border border-soft-sand px-4 py-2 text-sm font-medium text-forest-green disabled:opacity-50';
+export const actionClass = adminButtonClass();
 
 export function errorMessage(error: unknown): string {
   if (error instanceof ApiClientError) {

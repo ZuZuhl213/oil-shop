@@ -40,6 +40,14 @@ public class ProductService {
     @Transactional public ProductDto create(ProductWrite b) { Category c=category(b.categoryId()); String slug=CategoryService.normalizeSlug(b.slug(), 180); unique(slug,null); Product p=new Product(c,b.name().trim(),slug,CategoryService.trim(b.shortDescription()),CategoryService.trim(b.description()),thumbnailUrls.validate(b.thumbnailUrl()),b.saleType(),status(b.status()),CategoryService.value(b.sortOrder())); products.save(p); images.initialize(p,b); return mapper.product(p, java.util.List.of(), images.get(p.getId())); }
     @Transactional public ProductDto update(long id, ProductWrite b) { Product p=getForUpdate(id); Category c=category(b.categoryId()); String slug=CategoryService.normalizeSlug(b.slug(), 180); unique(slug,id); if (b.saleType()!=p.getSaleType()) throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT,"VALIDATION_ERROR","saleType cannot be changed"); images.update(p,b); p.setCategory(c);p.setSlug(slug);p.setName(b.name().trim());p.setShortDescription(CategoryService.trim(b.shortDescription()));p.setDescription(CategoryService.trim(b.description()));p.setStatus(status(b.status()));p.setSortOrder(CategoryService.value(b.sortOrder())); return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id),images.get(id)); }
     @Transactional public ProductDto status(long id, ProductStatus value) { Product p=getForUpdate(id);p.setStatus(value);return mapper.product(products.save(p),variants.findByProductIdOrderBySortOrderAscIdAsc(id),images.get(id)); }
+    @Transactional
+    public void delete(long id) {
+        // FK actions delete variants/images and detach historical items atomically.
+        // Storage objects may be shared, so this does not delete media from R2.
+        Product product = getForUpdate(id);
+        products.delete(product);
+        products.flush();
+    }
     private Product getForUpdate(long id) { return products.findByIdForUpdate(id).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,"NOT_FOUND","Product not found")); }
     Product get(long id) { return products.findById(id).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND,"NOT_FOUND","Product not found")); }
     Category category(String id) {

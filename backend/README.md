@@ -90,6 +90,12 @@ The example environment is in `.env.example`. Spring builds its JDBC connection 
 - Cross-table rules such as FIXED_PRICE requiring a price and order items matching the product sale type belong to services in plans 04–06; PostgreSQL enforces all local row invariants.
 - Do not edit an applied migration. Add a new versioned migration for later schema changes.
 
+## Permanent product deletion
+
+`DELETE /api/v1/admin/products/{id}` requires the existing admin session and CSRF protection. Success returns 204; a missing product returns 404. Flyway V6 changes catalog foreign keys: variants and product-image rows are deleted with their product; historical order-item product/variant links become NULL. Order and quote snapshots, totals, notes, vouchers, categories and R2 objects are retained. Deletion uses a product row lock and one transaction. If deletion wins a race after checkout pricing, the order transaction rolls back and returns 422 `ITEM_UNAVAILABLE`.
+
+The admin UI confirms both permanent deletion and product edits. An unknown deletion outcome must be checked with GET before another DELETE; requests are never automatically replayed. V6 must be applied by the backend before using deletion in a deployed environment.
+
 ## Admin media (plan 10)
 
 `POST /api/v1/admin/media` accepts one multipart `file` and requires the existing admin session, allowed Origin and CSRF token. It returns `201 {url, objectKey}`. JPEG, PNG and WebP must match their declared MIME and decode successfully, at most 5 MiB / 40 million pixels. SVG, traversal filenames and invalid images return 422; size violations return 413. Object keys are generated UUIDs under `products/`; client filenames never become storage paths.

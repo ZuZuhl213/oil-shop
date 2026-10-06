@@ -445,7 +445,6 @@ export function CheckoutForm({ legacyQuoteMode = false }: CheckoutFormProps) {
             <div className="mt-2 flex justify-between gap-4 border-t border-soft-sand-light pt-2 font-semibold text-forest-green">
               <span>Tổng ước lượng:</span><span className="tabular-nums">{formatCurrencyVnd(displayTotal)}</span>
             </div>
-            <p className="mt-2 text-xs text-text-muted">Số tiền cuối cùng do backend tính lại khi gửi yêu cầu.</p>
           </section>
         )}
 

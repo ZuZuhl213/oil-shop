@@ -1,9 +1,12 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ProductForm } from '@/features/admin/catalog/ProductForm';
+import { DeleteProductButton } from '@/features/admin/catalog/DeleteProductButton';
 import { listCategories, listProducts, setProductActive } from '@/features/admin/catalog/catalog-admin-api';
 import { useAdminResource } from '@/features/admin/catalog/use-admin-resource';
 import { actionClass, FormFeedback, useAdminMutation } from '@/features/admin/catalog/form-support';
@@ -17,10 +20,12 @@ export default function ProductsPage() {
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('all');
   const [categoryId, setCategoryId] = useState('');
+  const [deletedMessage, setDeletedMessage] = useState<string | null>(null);
   const products = resource.data?.products.filter((entry) => `${entry.name} ${entry.slug}`.toLocaleLowerCase('vi').includes(keyword.toLocaleLowerCase('vi')) && (status === 'all' || entry.status === status) && (!categoryId || entry.categoryId === categoryId));
   return <div className="space-y-5">
-    <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-semibold text-forest-green">Sản phẩm</h1><button className={actionClass} disabled={!resource.data} onClick={() => setCreating(true)}>Tạo sản phẩm</button></div>
+    <div className="flex flex-wrap items-center justify-between gap-3"><h1 className="text-2xl font-semibold text-forest-green">Sản phẩm</h1><button className={adminButtonClass('primary')} disabled={!resource.data} onClick={() => setCreating(true)}>Tạo sản phẩm</button></div>
     <FormFeedback mutation={mutation} prefix="products" />
+    {deletedMessage && <p role="status" className="text-sm text-forest-green">{deletedMessage}</p>}
     {resource.error && <div role="alert">Không tải được sản phẩm. <button className={actionClass} onClick={() => void resource.reload()}>Thử lại</button></div>}
     {resource.pending && <p role="status">Đang tải sản phẩm…</p>}
     {resource.data && <>
@@ -33,7 +38,13 @@ export default function ProductsPage() {
       {products?.length === 0 && <p>Không có sản phẩm phù hợp.</p>}
       <ul className="space-y-3">{products?.map((entry) => <li key={entry.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-soft-sand bg-white-pure p-4">
         <div><Link className="font-semibold text-forest-green underline" href={'/admin/products/' + encodeURIComponent(entry.id)}>{entry.name}</Link><p className="text-sm text-text-muted">{entry.saleType === 'QUOTE' ? 'Báo giá' : 'Giá cố định'} · {entry.status === 'ACTIVE' ? 'Hoạt động' : 'Đang ẩn'} · {entry.variants.filter((variant) => variant.isActive).length} quy cách đang bán</p></div>
-        <button disabled={mutation.pending} className={actionClass} aria-label={`${entry.status === 'ACTIVE' ? 'Ẩn' : 'Kích hoạt'} ${entry.name}`} onClick={() => void mutation.run(() => setProductActive(entry.id, entry.status !== 'ACTIVE'), (saved) => resource.setData((current) => current && ({ ...current, products: current.products.map((item) => item.id === saved.id ? saved : item) })), 'Đã cập nhật trạng thái sản phẩm.')}>{entry.status === 'ACTIVE' ? 'Ẩn' : 'Kích hoạt'}</button>
+        <div className="flex max-w-full flex-wrap items-start gap-2">
+        <button disabled={mutation.pending} className={adminButtonClass(entry.status === 'ACTIVE' ? 'danger' : 'success')} aria-label={`${entry.status === 'ACTIVE' ? 'Ẩn' : 'Kích hoạt'} ${entry.name}`} onClick={() => void mutation.run(() => setProductActive(entry.id, entry.status !== 'ACTIVE'), (saved) => resource.setData((current) => current && ({ ...current, products: current.products.map((item) => item.id === saved.id ? saved : item) })), 'Đã cập nhật trạng thái sản phẩm.')}>{entry.status === 'ACTIVE' ? 'Ẩn' : 'Kích hoạt'}</button>
+          <DeleteProductButton id={entry.id} name={entry.name} disabled={mutation.pending} onDeleted={() => {
+            resource.setData((current) => current && ({ ...current, products: current.products.filter((item) => item.id !== entry.id) }));
+            setDeletedMessage(`Đã xóa vĩnh viễn “${entry.name}”.`);
+          }} />
+        </div>
       </li>)}</ul>
     </>}
   </div>;

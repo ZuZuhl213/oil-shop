@@ -1,5 +1,7 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useAdminSession } from '../AdminSessionProvider';
@@ -18,7 +20,27 @@ export function ProductImagesEditor({ urls, cover, onChange, onPendingChange }: 
   const [message, setMessage] = useState<string | null>(null);
   const busy = useRef(false);
   const active = useRef(true);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
+
+  function isSupportedImage(file: File): boolean {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const type = file.type.toLowerCase();
+    return ['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/jfif', 'image/pjpeg'].includes(type)
+      || ['jpg', 'jpeg', 'png', 'webp', 'jfif'].includes(ext ?? '');
+  }
+
+  function normalizeImage(file: File): File {
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    const type = file.type.toLowerCase();
+    if (['png', 'image/png', 'image/x-png'].includes(ext ?? '') || type === 'image/png') {
+      return file.type === 'image/png' ? file : new File([file], file.name, { type: 'image/png' });
+    }
+    if (ext === 'webp' || type === 'image/webp') {
+      return file.type === 'image/webp' ? file : new File([file], file.name, { type: 'image/webp' });
+    }
+    return file.type === 'image/jpeg' ? file : new File([file], file.name, { type: 'image/jpeg' });
+  }
 
   async function upload(selected: File[]) {
     if (busy.current || !selected.length) return;
@@ -28,9 +50,10 @@ export function ProductImagesEditor({ urls, cover, onChange, onPendingChange }: 
     try {
       for (const file of selected) {
         if (!active.current) break;
-        if (file.size > 5 * 1024 * 1024 || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { failures.push(file); continue; }
+        if (file.size > 5 * 1024 * 1024 || !isSupportedImage(file)) { failures.push(file); continue; }
         try {
-          const result = await execute(() => uploadThumbnail(file));
+          const normalized = normalizeImage(file);
+          const result = await execute(() => uploadThumbnail(normalized));
           if (!result?.url) throw new Error('Invalid upload response');
           if (!active.current) break;
           if (!next.includes(result.url)) next.push(result.url);
@@ -40,6 +63,7 @@ export function ProductImagesEditor({ urls, cover, onChange, onPendingChange }: 
       }
       if (active.current) {
         setFiles([]); setFailed(failures);
+        if (fileInputRef.current) fileInputRef.current.value = '';
         if (failures.length) setError(`Không tải được: ${failures.map((file) => file.name).join(', ')}. Dùng JPEG, PNG hoặc WebP tối đa 5 MiB. Các ảnh đã tải thành công vẫn được giữ.`);
         if (next.length > urls.length) setMessage('Đã tải ảnh lên. Hãy lưu sản phẩm để áp dụng.');
       }
@@ -60,24 +84,24 @@ export function ProductImagesEditor({ urls, cover, onChange, onPendingChange }: 
   }
   return <section aria-label="Ảnh sản phẩm" className="space-y-3 rounded-lg border border-soft-sand p-3">
     <label className="block text-sm font-medium text-forest-green">Chọn ảnh sản phẩm
-      <input type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={pending} className="mt-2 block max-w-full text-sm" onChange={(event) => {
+      <input ref={fileInputRef} type="file" multiple accept="image/jpeg,image/png,image/webp,image/jpg,image/jfif,image/pjpeg" disabled={pending} className="mt-2 block max-w-full text-sm" onChange={(event) => {
         setFiles(Array.from(event.target.files ?? [])); setFailed([]); setError(null); setMessage(null);
-        event.target.value = '';
       }} />
     </label>
     <p className="text-xs text-text-muted">Tối đa 10 ảnh; JPEG, PNG hoặc WebP, mỗi ảnh tối đa 5 MiB. Gỡ ảnh chỉ bỏ khỏi sản phẩm sau khi lưu.</p>
+    {files.length > 0 && <p className="text-sm font-medium text-forest-green">Đã chọn {files.length} ảnh ({files.map((file) => file.name).join(', ')}). Nhấn &ldquo;Tải ảnh lên&rdquo; bên dưới để hoàn tất tải.</p>}
     {urls.length > 0 && <ol className="space-y-3">{urls.map((url, index) => <li key={url} className="flex flex-wrap items-center gap-2 rounded-lg border border-soft-sand p-2">
       <Image src={url} alt={`Ảnh ${index + 1} trong bản nháp`} width={96} height={96} unoptimized className="h-24 w-24 object-contain" />
       <div className="flex min-w-0 flex-wrap gap-2">
-        <button type="button" className={actionClass} disabled={pending} aria-pressed={url === cover} aria-label={url === cover ? `Ảnh ${index + 1} là đại diện` : `Chọn ảnh ${index + 1} làm đại diện`} onClick={() => onChange(urls, url)}>{url === cover ? 'Ảnh đại diện' : 'Chọn đại diện'}</button>
+        <button type="button" className={adminButtonClass(url === cover ? 'success' : 'info')} disabled={pending} aria-pressed={url === cover} aria-label={url === cover ? `Ảnh ${index + 1} là đại diện` : `Chọn ảnh ${index + 1} làm đại diện`} onClick={() => onChange(urls, url)}>{url === cover ? 'Ảnh đại diện' : 'Chọn đại diện'}</button>
         <button type="button" className={actionClass} disabled={pending || index === 0} aria-label={`Đưa ảnh ${index + 1} lên`} onClick={() => move(index, -1)}>Lên</button>
         <button type="button" className={actionClass} disabled={pending || index === urls.length - 1} aria-label={`Đưa ảnh ${index + 1} xuống`} onClick={() => move(index, 1)}>Xuống</button>
-        <button type="button" className={actionClass} disabled={pending} aria-label={`Gỡ ảnh ${index + 1} khỏi sản phẩm`} onClick={() => remove(index)}>Gỡ ảnh</button>
+        <button type="button" className={adminButtonClass('danger')} disabled={pending} aria-label={`Gỡ ảnh ${index + 1} khỏi sản phẩm`} onClick={() => remove(index)}>Gỡ ảnh</button>
       </div>
     </li>)}</ol>}
     {error && <p role="alert" className="text-sm text-error-crimson">{error}</p>}
     {message && <p role="status" className="text-sm text-forest-green">{message}</p>}
-    <button type="button" disabled={pending || !files.length} className={actionClass} onClick={() => void upload(files)}>{pending ? 'Đang tải ảnh…' : 'Tải ảnh lên'}</button>
-    {failed.length > 0 && <button type="button" disabled={pending} className={actionClass} onClick={() => void upload(failed)}>Thử lại ảnh lỗi</button>}
+    <button type="button" disabled={pending} className={adminButtonClass('primary')} onClick={() => { if (!files.length) fileInputRef.current?.click(); else void upload(files); }}>{pending ? 'Đang tải ảnh…' : 'Tải ảnh lên'}</button>
+    {failed.length > 0 && <button type="button" disabled={pending} className={adminButtonClass('warning')} onClick={() => void upload(failed)}>Thử lại ảnh lỗi</button>}
   </section>;
 }

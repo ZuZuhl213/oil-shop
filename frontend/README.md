@@ -10,23 +10,10 @@ Next.js App Router, React, TypeScript và Tailwind CSS. Giữ giao diện HM Nat
 - /products hỗ trợ category, q, page trong URL. Native History API đồng bộ filter với Next useSearchParams, tránh mất từ khóa khi điều hướng chậm.
 - /categories/[slug] chuyển đến /products?category=<slug>&page=0. Danh mục không tồn tại có thông báo và không hiển thị sản phẩm không liên quan.
 - /products/[slug] hiển thị giá, SKU, quantity min/step theo variant; QUOTE là giá nullable; giá 0 VND vẫn hợp lệ. Không có variant bán được thì khóa nút mua.
+- Sản phẩm ACTIVE trong danh mục active luôn xuất hiện trong danh sách và mở được chi tiết, kể cả chưa có quy cách hoặc mọi quy cách inactive. Card hiện “Hết hàng” thay nút mua và link “Liên hệ để biết thêm thông tin” đến `/contact`. API chỉ trả quy cách active, nên sản phẩm hết hàng có `variants: []`; tạo đơn/báo giá vẫn từ chối quy cách inactive. Chỉ sản phẩm/danh mục bị admin chủ động ẩn mới không public. Đây là trạng thái ngừng bán của quy cách, chưa có quản lý số lượng tồn kho; tải lại trang để nhận thay đổi mới.
 - Upstream product 404 dùng Next not-found boundary và noindex. Do dữ liệu được lấy ở client, HTTP document ban đầu có thể là 200; đây không phải triển khai SSR trả HTTP404 trước khi stream.
 - Proxy Node chỉ chuyển các path/method trong allowlist, giữ Cookie/Set-Cookie/CSRF/Origin/Idempotency-Key và HTTP status; API admin/auth/mutation dùng no-store. Timeout bao gồm đọc body upstream.
 - Ảnh SVG hiện tại là minh họa. Ảnh thật/Supabase chưa được cung cấp; không coi đã kiểm chứng image host production.
-
-## Viewer 3D trong trang chi tiết — 29/09/2026
-
-Nút **Xem 360°** mở dialog và chỉ lúc đó tải Three.js/React Three Fiber. Chai procedural là mô hình minh họa chung, không mô tả bao bì hay dung tích của variant thực tế.
-
-- Kéo chuột/vuốt để xoay; cuộn/chụm hai ngón để zoom trong giới hạn. Thanh góc xoay và nút reset dùng được bằng bàn phím.
-- Modal giữ focus, hỗ trợ Esc, nút đóng và bấm bên ngoài; trả focus về nút mở và khôi phục cuộn trang khi đóng.
-- Render theo nhu cầu, DPR tối đa 1.5, không tự xoay; unmount scene khi đóng. Không tải font, texture hoặc model từ dịch vụ ngoài.
-- Lỗi tải module, lỗi WebGL hoặc mất context sẽ hiển thị SVG dự phòng, giữ modal và luồng mua hàng sử dụng được.
-- Component: `Product360Modal` quản lý dialog, `Bottle3DViewer` tải client-only và xử lý lỗi, `BottleScene` quản lý camera/ánh sáng/điều khiển, `BottleModel` dựng chai mẫu.
-
-Khi có model chính thức, chuẩn bị `.glb` kèm texture nhúng, ảnh fallback, kích thước và nhãn được duyệt. Thay `BottleModel` bằng bộ tải GLB rồi chỉnh tâm model, scale, camera và vật liệu; bản hiện tại chưa có bộ tải GLB hay mapping model theo sản phẩm. Không cần thay business API cho viewer demo này.
-
-E2E có kiểm tra render thật và thay đổi hình khi xoay/reset, kéo chuột/vuốt, mở/đóng, focus, WebGL không hỗ trợ và mất context trên desktop/mobile.
 
 ## Chạy local
 
@@ -88,7 +75,8 @@ Cần bổ sung sau: ảnh sản phẩm thật và host Supabase nếu dùng, x�
 
 - `/admin/login`, `/admin/categories`, `/admin/products`, `/admin/products/[id]` dùng API hiện có qua proxy, cookie HttpOnly và CSRF; không lưu session ID bằng JavaScript. Redirect sau login chỉ chấp nhận đường dẫn admin nội bộ.
 - Khi nhận 401 trong lúc sửa, form vẫn mounted và giữ bản nháp, hiển thị dialog đăng nhập lại; đăng nhập thành công không tự gửi lại thao tác lưu. Lỗi mạng/422/409 có thông báo và retry bằng thao tác lưu rõ ràng.
-- Quản lý danh mục/sản phẩm/quy cách, tạo/sửa/ẩn/kích hoạt lại; không delete, saleType không đổi sau create. Giá nguyên VND, ID string, minQuantity/quantityStep tối đa 2 số thập phân và tương thích tiền nguyên. Sản phẩm chưa có variant active có cảnh báo.
+- Quản lý danh mục/sản phẩm/quy cách, tạo/sửa/ẩn/kích hoạt lại; saleType không đổi sau create. Giá nguyên VND, ID string, minQuantity/quantityStep tối đa 2 số thập phân và tương thích tiền nguyên. Sản phẩm chưa có variant active có cảnh báo.
+- Lưu sửa sản phẩm cần xác nhận tên sản phẩm; hủy giữ nguyên bản nháp và không gửi PUT. Nút danger “Xóa vĩnh viễn” có tại danh sách và trang sửa, cần xác nhận trước DELETE `/api/v1/admin/products/{id}` (cookie + CSRF). Chỉ gỡ thẻ sau 204 hoặc 404 đã xác minh. Lỗi mạng/5xx/408 khóa xóa lại; dùng GET kiểm tra kết quả, không tự gửi lại DELETE. Lịch sử đơn hàng và file R2 vẫn được giữ; backend cần migration V6.
 - Lọc admin sản phẩm trên toàn bộ các trang API đã tải, không chỉ trang đầu. Đây là cách làm cho catalog V1; catalog lớn nên bổ sung bộ lọc backend.
 - Upload JPEG/PNG/WebP ≤5 MiB qua backend; preview/URL mới chỉ ở bản nháp cho đến khi lưu product thành công. Lỗi upload giữ ảnh cũ; lỗi save giữ URL mới để retry. Storefront dùng thumbnail đã lưu và trở về hình minh họa nếu ảnh lỗi.
 - Navigation quản trị có thêm Đơn hàng và Voucher từ plan 11.

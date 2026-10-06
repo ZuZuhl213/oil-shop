@@ -1,10 +1,11 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { useAdminSession } from '../AdminSessionProvider';
 import { uploadThumbnail } from './catalog-admin-api';
-import { actionClass } from './form-support';
 
 export function ThumbnailUpload({ url, onUploaded, onPendingChange }: { url: string; onUploaded: (url: string) => void; onPendingChange?: (pending: boolean) => void }) {
   const { execute } = useAdminSession();
@@ -23,7 +24,7 @@ export function ThumbnailUpload({ url, onUploaded, onPendingChange }: { url: str
     {url && <Image src={url} alt="Ảnh đại diện trong bản nháp" width={160} height={160} unoptimized className="max-w-full rounded-lg object-contain" />}
     {error && <p role="alert" className="text-sm text-error-crimson">{error}</p>}
     {uploaded && <p role="status" className="text-sm text-forest-green">Đã tải ảnh lên. URL đang ở bản nháp; hãy lưu sản phẩm để áp dụng.</p>}
-    <button type="button" disabled={!file || pending} className={actionClass} onClick={async () => {
+    <button type="button" disabled={!file || pending} className={adminButtonClass('primary')} onClick={async () => {
       if (!file || busy.current) return;
       if (file.size > 5 * 1024 * 1024) { setError('Ảnh vượt quá giới hạn 5 MiB.'); return; }
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) { setError('Chỉ nhận ảnh JPEG, PNG hoặc WebP.'); return; }

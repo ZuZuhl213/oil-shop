@@ -54,7 +54,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/admin/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET,
                                 "/api/v1/categories", "/api/v1/products", "/api/v1/products/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/vouchers/validate", "/api/v1/orders").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/vouchers/validate", "/api/v1/orders", "/api/v1/orders/tracking").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
@@ -63,7 +63,8 @@ public class SecurityConfig {
                         return false;
                     }
                     String path = request.getRequestURI().substring(request.getContextPath().length());
-                    return "/api/v1/orders".equals(path) || "/api/v1/vouchers/validate".equals(path);
+                    return "/api/v1/orders".equals(path) || "/api/v1/orders/tracking".equals(path)
+                            || "/api/v1/vouchers/validate".equals(path);
                 }))
                 .cors(Customizer.withDefaults())
                 .requestCache(cache -> cache.disable())

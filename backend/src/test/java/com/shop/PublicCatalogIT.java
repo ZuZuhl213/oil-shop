@@ -49,7 +49,7 @@ class PublicCatalogIT extends PostgresIntegrationTest {
     void cleanup() { reset(); }
 
     @Test
-    void listsOnlyProductsInActiveCategoryWithActiveVariant() throws Exception {
+    void listsOnlyVisibleProductsInActiveCategory() throws Exception {
         var data = fixture.create();
         mockMvc.perform(get("/api/v1/products")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
@@ -75,17 +75,55 @@ class PublicCatalogIT extends PostgresIntegrationTest {
     }
 
     @Test
-    void inactiveOnlyVariantHidesProductAndUnknownSlugIs404() throws Exception {
+    void inactiveOnlyVariantsKeepProductVisibleButNotSellable() throws Exception {
         var data = fixture.create();
         data.bottleOneLiter().setActive(false); variants.save(data.bottleOneLiter());
         data.bottleHalfLiter().setActive(false); variants.save(data.bottleHalfLiter());
         mockMvc.perform(get("/api/v1/products")).andExpect(status().isOk())
-                .andExpect(jsonPath("$.content.length()").value(1));
-        mockMvc.perform(get("/api/v1/products/dau-lac-ep-lanh")).andExpect(status().isNotFound());
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].variants.length()").value(0));
+        mockMvc.perform(get("/api/v1/products/dau-lac-ep-lanh")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.variants.length()").value(0));
+        mockMvc.perform(get("/api/v1/products").param("category", "dau-thuc-vat").param("keyword", "lạc").param("size", "1"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].variants.length()").value(0));
         mockMvc.perform(get("/api/v1/products/no-such-product")).andExpect(status().isNotFound());
         assertThatThrownBy(() -> query.loadSellable(List.of(data.bottleOneLiter().getId())))
                 .isInstanceOf(BusinessException.class)
                 .satisfies(error -> assertThat(((BusinessException) error).code()).isEqualTo("ITEM_UNAVAILABLE"));
+        data.bottleHalfLiter().setActive(true); variants.save(data.bottleHalfLiter());
+        mockMvc.perform(get("/api/v1/products/dau-lac-ep-lanh")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.variants.length()").value(1))
+                .andExpect(jsonPath("$.variants[0].name").value("Chai 500ml"));
+        assertThat(query.loadSellable(List.of(data.bottleHalfLiter().getId()))).hasSize(1);
+    }
+
+    @Test
+    void quoteWithoutActiveVariantRemainsVisibleButCannotBeRequested() throws Exception {
+        var data = fixture.create();
+        data.weighted().setActive(false); variants.save(data.weighted());
+        mockMvc.perform(get("/api/v1/products/lac-nhan")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.saleType").value("QUOTE"))
+                .andExpect(jsonPath("$.variants.length()").value(0));
+        assertThatThrownBy(() -> query.loadSellable(List.of(data.weighted().getId())))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(error -> assertThat(((BusinessException) error).code()).isEqualTo("ITEM_UNAVAILABLE"));
+    }
+
+    @Test
+    void productWithoutConfiguredVariantsRemainsVisibleUntilAdminHidesIt() throws Exception {
+        var data = fixture.create();
+        variants.delete(data.bottleOneLiter());
+        variants.delete(data.bottleHalfLiter());
+        mockMvc.perform(get("/api/v1/products")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2));
+        mockMvc.perform(get("/api/v1/products/dau-lac-ep-lanh")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.variants.length()").value(0));
+        data.fixedProduct().setStatus(com.shop.entity.ProductStatus.INACTIVE);
+        products.save(data.fixedProduct());
+        mockMvc.perform(get("/api/v1/products")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1));
+        mockMvc.perform(get("/api/v1/products/dau-lac-ep-lanh")).andExpect(status().isNotFound());
     }
 
     @Test

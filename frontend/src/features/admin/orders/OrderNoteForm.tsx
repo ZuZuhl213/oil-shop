@@ -1,4 +1,6 @@
 'use client';
+
+import { adminButtonClass } from '@/features/admin/button-styles';
 import { useState } from 'react';
 import { TextField, formClass, actionClass } from '../catalog/form-support';
 export type NoteConflict = { phase: 'loading' | 'failed' } | { phase: 'ready'; note: string | null };
@@ -26,12 +28,12 @@ export function OrderNoteForm({ initialNote, pending, onSave, errors, conflict, 
       {conflict.phase === 'ready' && <>
         <dl className="space-y-2 break-words"><div><dt className="font-semibold">Ghi chú bạn đã đọc</dt><dd className="whitespace-pre-wrap">{draft.saved || 'Không có ghi chú'}</dd></div>
           <div><dt className="font-semibold">Ghi chú hiện tại trên hệ thống</dt><dd className="whitespace-pre-wrap">{conflict.note || 'Không có ghi chú'}</dd></div></dl>
-        <button type="button" className={actionClass} onClick={() => {
+        <button type="button" className={adminButtonClass('warning')} onClick={() => {
           setDraft((current) => ({ ...current, saved: conflict.note ?? '' })); onReviewed();
         }}>Đã xem ghi chú mới, tiếp tục chỉnh sửa</button>
         <p className="text-sm text-text-muted">Bạn có thể kết hợp nội dung mới vào bản nháp. Nhấn Lưu ghi chú khi đã quyết định thay thế nội dung hiện tại.</p>
       </>}
     </section>}
-    <button disabled={!!conflict} className="btn-action-touch fixed-flow disabled:opacity-50">Lưu ghi chú</button></fieldset>
+    <button disabled={!!conflict} className={adminButtonClass('primary')}>Lưu ghi chú</button></fieldset>
   </form>;
 }

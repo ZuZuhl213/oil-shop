@@ -9,8 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    String PUBLIC_VISIBILITY = "p.status = com.shop.entity.ProductStatus.ACTIVE and p.category.active = true "
-            + "and exists (select v.id from ProductVariant v where v.product = p and v.active = true)";
+    String PUBLIC_VISIBILITY = "p.status = com.shop.entity.ProductStatus.ACTIVE and p.category.active = true";
 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :id")

@@ -40,6 +40,13 @@ public class IdempotentOrderService {
         try {
             return orderService.create(request, key.toString(), hash);
         } catch (DataIntegrityViolationException exception) {
+            String constraint = constraintName(exception);
+            if ("fk_order_items_product".equals(constraint) || "fk_order_items_variant".equals(constraint)) {
+                // The catalog entry was deleted between pricing and item insertion.
+                // OrderService has rolled back before we translate the failure.
+                throw new BusinessException(HttpStatus.UNPROCESSABLE_CONTENT, "ITEM_UNAVAILABLE",
+                        "Catalog item is unavailable");
+            }
             if (!isIdempotencyConflict(exception)) {
                 throw exception;
             }
@@ -71,13 +78,17 @@ public class IdempotentOrderService {
     }
 
     private boolean isIdempotencyConflict(DataIntegrityViolationException exception) {
+        return "uq_orders_idempotency_key".equals(constraintName(exception));
+    }
+
+    private String constraintName(DataIntegrityViolationException exception) {
         Throwable cause = exception;
         while (cause != null) {
             if (cause instanceof ConstraintViolationException violation) {
-                return "uq_orders_idempotency_key".equals(violation.getConstraintName());
+                return violation.getConstraintName();
             }
             cause = cause.getCause();
         }
-        return false;
+        return null;
     }
 }

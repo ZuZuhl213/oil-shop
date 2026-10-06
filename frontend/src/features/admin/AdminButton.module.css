@@ -1,0 +1,42 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--button-border, var(--button-bg));
+  border-radius: 0.5rem;
+  background: var(--button-bg);
+  color: var(--button-text, #fff);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background: var(--button-hover);
+}
+
+.button:focus-visible {
+  outline: 3px solid var(--button-focus, var(--button-bg));
+  outline-offset: 3px;
+}
+
+.button:disabled {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #475569;
+  cursor: not-allowed;
+}
+
+.primary { --button-bg: #1d4ed8; --button-hover: #1e40af; }
+.success { --button-bg: #15803d; --button-hover: #166534; }
+.danger { --button-bg: #b91c1c; --button-hover: #991b1b; }
+.warning { --button-bg: #fef3c7; --button-hover: #fde68a; --button-text: #78350f; --button-border: #a16207; --button-focus: #a16207; }
+.info { --button-bg: #e0f2fe; --button-hover: #bae6fd; --button-text: #075985; --button-border: #0284c7; --button-focus: #0284c7; }
+.neutral { --button-bg: #f1f5f9; --button-hover: #e2e8f0; --button-text: #334155; --button-border: #94a3b8; --button-focus: #475569; }

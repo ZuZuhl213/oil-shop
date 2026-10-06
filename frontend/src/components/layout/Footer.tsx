@@ -13,14 +13,14 @@ export function Footer() {
         <div className="space-y-6">
           {/* Brand Row */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-forest-green border border-peanut-gold/40 text-peanut-gold grid place-items-center font-display font-bold text-sm shadow-sm">
+            <div className="brand-icon" style={{ width: 36, height: 36, fontSize: 15 }} aria-hidden="true">
               HM
             </div>
             <div className="flex flex-col">
               <span className="font-display font-bold text-base text-warm-cream tracking-wide">
                 HM NATURALS
               </span>
-              <span className="text-[9px] font-semibold uppercase tracking-[0.16em] text-peanut-gold">
+              <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-amber-400">
                 Dầu Nông Sản Nguyên Bản
               </span>
             </div>
@@ -88,14 +88,14 @@ export function Footer() {
             {/* Column 1: Brand & Craftsmanship Philosophy (5 cols) */}
             <div className="col-span-5 space-y-6">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-forest-green border border-peanut-gold/40 text-peanut-gold grid place-items-center font-display font-bold text-lg shadow-sm">
+                <div className="brand-icon" style={{ width: 44, height: 44, fontSize: 18, borderRadius: 12 }} aria-hidden="true">
                   HM
                 </div>
                 <div className="flex flex-col">
                   <span className="font-display font-bold text-xl text-warm-cream tracking-wide">
                     HM NATURALS
                   </span>
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-peanut-gold">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-amber-400">
                     DẦU NÔNG SẢN NGUYÊN BẢN
                   </span>
                 </div>

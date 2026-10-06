@@ -21,6 +21,7 @@ export async function listProducts(): Promise<ProductDto[]> {
   }
 }
 export const getProduct = (id: string) => apiFetch<ProductDto>('/admin/products/' + idPath(id));
+export const deleteProduct = async (id: string) => apiFetch<void>('/admin/products/' + idPath(id), { method: 'DELETE', headers: await mutationHeaders() });
 export const saveCategory = (body: CategoryWrite, id?: string) => write<CategoryDto>('/admin/categories' + (id ? '/' + idPath(id) : ''), id ? 'PUT' : 'POST', body);
 export const setCategoryActive = (id: string, isActive: boolean) => write<CategoryDto>(`/admin/categories/${idPath(id)}/status`, 'PATCH', { isActive });
 export const saveProduct = (body: ProductWrite, id?: string) => write<ProductDto>('/admin/products' + (id ? '/' + idPath(id) : ''), id ? 'PUT' : 'POST', body);

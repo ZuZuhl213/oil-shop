@@ -15,6 +15,7 @@ import java.net.URI;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,5 +67,12 @@ public class AdminProductController {
     @PatchMapping("/{id}/status")
     public ProductDto status(@PathVariable long id, @Valid @RequestBody ProductStatusWrite body) {
         return service.status(id, body.status());
+    }
+
+    @Operation(summary = "Xóa vĩnh viễn sản phẩm", description = "Xóa quy cách và dòng ảnh; giữ lịch sử đơn hàng và file ảnh trên R2")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable long id) {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useRef, useState } from 'react';
 import { ApiClientError } from '@/lib/api/client';
 import { useAdminSession } from './AdminSessionProvider';
@@ -30,6 +32,6 @@ export function LoginForm({ onSuccess }: { onSuccess?: () => void }) {
     <label className="block text-sm font-medium text-forest-green">Mật khẩu
       <input type="password" required autoComplete="current-password" value={password} disabled={pending} onChange={(event) => setPassword(event.target.value)} className="mt-1 min-h-11 w-full rounded-lg border border-soft-sand bg-white-pure px-3 text-dark-cocoa" />
     </label>
-    <button disabled={pending} type="submit" className="btn-action-touch fixed-flow w-full disabled:opacity-50">{pending ? 'Đang đăng nhập…' : 'Đăng nhập'}</button>
+    <button disabled={pending} type="submit" className={adminButtonClass('primary') + ' w-full'}>{pending ? 'Đang đăng nhập…' : 'Đăng nhập'}</button>
   </form>;
 }

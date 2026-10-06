@@ -1,0 +1,21 @@
+.card { position: relative; min-width: 0; }
+.link { display: flex; flex: 1; flex-direction: column; min-width: 0; color: inherit; }
+.status { padding: 0 12px 12px; }
+.contact { text-decoration: underline; text-underline-offset: 3px; color: var(--peanut-bark); }
+.contact:focus-visible { outline: 2px solid var(--peanut-bark); outline-offset: 2px; }
+.footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px; margin: 0 12px; padding: 10px 0 12px; border-top: 1px solid var(--soft-sand-light); }
+.price { min-width: 0; overflow-wrap: anywhere; }
+.action { position: static; min-height: 44px; padding: 0 10px; border: 0; border-radius: 99px; background: var(--forest-green); color: white; font-size: 12px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.action:hover:not(:disabled) { background: var(--forest-green-dark); }
+.action:disabled { opacity: 0.5; cursor: default; }
+.action.soldOut:disabled { background: var(--warm-cream); color: var(--text-muted); opacity: 1; }
+.action:focus-visible, .link:focus-visible, .option:focus-visible { outline: 2px solid var(--peanut-bark); outline-offset: -3px; }
+.menu { position: fixed; z-index: 100; visibility: hidden; overflow-y: auto; overscroll-behavior: contain; padding: 6px; border: 1px solid var(--soft-sand); border-radius: 12px; background: var(--white-pure); box-shadow: 0 8px 24px rgb(34 26 20 / 18%); }
+.option { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 44px; padding: 8px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--forest-green); font-size: 13px; text-align: left; cursor: pointer; }
+.option span { min-width: 0; overflow-wrap: anywhere; }
+.option:hover, .option:focus-visible { background: var(--warm-cream); }
+.optionPrice { flex-shrink: 0; font-weight: 600; }
+.feedback { color: var(--forest-green); font-weight: 600; }
+.feedback[role='alert'] { color: var(--error-crimson); }
+@media (max-width: 480px) { .footer { gap: 6px; margin-inline: 8px; } .action { padding-inline: 8px; font-size: 11px; } .footer .price { font-size: 12px; } }
+@media (max-width: 360px) { .footer { gap: 4px; margin-inline: 6px; } .footer .action { padding-inline: 2px; font-size: 10px; } .footer .price { font-size: 10px; letter-spacing: normal; } }

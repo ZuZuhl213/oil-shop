@@ -3,7 +3,10 @@ package com.shop.controller;
 import com.shop.dto.OrderDtos.CreateOrder;
 import com.shop.dto.OrderDtos.CreateResult;
 import com.shop.dto.OrderDtos.OrderReceipt;
+import com.shop.dto.OrderDtos.OrderTracking;
+import com.shop.dto.OrderDtos.OrderTrackingRequest;
 import com.shop.service.IdempotentOrderService;
+import com.shop.service.OrderTrackingService;
 import jakarta.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -25,9 +28,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/orders")
 public class OrderController {
     private final IdempotentOrderService service;
+    private final OrderTrackingService tracking;
 
-    public OrderController(IdempotentOrderService service) {
+    public OrderController(IdempotentOrderService service, OrderTrackingService tracking) {
         this.service = service;
+        this.tracking = tracking;
     }
 
     @PostMapping
@@ -61,5 +66,11 @@ public class OrderController {
             @Valid @RequestBody CreateOrder request) {
         CreateResult result = service.create(request, idempotencyKey);
         return ResponseEntity.status(result.replayed() ? 200 : 201).body(result.receipt());
+    }
+
+    @PostMapping("/tracking")
+    @Operation(summary = "Tra cứu trạng thái đơn hàng", description = "Xác thực bằng mã đơn và số điện thoại đặt hàng")
+    public OrderTracking track(@Valid @RequestBody OrderTrackingRequest request) {
+        return tracking.find(request);
     }
 }

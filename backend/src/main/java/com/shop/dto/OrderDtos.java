@@ -35,6 +35,30 @@ public final class OrderDtos {
             Instant createdAt) {
     }
 
+    public record OrderTrackingRequest(
+            @NotBlank @Size(max = 30) String orderCode,
+            @NotBlank @Size(max = 20) String phone) {
+    }
+
+    public record OrderTracking(
+            String orderCode,
+            OrderType orderType,
+            OrderStatus status,
+            Long subtotal,
+            long discountAmount,
+            Long totalAmount,
+            Instant createdAt,
+            List<TrackingItem> items) {
+    }
+
+    public record TrackingItem(
+            String productName,
+            String variantName,
+            BigDecimal quantity,
+            Long unitPrice,
+            Long lineTotal) {
+    }
+
     public record CreateResult(OrderReceipt receipt, boolean replayed) {
     }
 

@@ -1,5 +1,7 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useId, useState } from 'react';
 import type { CategoryDto, ProductDto, ProductStatus, SaleType } from '@/lib/api/contracts/types';
 import { saveProduct, getProduct, listProducts } from './catalog-admin-api';
@@ -7,7 +9,7 @@ import { FormFeedback, TextField, fieldClass, formClass, optionalText, sortOrder
 import { ProductImagesEditor } from './ProductImagesEditor';
 import { ApiClientError } from '@/lib/api/client';
 import { useAdminSession } from '../AdminSessionProvider';
-import { actionClass, errorMessage } from './form-support';
+import { errorMessage } from './form-support';
 
 export function ProductForm({ product, categories, onSaved }: { product?: ProductDto; categories: CategoryDto[]; onSaved: (product: ProductDto) => void }) {
   const prefix = useId();
@@ -37,7 +39,8 @@ export function ProductForm({ product, categories, onSaved }: { product?: Produc
   const [uploading, setUploading] = useState(false);
   return <form className={formClass} onSubmit={(event) => {
     event.preventDefault();
-    if (uploading || recovery || reviewPending) return;
+    if (uploading || recovery || reviewPending || mutation.pending) return;
+    if (saveId && !window.confirm(`Lưu thay đổi cho sản phẩm “${product?.name ?? name}”?`)) return;
     setAttemptedSlug(slug.trim().toLowerCase());
     void mutation.run(async () => {
       const body = { categoryId, name: name.trim(), slug: slug.trim(), shortDescription: optionalText(shortDescription), description: optionalText(description), thumbnailUrl: optionalText(thumbnailUrl), saleType, status, sortOrder: sortOrder(order), imageUrls, ...(saveId ? { expectedImagesRevision: revision } : {}) };
@@ -54,10 +57,10 @@ export function ProductForm({ product, categories, onSaved }: { product?: Produc
   }}>
     <h2 className="text-lg font-semibold text-forest-green">{product ? 'Thông tin sản phẩm' : 'Tạo sản phẩm'}</h2>
     <FormFeedback mutation={mutation} prefix={prefix} />
-    {(!product || !product.variants.some((variant) => variant.isActive)) && <p className="rounded-lg bg-warm-cream p-3 text-sm text-text-muted">Chưa có quy cách đang bán. Sản phẩm chỉ xuất hiện ở cửa hàng khi danh mục, sản phẩm và ít nhất một quy cách đều hoạt động.</p>}
+    {(!product || !product.variants.some((variant) => variant.isActive)) && <p className="rounded-lg bg-warm-cream p-3 text-sm text-text-muted">Chưa có quy cách đang bán. Sản phẩm vẫn hiển thị “Hết hàng” nếu danh mục và sản phẩm đang hoạt động, kể cả chưa có quy cách. Chọn “Ẩn” để gỡ sản phẩm khỏi cửa hàng.</p>}
     {recovery && <section aria-label="Đối chiếu kết quả lưu" className="space-y-3 rounded-lg border border-soft-sand p-3">
       <p className="text-sm">Bản nháp được giữ nguyên. Hãy đọc phiên bản đã lưu trước khi quyết định.</p>
-      <button type="button" className={actionClass} disabled={reviewPending || uploading || mutation.pending} onClick={async () => {
+      <button type="button" className={adminButtonClass('info')} disabled={reviewPending || uploading || mutation.pending} onClick={async () => {
         setReviewPending(true); setReviewError(null); setReviewed(null);
         try {
           const current = await execute(() => saveId ? getProduct(saveId) : listProducts().then((items) => items.find((item) => item.slug === attemptedSlug) ?? null));
@@ -68,11 +71,11 @@ export function ProductForm({ product, categories, onSaved }: { product?: Produc
       {reviewError && <p role="alert">{reviewError}</p>}
       {reviewed && <div className="space-y-3">
         {reviewed.product ? <><p>Đã lưu: {reviewed.product.name} — {reviewed.product.images?.length ?? 0} ảnh.</p><pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all text-xs">{JSON.stringify({ name: reviewed.product.name, slug: reviewed.product.slug, description: reviewed.product.description, thumbnailUrl: reviewed.product.thumbnailUrl, imageUrls: reviewed.product.images?.map((image) => image.url) ?? [] }, null, 2)}</pre></> : <p>Chưa có sản phẩm với slug của lượt lưu vừa rồi.</p>}
-        <button type="button" className={actionClass} disabled={uploading || mutation.pending} onClick={() => {
+        <button type="button" className={adminButtonClass('warning')} disabled={uploading || mutation.pending} onClick={() => {
           if (uploading || mutation.pending) return;
           setRevision(reviewed.product?.imagesRevision ?? 0); setSaveId(reviewed.product?.id ?? saveId); setRecovery(null); setReviewed(null);
         }}>Giữ bản nháp và cho phép lưu lại</button>
-        {reviewed.product && <button type="button" className={actionClass} disabled={uploading || mutation.pending} onClick={() => {
+        {reviewed.product && <button type="button" className={adminButtonClass('success')} disabled={uploading || mutation.pending} onClick={() => {
           if (uploading || mutation.pending) return;
           const current = reviewed.product!;
           setName(current.name); setSlug(current.slug); setCategoryId(current.categoryId); setShortDescription(current.shortDescription ?? ''); setDescription(current.description ?? '');
@@ -99,7 +102,7 @@ export function ProductForm({ product, categories, onSaved }: { product?: Produc
       <div id={`${prefix}-imageUrls`}><ProductImagesEditor urls={imageUrls} cover={thumbnailUrl} onChange={(urls, cover) => { setImageUrls(urls); setThumbnailUrl(cover ?? ''); }} onPendingChange={setUploading} /></div>
       <TextField label="Thứ tự" name="sortOrder" value={order} onChange={setOrder} prefix={prefix} errors={mutation.error?.fields} type="number" step="1" required />
       <label className="block text-sm font-medium text-forest-green">Trạng thái sản phẩm<select value={status} onChange={(event) => setStatus(event.target.value as ProductStatus)} className={fieldClass}><option value="ACTIVE">Hoạt động</option><option value="INACTIVE">Đang ẩn</option></select></label>
-      <button disabled={mutation.pending || uploading || !!recovery || reviewPending || !categoryId} className="btn-action-touch fixed-flow" type="submit">{mutation.pending ? 'Đang lưu…' : 'Lưu sản phẩm'}</button>
+      <button disabled={mutation.pending || uploading || !!recovery || reviewPending || !categoryId} className={adminButtonClass('primary')} type="submit">{mutation.pending ? 'Đang lưu…' : 'Lưu sản phẩm'}</button>
     </fieldset>
   </form>;
 }

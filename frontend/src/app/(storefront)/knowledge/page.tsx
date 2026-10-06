@@ -1,193 +1,85 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { ArrowRight, BookOpen, Search } from 'lucide-react';
 import { mockKnowledgeArticles } from '@/lib/mock-data';
-import { ProductBottleImage } from '@/components/product/ProductBottleImage';
+
+const categories = [
+  { key: 'all', name: 'Tất cả' },
+  { key: 'oil-knowledge', name: 'Kiến thức dầu' },
+  { key: 'kitchen-tips', name: 'Cách sử dụng' },
+  { key: 'skin-care', name: 'Chăm sóc da' },
+];
 
 export default function KnowledgePage() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [keyword, setKeyword] = useState<string>('');
-
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [keyword, setKeyword] = useState('');
   const filteredArticles = mockKnowledgeArticles.filter((article) => {
-    if (selectedCategory !== 'all' && article.categoryKey !== selectedCategory) {
-      return false;
-    }
-    if (keyword.trim()) {
-      const q = keyword.toLowerCase().trim();
-      return (
-        article.title.toLowerCase().includes(q) ||
-        article.excerpt.toLowerCase().includes(q) ||
-        article.takeaway.toLowerCase().includes(q)
-      );
-    }
-    return true;
+    if (selectedCategory !== 'all' && article.categoryKey !== selectedCategory) return false;
+    const query = keyword.toLocaleLowerCase('vi').trim();
+    return !query || [article.title, article.excerpt, article.takeaway, article.introduction,
+      ...article.sections.map((section) => section.title),
+    ].some((text) => text.toLocaleLowerCase('vi').includes(query));
   });
 
   return (
-    <div className="site-container py-4 pb-20">
-      {/* Header */}
-      <div className="knowledge-listing-head">
-        <span className="section-eyebrow">Cẩm nang ẩm thực &amp; cơ sở khoa học</span>
-        <h2 className="section-title">Góc Kiến Thức</h2>
-        <p style={{ fontSize: 13.5, color: 'var(--text-muted)', margin: '4px 0 0', lineHeight: 1.5 }}>
-          Tổng hợp kiến thức dinh dưỡng, cơ sở khoa học từ WHO, Harvard và kinh nghiệm sử dụng dầu nông sản nguyên bản.
-        </p>
+    <div className="site-container knowledge-hub">
+      <header className="knowledge-listing-head">
+        <span className="section-eyebrow">Từ căn bếp đến chăm sóc bản thân</span>
+        <h1 className="section-title">Góc kiến thức</h1>
+        <p className="knowledge-intro">Kiến thức về dầu thực vật, cách dùng trong bếp và chăm sóc da.</p>
+      </header>
+
+      <div className="knowledge-editor-note">
+        <BookOpen size={19} aria-hidden="true" />
+        <p>Hướng dẫn thực hành, kèm lưu ý và nguồn đọc thêm cho từng bài.</p>
       </div>
 
-      {/* Scientific & Dietary Disclaimer */}
-      <div className="knowledge-scientific-disclaimer" style={{ margin: '14px 0 16px' }}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--forest-green)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0, marginTop: 1 }}>
-            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
-            <rect x="9" y="3" width="6" height="4" rx="2" />
-            <line x1="9" y1="12" x2="15" y2="12" />
-            <line x1="9" y1="16" x2="12" y2="16" />
-          </svg>
-          <div>
-            <strong style={{ display: 'block', fontSize: 13, color: 'var(--forest-green)', marginBottom: 2 }}>
-              Cơ sở khoa học &amp; Định hướng dinh dưỡng
-            </strong>
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.55, margin: 0 }}>
-              Các nội dung được tổng hợp đối chiếu theo khuyến nghị của <strong>WHO</strong>, <strong>Harvard T.H. Chan</strong> và <strong>AHA</strong> về chất béo không bão hòa và chế độ ăn cân bằng. Thông tin mang tính chất phổ biến kiến thức, không thay thế chẩn đoán hay phác đồ điều trị y khoa.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Search Bar */}
       <div className="knowledge-search-bar">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="11" cy="11" r="7" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-        <input
-          type="text"
-          className="knowledge-search-input"
-          placeholder="Tìm bài viết, mẹo vặt, điểm khói..."
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
+        <Search size={18} aria-hidden="true" />
+        <input type="search" className="knowledge-search-input" placeholder="Tìm dầu lạc, dầu vừng, dưỡng ẩm..."
+          aria-label="Tìm bài viết" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
       </div>
 
-      {/* Category Filter Chips */}
-      <div className="category-chip-rail" id="knowledgeCategoryRail">
-        <button
-          type="button"
-          className={`cat-chip-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('all')}
-        >
-          Tất Cả ({mockKnowledgeArticles.length})
-        </button>
-        <button
-          type="button"
-          className={`cat-chip-btn ${selectedCategory === 'oil-knowledge' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('oil-knowledge')}
-        >
-          Kiến Thức Dầu
-        </button>
-        <button
-          type="button"
-          className={`cat-chip-btn ${selectedCategory === 'kitchen-tips' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('kitchen-tips')}
-        >
-          Mẹo Nhà Bếp
-        </button>
-        <button
-          type="button"
-          className={`cat-chip-btn ${selectedCategory === 'storage' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('storage')}
-        >
-          Bảo Quản
-        </button>
-        <button
-          type="button"
-          className={`cat-chip-btn ${selectedCategory === 'recipes' ? 'active' : ''}`}
-          onClick={() => setSelectedCategory('recipes')}
-        >
-          Công Thức Món
-        </button>
+      <div className="knowledge-filters" role="group" aria-label="Chủ đề bài viết">
+        {categories.map((category) => (
+          <button key={category.key} type="button"
+            className={`cat-chip-btn ${selectedCategory === category.key ? 'active' : ''}`}
+            aria-pressed={selectedCategory === category.key} onClick={() => setSelectedCategory(category.key)}>
+            {category.name}
+          </button>
+        ))}
       </div>
+      <p className="knowledge-result-count" role="status" aria-live="polite">{filteredArticles.length} bài viết</p>
 
-      {/* Articles Grid / List Container */}
-      {filteredArticles.length > 0 ? (
-        <div className="knowledge-featured-list" style={{ marginTop: 14 }}>
-          {filteredArticles.map((art) => (
-            <article
-              key={art.id}
-              className="knowledge-card"
-            >
-              <Link href={`/knowledge/${art.slug}`} className="knowledge-card-media block">
-                <ProductBottleImage type={art.thumbnailType ?? 'peanut'} alt={art.title} />
-                <span className="knowledge-cat-badge">{art.categoryName}</span>
-              </Link>
-              <div className="knowledge-card-body">
-                <Link href={`/knowledge/${art.slug}`} className="no-underline">
-                  <h4 className="knowledge-card-title">{art.title}</h4>
-                </Link>
-                <p className="knowledge-card-excerpt">{art.excerpt}</p>
-
-                <div className="article-takeaway-box" style={{ margin: '8px 0 0', padding: '10px 12px' }}>
-                  <div className="article-takeaway-title">Điểm cốt lõi</div>
-                  <div className="article-takeaway-text" style={{ fontSize: 12.5 }}>
-                    {art.takeaway}
-                  </div>
-                </div>
-
-                {art.sources && art.sources.length > 0 && (
-                  <div style={{ marginTop: 8, fontSize: 11.5, color: 'var(--text-muted)' }}>
-                    <span>Tham khảo: </span>
-                    {art.sources.map((s, idx, arr) => (
-                      <span key={idx}>
-                        <a
-                          href={s.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="hover:underline"
-                          style={{ color: 'var(--peanut-bark)', fontWeight: 500 }}
-                        >
-                          {s.name} ↗
-                        </a>
-                        {idx < arr.length - 1 ? ', ' : ''}
-                      </span>
-                    ))}
-                  </div>
-                )}
-
-                <div className="knowledge-card-meta">
-                  <span>{art.readTime}</span>
-                  <Link href={`/knowledge/${art.slug}`} style={{ color: 'var(--peanut-bark)', fontWeight: 600 }}>
-                    Đọc tiếp →
-                  </Link>
-                </div>
+      {filteredArticles.length ? (
+        <div className="knowledge-featured-list">
+          {filteredArticles.map((article, index) => (
+            <Link key={article.id} href={`/knowledge/${article.slug}`} className="knowledge-card"
+              aria-label={`Xem bài viết: ${article.title}`}>
+              <div className="knowledge-card-media">
+                <Image src={article.imageUrl} alt={article.title} width={800} height={450}
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" />
+                <span className="knowledge-cat-badge">{article.categoryName}</span>
               </div>
-            </article>
+              <div className="knowledge-card-body">
+                <h2 className="knowledge-card-title">{article.title}</h2>
+                <p className="knowledge-card-excerpt">{article.excerpt}</p>
+                <span className="knowledge-card-action">Xem bài viết <ArrowRight size={16} aria-hidden="true" /></span>
+              </div>
+            </Link>
           ))}
         </div>
       ) : (
-        /* Empty State */
-        <div className="empty-search-alert" style={{ display: 'block', margin: '16px var(--screen-pad)' }}>
-          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="var(--soft-sand)" strokeWidth="1.5" strokeLinecap="round" style={{ marginBottom: 8, display: 'block' }} aria-hidden="true">
-            <circle cx="11" cy="11" r="7" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <h4 style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--forest-green)', marginBottom: 4 }}>
-            Không Tìm Thấy Bài Viết
-          </h4>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            Vui lòng thử từ khóa khác hoặc bấm nút bên dưới để xem lại tất cả bài viết.
-          </p>
-          <button
-            type="button"
-            className="btn-action-touch quote-flow"
-            style={{ marginTop: 12 }}
-            onClick={() => {
-              setSelectedCategory('all');
-              setKeyword('');
-            }}
-          >
-            Xem Lại Tất Cả
-          </button>
+        <div className="knowledge-empty">
+          <Search size={30} aria-hidden="true" />
+          <h2>Chưa tìm thấy bài phù hợp</h2>
+          <p>Thử từ khóa khác hoặc xem lại tất cả bài viết.</p>
+          <button type="button" className="btn-action-touch quote-flow"
+            onClick={() => { setSelectedCategory('all'); setKeyword(''); }}>Xem tất cả bài viết</button>
         </div>
       )}
     </div>

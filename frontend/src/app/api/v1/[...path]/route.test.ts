@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { GET, OPTIONS, PATCH, POST } from './route';
+import { DELETE, GET, OPTIONS, PATCH, POST } from './route';
 
 const context = (path: string[]) => ({ params: Promise.resolve({ path }) });
 
@@ -322,4 +322,24 @@ describe('API proxy route', () => {
     expect(response.status).toBe(204);
     expect(fetchMock).not.toHaveBeenCalled();
   });
+});
+
+
+it('forwards only permanent product DELETE with session and CSRF headers', async () => {
+  const upstream = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+  vi.stubGlobal('fetch', upstream);
+  try {
+    const response = await DELETE(new Request('http://localhost/api/v1/admin/products/31', {
+      method: 'DELETE', headers: { cookie: 'JSESSIONID=admin', 'x-csrf-token': 'csrf' },
+    }), context(['admin', 'products', '31']));
+    expect(response.status).toBe(204);
+    expect(upstream.mock.calls[0][1].method).toBe('DELETE');
+    const headers = new Headers(upstream.mock.calls[0][1].headers);
+    expect(headers.get('cookie')).toBe('JSESSIONID=admin');
+    expect(headers.get('x-csrf-token')).toBe('csrf');
+    for (const path of [['products', '31'], ['admin', 'products'], ['admin', 'products', '31', 'status'], ['admin', 'categories', '21'], ['admin', 'orders', '1']]) {
+      expect((await DELETE(new Request('http://localhost/api/v1/' + path.join('/'), { method: 'DELETE' }), context(path))).status).toBe(404);
+    }
+    expect(upstream).toHaveBeenCalledTimes(1);
+  } finally { vi.unstubAllGlobals(); }
 });
