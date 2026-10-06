@@ -1,5 +1,5 @@
 import { apiFetch, mutationHeaders } from './client';
-import type { CreateOrderRequest, OrderReceipt } from './contracts/types';
+import type { CreateOrderRequest, OrderReceipt, OrderTracking } from './contracts/types';
 
 export async function createOrder(
   body: CreateOrderRequest,
@@ -12,5 +12,13 @@ export async function createOrder(
       'Idempotency-Key': idempotencyKey,
     }),
     body: JSON.stringify(body),
+  });
+}
+
+export async function trackOrder(orderCode: string, phone: string): Promise<OrderTracking> {
+  return apiFetch<OrderTracking>('/orders/tracking', {
+    method: 'POST',
+    headers: await mutationHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ orderCode, phone }),
   });
 }

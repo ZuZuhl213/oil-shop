@@ -105,7 +105,7 @@ export function HeroSection() {
 
             {/* Dual Action Buttons */}
             <div className="ref-ctas-row">
-              <Link href={`/products/${current.slug}`} className="ref-btn-order no-underline">
+              <Link href="/products" className="ref-btn-order no-underline">
                 <span>Đặt hàng ngay</span>
                 <span>→</span>
               </Link>
@@ -268,7 +268,7 @@ export function HeroSection() {
 
         {/* Dual CTAs */}
         <div className="ref-ctas-row">
-          <Link href={`/products/${current.slug}`} className="ref-btn-order no-underline">
+          <Link href="/products" className="ref-btn-order no-underline">
             <span>Đặt hàng ngay</span>
             <span>→</span>
           </Link>

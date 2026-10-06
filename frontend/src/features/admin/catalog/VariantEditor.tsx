@@ -1,10 +1,12 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useId, useState } from 'react';
 import { ApiClientError } from '@/lib/api/client';
 import type { ProductDto, VariantDto } from '@/lib/api/contracts/types';
 import { saveVariant, setVariantActive } from './catalog-admin-api';
-import { actionClass, FormFeedback, TextField, formClass, optionalText, sortOrder, useAdminMutation } from './form-support';
+import { FormFeedback, TextField, formClass, optionalText, sortOrder, useAdminMutation } from './form-support';
 
 function quantityRule(value: string, field: string): number {
   const number = Number(value);
@@ -49,8 +51,8 @@ export function VariantEditor({ product, variant, onSaved }: { product: ProductD
       <p className="text-sm text-text-muted">Ví dụ: chai dùng 1 / 1; hàng theo cân có thể dùng 0.5 / 0.5. Số lượng từ mức tối thiểu, tăng theo bước quy định.</p>
       <TextField label="Thứ tự quy cách" name="sortOrder" value={order} onChange={setOrder} prefix={prefix} errors={mutation.error?.fields} type="number" step="1" required />
       <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={active} onChange={(event) => setActive(event.target.checked)} />Đang bán</label>
-      <button disabled={mutation.pending} className="btn-action-touch fixed-flow" type="submit">{mutation.pending ? 'Đang lưu…' : 'Lưu quy cách'}</button>
-      {variant && <button type="button" disabled={mutation.pending} className={`${actionClass} ml-2`} onClick={() => void mutation.run(() => setVariantActive(variant.id, !variant.isActive), (saved) => { setActive(saved.isActive); onSaved(saved); }, 'Đã cập nhật trạng thái quy cách.')}>{variant.isActive ? 'Ẩn quy cách' : 'Kích hoạt quy cách'}</button>}
+      <button disabled={mutation.pending} className={adminButtonClass('primary')} type="submit">{mutation.pending ? 'Đang lưu…' : 'Lưu quy cách'}</button>
+      {variant && <button type="button" disabled={mutation.pending} className={`${adminButtonClass(variant.isActive ? 'danger' : 'success')} ml-2`} onClick={() => void mutation.run(() => setVariantActive(variant.id, !variant.isActive), (saved) => { setActive(saved.isActive); onSaved(saved); }, 'Đã cập nhật trạng thái quy cách.')}>{variant.isActive ? 'Ẩn quy cách' : 'Kích hoạt quy cách'}</button>}
     </fieldset>
   </form>;
 }

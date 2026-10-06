@@ -98,6 +98,14 @@ export function Header() {
               </li>
               <li>
                 <Link
+                  href="/tracking"
+                  className={`desktop-nav-link ${pathname === '/tracking' ? 'active' : ''}`}
+                >
+                  Tra Cứu Đơn
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/contact"
                   className={`desktop-nav-link ${pathname === '/contact' ? 'active' : ''}`}
                 >
@@ -170,7 +178,7 @@ export function Header() {
 
             {/* CTA Button */}
             <Link
-              href="/products/dau-lac-nguyen-chat"
+              href="/products"
               className="desktop-cta-btn no-underline"
             >
               Đặt hàng ngay
@@ -200,7 +208,7 @@ export function Header() {
           <div className="brand-icon" aria-hidden="true">HM</div>
           <div className="brand-text-wrap">
             <span className="brand-text-name">HM NATURALS</span>
-            <span className="brand-text-tagline">Dầu Nông Sản Nguyên Bản</span>
+            <span className="brand-text-tagline">DẦU NÔNG SẢN NGUYÊN BẢN</span>
           </div>
         </Link>
 

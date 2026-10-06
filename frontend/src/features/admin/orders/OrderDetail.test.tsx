@@ -32,8 +32,8 @@ it('renders historical snapshots, backend totals, voucher and separate customer/
 it('keeps quote NULL prices and explains completed quote does not count as revenue', async () => {
   latest = { ...order, orderType: 'QUOTE_REQUEST', subtotal: null, totalAmount: null, discountAmount: 0, voucherCodeSnapshot: null, status: 'CONFIRMED', items: order.items.map((item) => ({ ...item, unitPrice: null, lineTotal: null })) };
   mount(); expect(await screen.findByText('Yêu cầu báo giá')).toBeVisible(); expect(screen.getAllByText('Chưa có giá').length).toBeGreaterThanOrEqual(3);
-  expect(screen.getByText(/không ghi nhận doanh thu/)).toBeVisible(); fireEvent.click(screen.getByRole('button', { name: 'Hoàn tất xử lý' }));
-  await waitFor(() => expect(calls[0].body).toEqual({ status: 'COMPLETED' }));
+  expect(screen.getByText(/không ghi nhận doanh thu/)).toBeVisible(); fireEvent.click(screen.getByRole('button', { name: 'Đang giao' }));
+  await waitFor(() => expect(calls[0].body).toEqual({ status: 'DELIVERING' }));
 });
 it('requires cancellation confirmation, sends only status and prevents duplicate actions', async () => {
   mount(); await screen.findByText('Dầu cũ'); const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
@@ -151,7 +151,7 @@ it('keeps status locked after GET failure and renders another admin valid action
   expect(screen.getByRole('button', { name: 'Đã liên hệ' })).toBeDisabled();
   failed = false; latest = { ...order, status: 'CONFIRMED' };
   fireEvent.click(screen.getByRole('button', { name: 'Tải lại trạng thái' }));
-  expect(await screen.findByRole('button', { name: 'Hoàn tất xử lý' })).toBeEnabled(); expect(calls).toHaveLength(1);
+  expect(await screen.findByRole('button', { name: 'Đang giao' })).toBeEnabled(); expect(calls).toHaveLength(1);
 });
 
 it.each([401, 422])('does not classify definite status HTTP %s as unknown', async (status) => {
@@ -203,12 +203,12 @@ it('adopts refreshed server note when untouched, preserves dirty draft, then res
   fireEvent.change(screen.getByLabelText('Ghi chú quản trị'), { target: { value: 'Draft của tôi' } });
   write = async (_, body) => Response.json({ ...order, ...body, adminNote: 'Note từ admin thứ ba' });
   fireEvent.click(screen.getByRole('button', { name: 'Xác nhận yêu cầu' }));
-  await screen.findByRole('button', { name: 'Hoàn tất xử lý' });
+  await screen.findByRole('button', { name: 'Đang giao' });
   expect(screen.getByLabelText('Ghi chú quản trị')).toHaveValue('Draft của tôi');
   write = async (_, body) => Response.json({ ...order, status: 'CONFIRMED', ...body });
   fireEvent.click(screen.getByRole('button', { name: 'Lưu ghi chú' })); await screen.findByText('Đã lưu ghi chú.');
   write = async (_, body) => Response.json({ ...order, ...body, adminNote: 'Note mới sau khi đã lưu' });
-  fireEvent.click(screen.getByRole('button', { name: 'Hoàn tất xử lý' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Đang giao' }));
   await waitFor(() => expect(screen.getByLabelText('Ghi chú quản trị')).toHaveValue('Note mới sau khi đã lưu'));
 });
 it('hides previous rows/page counts after failed pagination and failed filters, then retry restores correct query data', async () => {

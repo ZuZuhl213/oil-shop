@@ -1,4 +1,6 @@
 'use client';
+
+import { adminButtonClass } from '@/features/admin/button-styles';
 import { useId, useState } from 'react';
 import { useAdminSession } from '../AdminSessionProvider';
 import { ApiClientError } from '@/lib/api/client';
@@ -40,7 +42,7 @@ export function VoucherForm({ voucher, onSaved }: { voucher?: Voucher; onSaved: 
     <FormFeedback mutation={mutation} prefix={prefix} />
     {usage && <p className="text-sm">Đã dùng: {usage.usedCount} · Còn lại: {usage.quantity - usage.usedCount}</p>}
     <p className="text-sm text-text-muted">Số lượt là dữ liệu lần tải gần nhất, có thể thay đổi khi khách đặt đơn. Thời gian nhập theo giờ Việt Nam (UTC+7).</p>
-    {usageError && <p role="alert">Chưa tải lại được số lượt đã dùng. <button type="button" onClick={() => void mutation.run(() => getVoucher(voucher!.id), (saved) => { setUsage(saved); setUsageError(false); }, 'Đã tải lại số lượt.')}>Thử tải lại</button></p>}
+    {usageError && <p role="alert">Chưa tải lại được số lượt đã dùng. <button type="button" className={adminButtonClass()} onClick={() => void mutation.run(() => getVoucher(voucher!.id), (saved) => { setUsage(saved); setUsageError(false); }, 'Đã tải lại số lượt.')}>Thử tải lại</button></p>}
     <fieldset disabled={mutation.pending} className="min-w-0 space-y-4">
       <TextField label="Mã voucher" name="code" prefix={prefix} value={draft.code} onChange={(value) => change('code', value)} errors={fields} required maxLength={50} />
       <label className="block text-sm">Loại giảm<select className="mt-1 min-h-11 w-full rounded-lg border border-soft-sand px-3" value={draft.discountType} onChange={(event) => change('discountType', event.target.value)}><option value="FIXED">Số tiền (VND)</option><option value="PERCENT">Phần trăm (%)</option></select></label>
@@ -50,8 +52,8 @@ export function VoucherForm({ voucher, onSaved }: { voucher?: Voucher; onSaved: 
       <TextField label="Tổng lượt" name="quantity" prefix={prefix} value={draft.quantity} onChange={(value) => change('quantity', value)} errors={fields} type="number" min={0} step="1" required />
       <div className="grid min-w-0 gap-4 sm:grid-cols-2">{(['startAt', 'endAt'] as const).map((name) => <TextField key={name} label={name === 'startAt' ? 'Bắt đầu (giờ Việt Nam)' : 'Kết thúc (giờ Việt Nam)'} name={name} prefix={prefix} value={draft[name]} onChange={(value) => change(name, value)} errors={fields} type="datetime-local" />)}</div>
       <label className="flex min-h-11 items-center gap-2"><input type="checkbox" checked={draft.isActive} onChange={(event) => change('isActive', event.target.checked)} />Voucher hoạt động</label>
-      <button className="btn-action-touch fixed-flow" type="submit">{mutation.pending ? 'Đang lưu…' : 'Lưu voucher'}</button>
+      <button className={adminButtonClass('primary')} type="submit">{mutation.pending ? 'Đang lưu…' : 'Lưu voucher'}</button>
     </fieldset>
-    {usage && <button type="button" disabled={mutation.pending} className="min-h-11 rounded-lg border border-soft-sand px-4 py-2 text-forest-green" onClick={() => void mutation.run(() => setVoucherActive(usage.id, !usage.isActive), (saved) => { setUsage(saved); change('isActive', saved.isActive); onSaved(saved); }, 'Đã cập nhật trạng thái voucher.')}>{usage.isActive ? 'Ẩn voucher' : 'Kích hoạt voucher'}</button>}
+    {usage && <button type="button" disabled={mutation.pending} className={adminButtonClass(usage.isActive ? 'danger' : 'success')} onClick={() => void mutation.run(() => setVoucherActive(usage.id, !usage.isActive), (saved) => { setUsage(saved); change('isActive', saved.isActive); onSaved(saved); }, 'Đã cập nhật trạng thái voucher.')}>{usage.isActive ? 'Ẩn voucher' : 'Kích hoạt voucher'}</button>}
   </form>;
 }

@@ -1,5 +1,7 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useAdminSession } from '../AdminSessionProvider';
@@ -91,15 +93,15 @@ export function ProductImagesEditor({ urls, cover, onChange, onPendingChange }: 
     {urls.length > 0 && <ol className="space-y-3">{urls.map((url, index) => <li key={url} className="flex flex-wrap items-center gap-2 rounded-lg border border-soft-sand p-2">
       <Image src={url} alt={`Ảnh ${index + 1} trong bản nháp`} width={96} height={96} unoptimized className="h-24 w-24 object-contain" />
       <div className="flex min-w-0 flex-wrap gap-2">
-        <button type="button" className={actionClass} disabled={pending} aria-pressed={url === cover} aria-label={url === cover ? `Ảnh ${index + 1} là đại diện` : `Chọn ảnh ${index + 1} làm đại diện`} onClick={() => onChange(urls, url)}>{url === cover ? 'Ảnh đại diện' : 'Chọn đại diện'}</button>
+        <button type="button" className={adminButtonClass(url === cover ? 'success' : 'info')} disabled={pending} aria-pressed={url === cover} aria-label={url === cover ? `Ảnh ${index + 1} là đại diện` : `Chọn ảnh ${index + 1} làm đại diện`} onClick={() => onChange(urls, url)}>{url === cover ? 'Ảnh đại diện' : 'Chọn đại diện'}</button>
         <button type="button" className={actionClass} disabled={pending || index === 0} aria-label={`Đưa ảnh ${index + 1} lên`} onClick={() => move(index, -1)}>Lên</button>
         <button type="button" className={actionClass} disabled={pending || index === urls.length - 1} aria-label={`Đưa ảnh ${index + 1} xuống`} onClick={() => move(index, 1)}>Xuống</button>
-        <button type="button" className={actionClass} disabled={pending} aria-label={`Gỡ ảnh ${index + 1} khỏi sản phẩm`} onClick={() => remove(index)}>Gỡ ảnh</button>
+        <button type="button" className={adminButtonClass('danger')} disabled={pending} aria-label={`Gỡ ảnh ${index + 1} khỏi sản phẩm`} onClick={() => remove(index)}>Gỡ ảnh</button>
       </div>
     </li>)}</ol>}
     {error && <p role="alert" className="text-sm text-error-crimson">{error}</p>}
     {message && <p role="status" className="text-sm text-forest-green">{message}</p>}
-    <button type="button" disabled={pending} className={actionClass} onClick={() => { if (!files.length) fileInputRef.current?.click(); else void upload(files); }}>{pending ? 'Đang tải ảnh…' : 'Tải ảnh lên'}</button>
-    {failed.length > 0 && <button type="button" disabled={pending} className={actionClass} onClick={() => void upload(failed)}>Thử lại ảnh lỗi</button>}
+    <button type="button" disabled={pending} className={adminButtonClass('primary')} onClick={() => { if (!files.length) fileInputRef.current?.click(); else void upload(files); }}>{pending ? 'Đang tải ảnh…' : 'Tải ảnh lên'}</button>
+    {failed.length > 0 && <button type="button" disabled={pending} className={adminButtonClass('warning')} onClick={() => void upload(failed)}>Thử lại ảnh lỗi</button>}
   </section>;
 }

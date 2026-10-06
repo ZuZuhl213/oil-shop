@@ -104,7 +104,6 @@ export default function ContactPage() {
                   {siteConfig.address}
                 </span>
                 <span className="contact-item-note">
-                  Vùng bãi bồi nông sản bản địa thuần nông
                 </span>
               </div>
             </div>

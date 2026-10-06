@@ -1,5 +1,7 @@
 'use client';
 
+import { adminButtonClass } from '@/features/admin/button-styles';
+
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -16,7 +18,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [session.status, session.hasAuthenticated, router, pathname]);
 
   if (!session.hasAuthenticated) return <main className="min-h-dvh bg-warm-cream p-6">
-    {session.status === 'error' ? <><p role="alert">Không kiểm tra được phiên đăng nhập.</p><button className="btn-action-touch fixed-flow mt-4" onClick={() => void session.refresh()}>Thử lại</button></>
+    {session.status === 'error' ? <><p role="alert">Không kiểm tra được phiên đăng nhập.</p><button className={adminButtonClass() + ' mt-4'} onClick={() => void session.refresh()}>Thử lại</button></>
       : <p role="status">Đang kiểm tra phiên đăng nhập…</p>}
   </main>;
 
@@ -26,7 +28,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <Link href="/admin/products" className="font-display text-xl font-semibold text-forest-green">HM NATURALS <span className="text-sm font-body">Quản trị</span></Link>
         <div className="flex flex-wrap items-center gap-4 text-sm">
           <span>{session.admin?.name}</span><Link href="/">Xem cửa hàng</Link>
-          <button disabled={loggingOut} className="min-h-11 rounded-lg border border-soft-sand px-3" onClick={async () => {
+          <button disabled={loggingOut} className={adminButtonClass('danger')} onClick={async () => {
             if (loggingOut) return;
             setLoggingOut(true); setLogoutError(false);
             try { await session.logout(); router.replace('/admin/login'); }
@@ -41,7 +43,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </nav>
       <main className="min-w-0">
         {logoutError && <p role="alert" className="mb-4 text-error-crimson">Không đăng xuất được. Hãy thử lại.</p>}
-        {session.status === 'error' && <div role="alert" className="mb-4 rounded-lg border border-soft-sand p-3">Chưa kiểm tra được phiên. Bản nháp vẫn được giữ. <button onClick={() => void session.refresh()} className="underline">Thử lại</button></div>}
+        {session.status === 'error' && <div role="alert" className="mb-4 rounded-lg border border-soft-sand p-3">Chưa kiểm tra được phiên. Bản nháp vẫn được giữ. <button onClick={() => void session.refresh()} className={adminButtonClass()}>Thử lại</button></div>}
         {children}
       </main>
     </div>

@@ -5,9 +5,12 @@ import ProductDetail from '@/app/admin/(protected)/products/[id]/page';
 import { AdminSessionProvider } from '../AdminSessionProvider';
 import { categories, product } from '@/test/catalog-fixtures';
 
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
+
 afterEach(() => vi.unstubAllGlobals());
 
 it('keeps a newly saved variant when an earlier product PUT response arrives late', async () => {
+  vi.spyOn(window, 'confirm').mockReturnValue(true);
   let finishProduct!: (response: Response) => void;
   const created = { ...product.variants[0], id: '9007199254740993', name: 'Quy cách mới' };
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {

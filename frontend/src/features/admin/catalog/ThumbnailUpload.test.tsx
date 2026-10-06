@@ -11,6 +11,7 @@ const newUrl = 'https://storage.example.test/products/new.png';
 let upload: () => Promise<Response>;
 let mediaCalls: FormData[];
 beforeEach(() => {
+  vi.spyOn(window, 'confirm').mockReturnValue(true);
   mediaCalls = [];
   upload = async () => Response.json({ url: newUrl, objectKey: 'products/new.png' }, { status: 201 });
   vi.stubGlobal('fetch', vi.fn(async (url: string, init?: RequestInit) => {

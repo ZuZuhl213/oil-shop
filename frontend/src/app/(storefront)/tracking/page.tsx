@@ -1,13 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { trackOrder } from '@/lib/api/orders';
+import type { OrderTracking } from '@/lib/api/contracts/types';
+import { ApiClientError } from '@/lib/api/client';
+import { formatCurrencyVnd } from '@/lib/format/currency';
 
 export default function OrderTrackingSearchPage() {
-  const router = useRouter();
   const [orderCode, setOrderCode] = useState('');
   const [phone, setPhone] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [result, setResult] = useState<OrderTracking | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLookup = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,7 +24,16 @@ export default function OrderTrackingSearchPage() {
     }
 
     setErrorMessage('');
-    router.push(`/orders/${trimmedCode}`);
+    setResult(null);
+    setIsLoading(true);
+    trackOrder(trimmedCode, trimmedPhone)
+      .then(setResult)
+      .catch((error: unknown) => {
+        setErrorMessage(error instanceof ApiClientError && error.code === 'ORDER_NOT_FOUND'
+          ? 'Không tìm thấy đơn hàng với mã và số điện thoại này.'
+          : 'Không thể tra cứu lúc này. Vui lòng thử lại sau.');
+      })
+      .finally(() => setIsLoading(false));
   };
 
   return (
@@ -85,24 +98,39 @@ export default function OrderTrackingSearchPage() {
             type="submit"
             className="btn-action-touch fixed-flow"
             style={{ width: '100%', height: 46, fontSize: 14, marginTop: 6 }}
+            disabled={isLoading}
           >
-            Tra Cứu Đơn Hàng
+            {isLoading ? 'Đang tra cứu...' : 'Tra Cứu Đơn Hàng'}
           </button>
         </form>
 
+        {result && (
+          <div style={{ marginTop: 24, padding: 16, background: 'var(--white-pure)', border: '1px solid var(--soft-sand)', borderRadius: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'baseline' }}>
+              <strong style={{ color: 'var(--forest-green)' }}>{result.orderCode}</strong>
+              <span style={{ fontWeight: 700, color: 'var(--peanut-bark)' }}>{result.status}</span>
+            </div>
+            <p style={{ margin: '10px 0', fontSize: 13, color: 'var(--text-muted)' }}>
+              Tạo lúc {new Date(result.createdAt).toLocaleString('vi-VN')}
+            </p>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {result.items.map((item, index) => (
+                <div key={`${item.productName}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 13 }}>
+                  <span>{item.productName}{item.variantName ? ` / ${item.variantName}` : ''} × {item.quantity}</span>
+                  <strong>{item.lineTotal == null ? 'Báo giá sau' : formatCurrencyVnd(item.lineTotal)}</strong>
+                </div>
+              ))}
+            </div>
+            {result.totalAmount != null && (
+              <div style={{ borderTop: '1px solid var(--soft-sand)', marginTop: 12, paddingTop: 10, display: 'flex', justifyContent: 'space-between', fontWeight: 700 }}>
+                <span>Tổng tiền</span><span>{formatCurrencyVnd(result.totalAmount)}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <div style={{ marginTop: 24, padding: '14px', background: 'var(--white-pure)', border: '1px solid var(--soft-sand)', borderRadius: 12, fontSize: 12, color: 'var(--text-muted)' }}>
-          <strong>💡 Mã đơn thử nghiệm:</strong> Bạn có thể dùng mã{' '}
-          <button
-            type="button"
-            onClick={() => {
-              setOrderCode('HMN-2026-9812');
-              setPhone('0912345678');
-            }}
-            style={{ color: 'var(--forest-green)', fontWeight: 700, textDecoration: 'underline', border: 'none', background: 'transparent', cursor: 'pointer' }}
-          >
-            HMN-2026-9812
-          </button>{' '}
-          để xem trực tiếp giao diện biên nhận và quy trình 5 bước.
+            Nhập mã đơn và số điện thoại đã dùng khi đặt hàng để xem trạng thái mới nhất.
         </div>
       </div>
     </div>

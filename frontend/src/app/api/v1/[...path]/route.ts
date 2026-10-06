@@ -31,13 +31,14 @@ function upstreamOrigin(): string {
 
 function routeRule(path: string, method: string): boolean {
   const normalizedMethod = method.toUpperCase();
+  if (normalizedMethod === 'DELETE') return /^admin\/products\/[^/]+$/.test(path);
   if (path === 'categories') return normalizedMethod === 'GET';
   if (path === 'products' || /^products\/[^/]+$/.test(path)) {
     return normalizedMethod === 'GET';
   }
   if (path === 'health') return normalizedMethod === 'GET';
   if (path === 'csrf') return normalizedMethod === 'GET';
-  if (path === 'vouchers/validate' || path === 'orders') return normalizedMethod === 'POST';
+  if (path === 'vouchers/validate' || path === 'orders' || path === 'orders/tracking') return normalizedMethod === 'POST';
   if (path === 'admin/auth/login') return normalizedMethod === 'POST';
   if (path === 'admin/auth/me') return normalizedMethod === 'GET';
   if (path === 'admin/auth/logout') return normalizedMethod === 'POST';

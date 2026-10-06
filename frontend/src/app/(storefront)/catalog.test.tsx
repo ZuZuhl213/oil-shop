@@ -64,6 +64,7 @@ it('allows adding a zero-price fixed variant and displays zero VND', () => {
   renderPage(<ProductCard product={toUiProduct(free)}/>);
   expect(screen.getByText('0 ₫')).toBeVisible();
   fireEvent.click(screen.getByRole('button',{name:'Chọn mua Dầu lạc API'}));
+  fireEvent.click(screen.getByRole('menuitem',{name:/Chai 1L/}));
   expect(JSON.parse(localStorage.getItem('hm_naturals_cart_v1')!).items[0]).toMatchObject({variantId:'41',price:0});
 });
 it('changes displayed price and SKU with the selected variant', async () => {
@@ -77,6 +78,9 @@ it('disables both purchase actions when no variant is sellable', async () => {
   catalogApi({...product, variants:[]}); await renderDetail('dau-lac-api');
   expect(await screen.findByRole('button',{name:'Đặt Mua Ngay'})).toBeDisabled();
   expect(screen.getByRole('button',{name:'+ Giỏ Hàng'})).toBeDisabled();
+  expect(screen.getByText('Hết hàng')).toBeVisible();
+  expect(screen.queryByText('Sẵn sàng giao tận bếp')).not.toBeInTheDocument();
+  expect(screen.getByRole('link',{name:'Liên hệ để biết thêm thông tin'})).toHaveAttribute('href','/contact');
 });
 it('shows quote pricing without zero VND', async () => {
   catalogApi({...product,saleType:'QUOTE',variants:[{...product.variants[0],price:null}]});

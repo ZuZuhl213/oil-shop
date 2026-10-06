@@ -12,6 +12,7 @@ let readProduct: () => Promise<Response>;
 let readProducts: () => Promise<Response>;
 let write: (url: string, init: RequestInit) => Promise<Response>;
 beforeEach(() => {
+  vi.spyOn(window, 'confirm').mockReturnValue(true);
   calls = [];
   readProduct = async () => Response.json(product);
   readProducts = async () => Response.json({ content: [], totalPages: 0 });
@@ -179,4 +180,21 @@ it('blocks uploads and gallery edits while recovery awaits review', async () => 
   fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
   await screen.findByRole('alert');
   expect(screen.getByLabelText('Chọn ảnh sản phẩm')).toBeDisabled();
+});
+
+
+it('asks before editing and preserves the draft without a request when cancelled', async () => {
+  const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false);
+  const saved = vi.fn();
+  write = async () => Response.json(product);
+  mount(<ProductForm product={product} categories={categories} onSaved={saved} />);
+  fireEvent.change(screen.getByLabelText('Tên sản phẩm'), { target: { value: 'Tên mới' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
+  expect(confirm).toHaveBeenCalledWith(expect.stringContaining(product.name));
+  expect(calls).toHaveLength(0);
+  expect(screen.getByLabelText('Tên sản phẩm')).toHaveValue('Tên mới');
+  confirm.mockReturnValue(true);
+  fireEvent.click(screen.getByRole('button', { name: 'Lưu sản phẩm' }));
+  await waitFor(() => expect(saved).toHaveBeenCalledTimes(1));
+  expect(calls[0].body.name).toBe('Tên mới');
 });

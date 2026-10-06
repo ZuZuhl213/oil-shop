@@ -169,9 +169,13 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
               </span>
             </div>
             <span className="d-status-pill">
-              {isQuote ? 'Báo giá theo số lượng' : 'Sẵn sàng giao tận bếp'}
+              {!selectedVariant ? 'Hết hàng' : isQuote ? 'Báo giá theo số lượng' : 'Sẵn sàng giao tận bếp'}
             </span>
           </div>
+
+          {!selectedVariant && <p className="mt-3 text-sm text-text-muted">
+            <Link href="/contact" className="underline underline-offset-4">Liên hệ để biết thêm thông tin</Link>
+          </p>}
 
           {/* Variant Selector */}
           {product.variants.length > 0 && (
