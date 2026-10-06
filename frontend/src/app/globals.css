@@ -738,15 +738,25 @@ body {
   background: #FAF6F0;
   border-top: 1px solid var(--soft-sand);
   border-bottom: 1px solid var(--soft-sand);
-  padding: 30px 40px;
+  padding: 24px var(--screen-pad);
   margin: 16px 0 28px;
 }
 .compact-values-grid {
   max-width: 1260px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  /* ponytail: 1-col mobile, 3-col desktop; add 2-col tablet at md if needed */
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .compact-values-section {
+    padding: 30px 40px;
+  }
+  .compact-values-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
 }
 .compact-val-card {
   display: flex;
@@ -815,7 +825,7 @@ body {
   align-items: center;
   justify-content: center;
   margin: 4px 0 10px;
-  overflow: visible;
+  overflow: hidden;
 }
 .ref-mobile-hero .unlabeled-bottle-container {
   width: 100%;
@@ -839,6 +849,30 @@ body {
   bottom: 6px;
   font-size: 13.5px;
 }
+/* Mobile Hero quote — centered, styled to match desktop subtle-script-quote */
+.ref-mobile-hero-quote {
+  font-family: var(--font-script, 'Playfair Display', serif);
+  font-size: 14px;
+  font-weight: 600;
+  font-style: italic;
+  color: #554A3F;
+  opacity: 0.8;
+  text-align: center;
+  margin: 0;
+  pointer-events: none;
+}
+
+/* Mobile Hero — center all children, tighten vertical rhythm */
+.ref-mobile-hero .ref-mobile-hero-header {
+  text-align: center;
+}
+.ref-mobile-hero .ref-hero-indicators {
+  justify-content: center;
+}
+.ref-mobile-hero .ref-ctas-row {
+  justify-content: center;
+}
+
 .ref-mobile-selector-row {
   display: flex;
   align-items: center;

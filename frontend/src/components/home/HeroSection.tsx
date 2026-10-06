@@ -196,18 +196,22 @@ export function HeroSection() {
 
       {/* ── Mobile Natural Minimalist Hero (< 1024px) ── */}
       <section className="ref-mobile-hero" id="mobileHeroSection">
-        <div className="ref-eyebrow">TINH HOA TỪ NÔNG SẢN VIỆT</div>
-        <h1 className="ref-hero-headline" id="mobHeroHeadline">
-          {current.mobileHeadline}
-        </h1>
-        <p className="ref-hero-sub" id="mobHeroDesc">
-          {current.desc}
-        </p>
+        <div className="ref-mobile-hero-header">
+          <div className="ref-eyebrow">
+            <span>TINH HOA TỪ NÔNG SẢN VIỆT</span>
+          </div>
+          <h1 className="ref-hero-headline" id="mobHeroHeadline">
+            {current.mobileHeadline}
+          </h1>
+          <p className="ref-hero-sub" id="mobHeroDesc">
+            {current.desc}
+          </p>
+        </div>
 
         {/* Mobile Visual Stage (Separated Layers) */}
         <div className="ref-stage-wrap">
-          <div className="ref-stage-ambient-glow" style={{ width: 260, height: 260 }} />
-          <div className="ref-stage-floor-shadow" style={{ width: 200, bottom: 10 }} />
+          <div className="ref-stage-ambient-glow" aria-hidden="true" />
+          <div className="ref-stage-floor-shadow" aria-hidden="true" />
           <div
             className="unlabeled-bottle-container"
             id="refMobileBottleWrapper"
@@ -217,15 +221,19 @@ export function HeroSection() {
               <UnlabeledBottle type={selectedProduct} idPrefix="mob" />
             </div>
           </div>
-          <p className="subtle-script-quote" style={{ right: 8, bottom: 8, fontSize: 14 }}>
-            &ldquo;Món ngon từ nguyên liệu tốt&rdquo;
-          </p>
         </div>
+
+        {/* Brand Quote — centered outside the stage */}
+        <p className="ref-mobile-hero-quote" aria-hidden="true">
+          &ldquo;Món ngon từ nguyên liệu tốt&rdquo;
+        </p>
 
         {/* Mobile Compact Horizontal Selector */}
         <div className="ref-mobile-selector-row" role="tablist" aria-label="Chọn nông phẩm">
           <button
             type="button"
+            role="tab"
+            aria-selected={selectedProduct === 'peanut'}
             className={`ref-mobile-sel-btn ${selectedProduct === 'peanut' ? 'active' : ''}`}
             onClick={() => setSelectedProduct('peanut')}
           >
@@ -233,6 +241,8 @@ export function HeroSection() {
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={selectedProduct === 'sesame'}
             className={`ref-mobile-sel-btn ${selectedProduct === 'sesame' ? 'active' : ''}`}
             onClick={() => setSelectedProduct('sesame')}
           >
@@ -240,6 +250,8 @@ export function HeroSection() {
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={selectedProduct === 'coconut'}
             className={`ref-mobile-sel-btn ${selectedProduct === 'coconut' ? 'active' : ''}`}
             onClick={() => setSelectedProduct('coconut')}
           >
@@ -248,14 +260,14 @@ export function HeroSection() {
         </div>
 
         {/* Compact Value Indicators */}
-        <div className="ref-hero-indicators" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', margin: '4px 0 8px' }}>
+        <div className="ref-hero-indicators">
           <span className="ref-indicator-pill">100% Nông sản Việt</span>
           <span className="ref-indicator-pill">Ép nhiệt cơ học</span>
           <span className="ref-indicator-pill">Chai thủy tinh tối màu</span>
         </div>
 
         {/* Dual CTAs */}
-        <div className="ref-ctas-row" style={{ justifyContent: 'center' }}>
+        <div className="ref-ctas-row">
           <Link href={`/products/${current.slug}`} className="ref-btn-order no-underline">
             <span>Đặt hàng ngay</span>
             <span>→</span>
