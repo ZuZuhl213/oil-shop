@@ -14,20 +14,6 @@ Next.js App Router, React, TypeScript và Tailwind CSS. Giữ giao diện HM Nat
 - Proxy Node chỉ chuyển các path/method trong allowlist, giữ Cookie/Set-Cookie/CSRF/Origin/Idempotency-Key và HTTP status; API admin/auth/mutation dùng no-store. Timeout bao gồm đọc body upstream.
 - Ảnh SVG hiện tại là minh họa. Ảnh thật/Supabase chưa được cung cấp; không coi đã kiểm chứng image host production.
 
-## Viewer 3D trong trang chi tiết — 29/09/2026
-
-Nút **Xem 360°** mở dialog và chỉ lúc đó tải Three.js/React Three Fiber. Chai procedural là mô hình minh họa chung, không mô tả bao bì hay dung tích của variant thực tế.
-
-- Kéo chuột/vuốt để xoay; cuộn/chụm hai ngón để zoom trong giới hạn. Thanh góc xoay và nút reset dùng được bằng bàn phím.
-- Modal giữ focus, hỗ trợ Esc, nút đóng và bấm bên ngoài; trả focus về nút mở và khôi phục cuộn trang khi đóng.
-- Render theo nhu cầu, DPR tối đa 1.5, không tự xoay; unmount scene khi đóng. Không tải font, texture hoặc model từ dịch vụ ngoài.
-- Lỗi tải module, lỗi WebGL hoặc mất context sẽ hiển thị SVG dự phòng, giữ modal và luồng mua hàng sử dụng được.
-- Component: `Product360Modal` quản lý dialog, `Bottle3DViewer` tải client-only và xử lý lỗi, `BottleScene` quản lý camera/ánh sáng/điều khiển, `BottleModel` dựng chai mẫu.
-
-Khi có model chính thức, chuẩn bị `.glb` kèm texture nhúng, ảnh fallback, kích thước và nhãn được duyệt. Thay `BottleModel` bằng bộ tải GLB rồi chỉnh tâm model, scale, camera và vật liệu; bản hiện tại chưa có bộ tải GLB hay mapping model theo sản phẩm. Không cần thay business API cho viewer demo này.
-
-E2E có kiểm tra render thật và thay đổi hình khi xoay/reset, kéo chuột/vuốt, mở/đóng, focus, WebGL không hỗ trợ và mất context trên desktop/mobile.
-
 ## Chạy local
 
 ```bash

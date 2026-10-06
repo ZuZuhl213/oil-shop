@@ -17,7 +17,6 @@ import { AddToCartButton } from '@/components/cart/AddToCartButton';
 import type { CartItemInput } from '@/features/cart/cart-types';
 import { saveQuoteDraft, type QuoteDraft } from '@/lib/checkout-storage';
 import { ProductCard } from '@/components/product/ProductCard';
-import Product360Modal from '@/components/product/Product360Modal';
 
 interface ProductDetailPageProps {
   params: Promise<{ slug: string }>;
@@ -37,7 +36,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
   const { addItem, closeCart } = useCart();
   const [selectedVariantId, setSelectedVariantId] = useState<string | undefined>();
   const [quantity, setQuantity] = useState<number>(1);
-  const [show360Modal, setShow360Modal] = useState<boolean>(false);
 
   useEffect(() => {
     let active = true;
@@ -159,24 +157,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           <h1 className="d-title">{product.name}</h1>
           <p className="d-desc">{product.description || product.shortDescription}</p>
           {selectedVariant?.sku && <p className="text-sm text-text-muted">SKU: {selectedVariant.sku}</p>}
-
-          {/* 360 Degree View Interactive Button */}
-          <div>
-            <button
-              type="button"
-              className="btn-360-view-pill"
-              onClick={() => setShow360Modal(true)}
-              aria-label="Xem 360 độ chai dầu HM NATURALS"
-            >
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M21.5 2v6h-6" />
-                <path d="M2.5 12A10 10 0 0 1 19 4.5l2.5 3.5" />
-                <path d="M2.5 22v-6h6" />
-                <path d="M21.5 12A10 10 0 0 1 5 19.5l-2.5-3.5" />
-              </svg>
-              <span>Xem 360° Chai Dầu HM NATURALS</span>
-            </button>
-          </div>
 
           {/* Price Box */}
           <div className="d-price-box">
@@ -318,11 +298,6 @@ export default function ProductDetailPage({ params }: ProductDetailPageProps) {
           </button>
         </div>
       </div>
-
-      {/* ── 360 View Interactive Modal ── */}
-      {show360Modal && (
-        <Product360Modal productName={product.name} visualType={product.visualType} onClose={() => setShow360Modal(false)} />
-      )}
     </div>
   );
 }

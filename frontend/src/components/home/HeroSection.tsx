@@ -27,17 +27,17 @@ const HERO_PRODUCTS: Record<HeroOilType, HeroProductInfo> = {
   sesame: {
     type: 'sesame',
     titleL1: 'Dầu Mè Đen',
-    titleL2: 'Rang Mộc',
-    mobileHeadline: 'Dầu Mè Đen Rang Mộc',
+    titleL2: 'Thơm Đậm',
+    mobileHeadline: 'Dầu Mè Đen',
     desc: 'Hương thơm nồng nàn từ hạt mè đen nương đồi tuyển chọn, ép nhiệt cơ học nguyên chất.',
     slug: 'dau-vung-ep-lanh',
   },
   coconut: {
     type: 'coconut',
     titleL1: 'Dầu Dừa',
-    titleL2: 'Ép Lạnh',
-    mobileHeadline: 'Dầu Dừa Ép Lạnh Tinh Khiết',
-    desc: 'Cơm dừa tươi Bến Tre ép lạnh ly tâm, thơm dịu ngọt lành, dùng ẩm thực và chăm sóc sức khỏe.',
+    titleL2: 'Tinh Khiết',
+    mobileHeadline: 'Dầu Dừa',
+    desc: 'Cơm dừa tươi ép nhiệt cơ học, thơm dịu ngọt lành, dùng ẩm thực và chăm sóc sức khỏe.',
     slug: 'dau-dua-nguyen-chat',
   },
 };
